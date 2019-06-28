@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/kazhuravlev/options-gen"
+	"github.com/kazhuravlev/options-gen/generator"
 	"io/ioutil"
 )
 
@@ -18,13 +18,13 @@ func main() {
 	flag.StringVar(&outPackageName, "pkg", "", "output package name")
 	flag.Parse()
 
-	data, err := optionsgen.GetOptionSpec(inFilename)
+	data, err := generator.GetOptionSpec(inFilename)
 	if err != nil {
 		fmt.Println("cannot get options spec:", err.Error())
 		return
 	}
 
-	res, err := optionsgen.RenderOptions(outPackageName, data)
+	res, err := generator.RenderOptions(outPackageName, data)
 	if err != nil {
 		fmt.Println("cannot renderOptions template:", err.Error())
 		return

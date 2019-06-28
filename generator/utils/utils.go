@@ -1,4 +1,4 @@
-package optionsgen
+package utils
 
 import "reflect"
 

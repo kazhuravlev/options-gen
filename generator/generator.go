@@ -1,12 +1,14 @@
-package optionsgen
+package generator
 
 import (
 	"bytes"
 	"fmt"
 	"go/ast"
+	"go/format"
 	"go/parser"
 	"go/token"
 	"io/ioutil"
+	"log"
 	"path"
 	"reflect"
 	"strings"
@@ -15,7 +17,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-//go:generate go-assets-builder --package=optionsgen --variable=templates --output=templates_generated.go templates/options.go.tpl
+//go:generate go-assets-builder --package=generator --variable=templates --output=templates_generated.go templates/options.go.tpl
 
 var (
 	tplOption = mustLoadAsset("/templates/options.go.tpl")
@@ -45,7 +47,27 @@ func RenderOptions(packageName string, data []optionMeta) (string, error) {
 		return "", errors.Wrap(err, "cannot RenderOptions template")
 	}
 
-	return buf.String(), nil
+	formatted, err := formatSource(buf.String())
+	if err != nil {
+		return "", errors.Wrap(err, "cannot format source")
+	}
+
+	return formatted, nil
+}
+
+func formatSource(s string) (string, error) {
+	fset := token.NewFileSet()
+	node, err := parser.ParseFile(fset, "<inmem-file>", s, 0)
+	if err != nil {
+		return "", errors.Wrap(err, "cannot parse expresion")
+	}
+
+	buf2 := new(bytes.Buffer)
+	if err := format.Node(buf2, fset, node); err != nil {
+		log.Fatal(err)
+	}
+
+	return buf2.String(), nil
 }
 
 func mustLoadAsset(path string) string {
@@ -109,19 +131,22 @@ func GetOptionSpec(filePath string) ([]optionMeta, error) {
 		case *ast.Ident:
 			typeName = t.Name
 		default:
-			panic("unknown type")
+			return nil, errors.New("unknown field type. use only local-defined interfaces")
 		}
 
-		tag := reflect.StructTag(strings.Trim(field.Tag.Value, "`"))
-		tagString := tag.Get("option")
-
 		var tagOpt tagOption
-		for _, opt := range strings.Split(tagString, ",") {
-			if opt == "required" {
-				tagOpt.IsRequired = true
-			}
-			if opt == "not-empty" {
-				tagOpt.IsNotEmpty = true
+		if field.Tag != nil {
+			value := field.Tag.Value
+
+			tag := reflect.StructTag(strings.Trim(value, "`")).Get("option")
+
+			for _, opt := range strings.Split(tag, ",") {
+				if opt == "required" {
+					tagOpt.IsRequired = true
+				}
+				if opt == "not-empty" {
+					tagOpt.IsNotEmpty = true
+				}
 			}
 		}
 
