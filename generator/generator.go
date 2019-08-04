@@ -3,6 +3,7 @@ package generator
 import (
 	"bytes"
 	"fmt"
+	"github.com/pkg/errors"
 	"go/ast"
 	"go/format"
 	"go/parser"
@@ -13,8 +14,6 @@ import (
 	"reflect"
 	"strings"
 	"text/template"
-
-	"github.com/pkg/errors"
 )
 
 //go:generate go-assets-builder --package=generator --variable=templates --output=templates_generated.go templates/options.go.tpl
