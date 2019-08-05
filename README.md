@@ -1,5 +1,11 @@
 # options
 
+## Install cli
+
+```go
+go install github.com/kazhuravlev/options-gen/cmd/options-gen
+```
+
 ## Usage
 
 ```go
