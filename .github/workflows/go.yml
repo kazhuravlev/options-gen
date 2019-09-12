@@ -27,7 +27,7 @@ jobs:
     - name: Build
       run: |
         mkdir -p ./build
-        go build -v ./cmd/options-gen -o ./build
+        go build -v ./cmd/options-gen
    
     - name: Test
       run: go test -v ./...   
