@@ -3,7 +3,7 @@ on: [push]
 jobs:
 
   build:
-    name: Build on node ${{ matrix.go_version }} and ${{ matrix.os }}
+    name: Build on golang ${{ matrix.go_version }} and ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
