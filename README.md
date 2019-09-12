@@ -10,7 +10,7 @@ import (
     "log"
 )
 
-//go:generate options-gen -filename=$GOFILE -out-filename=options_generated.go -pkg=mypkg
+//go:generate options-gen -filename=$GOFILE -out-filename=options_generated.go -pkg=mypkg -from-struct=Options
 type Options struct {
 	logFactory log.Logger `option:"required"`
 	listenAddr string     `option:"required,not-empty"`

@@ -108,14 +108,14 @@ func findInterfaceMethods(packages map[string]*ast.Package, typeName string) ([]
 	return methods, nil
 }
 
-func GetOptionSpec(filePath string) ([]optionMeta, error) {
+func GetOptionSpec(filePath, optionsStructName string) ([]optionMeta, error) {
 	fset := token.NewFileSet()
 	node, err := parser.ParseDir(fset, path.Dir(filePath), nil, parser.ParseComments)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot parse dir")
 	}
 
-	data, err := findInterfaceMethods(node, "Options")
+	data, err := findInterfaceMethods(node, optionsStructName)
 	if err != nil {
 		return nil, errors.Wrap(err, "can")
 	}
