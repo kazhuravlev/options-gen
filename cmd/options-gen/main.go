@@ -20,6 +20,11 @@ func main() {
 	flag.StringVar(&optionsStructName, "from-struct", "", "struct that contains options")
 	flag.Parse()
 
+	if inFilename == "" || outFilename == "" || outPackageName == "" || optionsStructName == "" {
+		fmt.Println("specify all options")
+		return
+	}
+
 	data, err := generator.GetOptionSpec(inFilename, optionsStructName)
 	if err != nil {
 		fmt.Println("cannot get options spec:", err.Error())
