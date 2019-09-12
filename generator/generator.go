@@ -108,6 +108,27 @@ func findInterfaceMethods(packages map[string]*ast.Package, typeName string) ([]
 	return methods, nil
 }
 
+func makeTypeName(expr ast.Expr) (string, error) {
+	var typeName string
+	switch t := expr.(type) {
+	case *ast.SelectorExpr:
+		typeName = t.X.(*ast.Ident).Name + "." + t.Sel.Name
+	case *ast.Ident:
+		typeName = t.Name
+	case *ast.ArrayType:
+		eltName, err := makeTypeName(t.Elt)
+		if err != nil {
+			return "", err
+		}
+
+		typeName = "[]" + eltName
+	default:
+		return "", errors.Errorf("unknown field type (%T). use only local-defined interfaces", expr)
+	}
+
+	return typeName, nil
+}
+
 func GetOptionSpec(filePath, optionsStructName string) ([]optionMeta, error) {
 	fset := token.NewFileSet()
 	node, err := parser.ParseDir(fset, path.Dir(filePath), nil, parser.ParseComments)
@@ -123,14 +144,9 @@ func GetOptionSpec(filePath, optionsStructName string) ([]optionMeta, error) {
 	options := make([]optionMeta, len(data))
 	for i := range data {
 		field := data[i]
-		var typeName string
-		switch t := field.Type.(type) {
-		case *ast.SelectorExpr:
-			typeName = t.X.(*ast.Ident).Name + "." + t.Sel.Name
-		case *ast.Ident:
-			typeName = t.Name
-		default:
-			return nil, errors.New("unknown field type. use only local-defined interfaces")
+		typeName, err := makeTypeName(field.Type)
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot make type name")
 		}
 
 		var tagOpt tagOption
