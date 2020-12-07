@@ -3,6 +3,9 @@ package {{ .packageName }}
 import (
 	"github.com/pkg/errors"
 	"github.com/kazhuravlev/options-gen/generator/utils"
+	{{- range $import := .imports }}
+	{{ $import -}}
+	{{- end }}
 )
 
 type optMeta struct {

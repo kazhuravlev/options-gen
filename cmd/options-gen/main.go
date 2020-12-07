@@ -21,7 +21,8 @@ func main() {
 	flag.Parse()
 
 	if inFilename == "" || outFilename == "" || outPackageName == "" || optionsStructName == "" {
-		fmt.Println("specify all options")
+		flag.Usage()
+		fmt.Println("all options are required")
 		return
 	}
 
@@ -31,7 +32,13 @@ func main() {
 		return
 	}
 
-	res, err := generator.RenderOptions(outPackageName, data)
+	imports, err := generator.GetImports(inFilename)
+	if err != nil {
+		fmt.Println("cannot get imports:", err.Error())
+		return
+	}
+
+	res, err := generator.RenderOptions(outPackageName, imports, data)
 	if err != nil {
 		fmt.Println("cannot renderOptions template:", err.Error())
 		return
