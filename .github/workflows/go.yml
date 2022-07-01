@@ -25,7 +25,7 @@ jobs:
 
       - name: Build
         run: |
-          go build -v ./cmd/options-gen
+          go build -v -o /dev/null ./cmd/options-gen
 
       - name: Test
         run: go test -v ./...
