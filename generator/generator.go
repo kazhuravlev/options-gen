@@ -2,86 +2,61 @@ package generator
 
 import (
 	"bytes"
-	"fmt"
+	"embed"
 	"github.com/pkg/errors"
 	"go/ast"
-	"go/format"
 	"go/parser"
 	"go/token"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+	"golang.org/x/tools/imports"
 	"io/ioutil"
-	"log"
 	"path"
 	"reflect"
 	"strings"
 	"text/template"
 )
 
-//go:generate go-assets-builder --package=generator --variable=templates --output=templates_generated.go templates/options.go.tpl
+//go:embed templates/options.go.tpl
+var templates embed.FS
 
-var (
-	tplOption = mustLoadAsset("/templates/options.go.tpl")
-)
+type OptionMeta struct {
+	Name      string
+	Field     string
+	Type      string
+	TagOption TagOption
+}
 
-type tagOption struct {
+type TagOption struct {
 	IsRequired bool
 	IsNotEmpty bool
 }
 
-type optionMeta struct {
-	Name      string
-	Field     string
-	Type      string
-	TagOption tagOption
-}
-
-func RenderOptions(packageName string, data []optionMeta) (string, error) {
-	tmpl := template.Must(template.New("tpl").Parse(tplOption))
+func RenderOptions(packageName, optionsStructName string, fileImports []string, data []OptionMeta) ([]byte, error) {
+	tmpl := template.Must(template.ParseFS(templates, "templates/options.go.tpl"))
 
 	tplContext := map[string]interface{}{
-		"packageName": packageName,
-		"options":     data,
+		"packageName":       packageName,
+		"imports":           fileImports,
+		"optionsStructName": optionsStructName,
+		"options":           data,
 	}
 	buf := new(bytes.Buffer)
 	if err := tmpl.Execute(buf, tplContext); err != nil {
-		return "", errors.Wrap(err, "cannot RenderOptions template")
+		return nil, errors.Wrap(err, "cannot render template")
 	}
 
-	formatted, err := formatSource(buf.String())
+	// reformat, remove unused and duplicate imports, sort them
+	formatted, err := imports.Process("", buf.Bytes(), nil)
 	if err != nil {
-		return "", errors.Wrap(err, "cannot format source")
+		return nil, errors.Wrap(err, "cannot optimize imports")
 	}
 
 	return formatted, nil
 }
 
-func formatSource(s string) (string, error) {
-	fset := token.NewFileSet()
-	node, err := parser.ParseFile(fset, "<inmem-file>", s, 0)
-	if err != nil {
-		return "", errors.Wrap(err, "cannot parse expresion")
-	}
-
-	buf2 := new(bytes.Buffer)
-	if err := format.Node(buf2, fset, node); err != nil {
-		log.Fatal(err)
-	}
-
-	return buf2.String(), nil
-}
-
-func mustLoadAsset(path string) string {
-	file, ok := templates.Files[path]
-	if !ok {
-		panic(fmt.Sprintf("file %q not found", path))
-	}
-	blob, err := ioutil.ReadAll(file)
-	if err != nil {
-		panic(err)
-	}
-	return string(blob)
-}
-
-func findInterfaceMethods(packages map[string]*ast.Package, typeName string) ([]*ast.Field, error) {
+//nolint:gocognit,nestif
+func findInterfaceMethods(packages map[string]*ast.Package, typeName string) []*ast.Field {
 	var methods []*ast.Field
 
 	for _, pkg := range packages {
@@ -105,7 +80,7 @@ func findInterfaceMethods(packages map[string]*ast.Package, typeName string) ([]
 		}
 	}
 
-	return methods, nil
+	return methods
 }
 
 func makeTypeName(expr ast.Expr) (string, error) {
@@ -122,6 +97,13 @@ func makeTypeName(expr ast.Expr) (string, error) {
 		}
 
 		typeName = "[]" + eltName
+	case *ast.StarExpr:
+		tName, err := makeTypeName(t.X)
+		if err != nil {
+			return "", errors.Wrap(err, "cannot make type name for star expr")
+		}
+
+		return "*" + tName, nil
 	default:
 		return "", errors.Errorf("unknown field type (%T). use only local-defined interfaces", expr)
 	}
@@ -129,27 +111,24 @@ func makeTypeName(expr ast.Expr) (string, error) {
 	return typeName, nil
 }
 
-func GetOptionSpec(filePath, optionsStructName string) ([]optionMeta, error) {
+func GetOptionSpec(filePath, optionsStructName string) ([]OptionMeta, error) {
 	fset := token.NewFileSet()
 	node, err := parser.ParseDir(fset, path.Dir(filePath), nil, parser.ParseComments)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot parse dir")
 	}
 
-	data, err := findInterfaceMethods(node, optionsStructName)
-	if err != nil {
-		return nil, errors.Wrap(err, "can")
-	}
+	methods := findInterfaceMethods(node, optionsStructName)
 
-	options := make([]optionMeta, len(data))
-	for i := range data {
-		field := data[i]
+	options := make([]OptionMeta, len(methods))
+	for i := range methods {
+		field := methods[i]
 		typeName, err := makeTypeName(field.Type)
 		if err != nil {
 			return nil, errors.Wrap(err, "cannot make type name")
 		}
 
-		var tagOpt tagOption
+		var tagOpt TagOption
 		if field.Tag != nil {
 			value := field.Tag.Value
 
@@ -165,8 +144,9 @@ func GetOptionSpec(filePath, optionsStructName string) ([]optionMeta, error) {
 			}
 		}
 
-		options[i] = optionMeta{
-			Name:      strings.Title(field.Names[0].Name),
+		title := cases.Title(language.English, cases.NoLower)
+		options[i] = OptionMeta{
+			Name:      title.String(field.Names[0].Name),
 			Field:     field.Names[0].Name,
 			Type:      typeName,
 			TagOption: tagOpt,
@@ -174,4 +154,25 @@ func GetOptionSpec(filePath, optionsStructName string) ([]optionMeta, error) {
 	}
 
 	return options, nil
+}
+
+func GetFileImports(filePath string) ([]string, error) {
+	source, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to read file %q", filePath)
+	}
+
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, filePath, source, 0)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot parse file %q", filePath)
+	}
+
+	fileImports := make([]string, 0, len(file.Imports))
+	for _, importSpec := range file.Imports {
+		imp := string(source[importSpec.Pos()-1 : importSpec.End()-1])
+		fileImports = append(fileImports, imp)
+	}
+
+	return fileImports, nil
 }
