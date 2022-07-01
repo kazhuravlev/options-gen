@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/kazhuravlev/options-gen/generator"
-	"io/ioutil"
+
+	optionsgen "github.com/kazhuravlev/options-gen/options-gen"
 )
 
 func main() {
@@ -21,24 +21,15 @@ func main() {
 	flag.Parse()
 
 	if inFilename == "" || outFilename == "" || outPackageName == "" || optionsStructName == "" {
-		fmt.Println("specify all options")
+		flag.Usage()
+		//nolint:forbidigo
+		fmt.Println("all options are required")
 		return
 	}
 
-	data, err := generator.GetOptionSpec(inFilename, optionsStructName)
-	if err != nil {
-		fmt.Println("cannot get options spec:", err.Error())
-		return
-	}
-
-	res, err := generator.RenderOptions(outPackageName, data)
-	if err != nil {
-		fmt.Println("cannot renderOptions template:", err.Error())
-		return
-	}
-
-	if err := ioutil.WriteFile(outFilename, []byte(res), 0644); err != nil {
-		fmt.Println("cannot write result:", err.Error())
+	if err := optionsgen.Run(inFilename, outFilename, optionsStructName, outPackageName); err != nil {
+		//nolint:forbidigo
+		fmt.Println("cannot run options gen", err.Error())
 		return
 	}
 }
