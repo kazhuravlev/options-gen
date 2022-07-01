@@ -3,6 +3,8 @@ package {{ .packageName }}
 
 import (
 	"fmt"
+    "github.com/pkg/errors"
+    "golang.org/x/sync/errgroup"
 	"github.com/kazhuravlev/options-gen/validator"
 	{{- range $import := .imports }}
 	{{ $import -}}
@@ -54,12 +56,15 @@ func New{{ .optionsStructName }}(
 }
 
 func (o *{{ .optionsStructName }}) Validate() error {
-	{{ range .options -}}
-		if err := _{{ $.optionsStructName }}_{{ .Field }}Validator(o); err != nil{
-			return fmt.Errorf("%w: invalid value for option With{{ .Name }}", err)
-		}
+    g := new(errgroup.Group)
 
+	{{ range .options -}}
+	    g.Go(func() error {
+	        err := _{{ $.optionsStructName }}_{{ .Field }}Validator(o)
+
+	        return errors.Wrap(err, "invalid value for option With{{ .Name }}")
+	    })
 	{{ end -}}
 
-	return nil
+	return g.Wait()
 }

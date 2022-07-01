@@ -2,7 +2,8 @@
 package main
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 )
 
 type optConfigMeta struct {
@@ -36,9 +37,12 @@ func NewConfig(
 }
 
 func (o *Config) Validate() error {
-	if err := _Config_nameValidator(o); err != nil {
-		return fmt.Errorf("%w: invalid value for option WithName", err)
-	}
+	g := new(errgroup.Group)
 
-	return nil
+	g.Go(func() error {
+		err := _Config_nameValidator(o)
+
+		return errors.Wrap(err, "invalid value for option WithName")
+	})
+	return g.Wait()
 }

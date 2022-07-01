@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/kazhuravlev/options-gen/validator"
+	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 )
 
 type optOptionsMeta struct {
@@ -43,13 +45,17 @@ func NewOptions(
 }
 
 func (o *Options) Validate() error {
-	if err := _Options_httpClientValidator(o); err != nil {
-		return fmt.Errorf("%w: invalid value for option WithHttpClient", err)
-	}
+	g := new(errgroup.Group)
 
-	if err := _Options_tokenValidator(o); err != nil {
-		return fmt.Errorf("%w: invalid value for option WithToken", err)
-	}
+	g.Go(func() error {
+		err := _Options_httpClientValidator(o)
 
-	return nil
+		return errors.Wrap(err, "invalid value for option WithHttpClient")
+	})
+	g.Go(func() error {
+		err := _Options_tokenValidator(o)
+
+		return errors.Wrap(err, "invalid value for option WithToken")
+	})
+	return g.Wait()
 }

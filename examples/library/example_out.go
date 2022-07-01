@@ -6,6 +6,8 @@ import (
 
 	subpackage "github.com/kazhuravlev/options-gen/examples/library/sub-package"
 	"github.com/kazhuravlev/options-gen/validator"
+	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 )
 
 type optOptionsMeta struct {
@@ -36,9 +38,12 @@ func NewOptions(
 }
 
 func (o *Options) Validate() error {
-	if err := _Options_service1Validator(o); err != nil {
-		return fmt.Errorf("%w: invalid value for option WithService1", err)
-	}
+	g := new(errgroup.Group)
 
-	return nil
+	g.Go(func() error {
+		err := _Options_service1Validator(o)
+
+		return errors.Wrap(err, "invalid value for option WithService1")
+	})
+	return g.Wait()
 }

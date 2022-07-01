@@ -96,6 +96,8 @@ import (
 	"fmt"
 
 	"github.com/kazhuravlev/options-gen/validator"
+	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 )
 
 type optTestOptionsMeta struct {
@@ -152,18 +154,23 @@ func NewTestOptions(
 }
 
 func (o *TestOptions) Validate() error {
-	if err := _TestOptions_stringerValidator(o); err != nil {
-		return fmt.Errorf("%w: invalid value for option WithStringer", err)
-	}
+	g := new(errgroup.Group)
 
-	if err := _TestOptions_strValidator(o); err != nil {
-		return fmt.Errorf("%w: invalid value for option WithStr", err)
-	}
+	g.Go(func() error {
+		err := _TestOptions_stringerValidator(o)
 
-	if err := _TestOptions_noValidationValidator(o); err != nil {
-		return fmt.Errorf("%w: invalid value for option WithNoValidation", err)
-	}
+		return errors.Wrap(err, "invalid value for option WithStringer")
+	})
+	g.Go(func() error {
+		err := _TestOptions_strValidator(o)
 
-	return nil
+		return errors.Wrap(err, "invalid value for option WithStr")
+	})
+	g.Go(func() error {
+		err := _TestOptions_noValidationValidator(o)
+
+		return errors.Wrap(err, "invalid value for option WithNoValidation")
+	})
+	return g.Wait()
 }
 `
