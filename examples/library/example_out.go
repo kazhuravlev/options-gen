@@ -2,8 +2,6 @@
 package main
 
 import (
-	"fmt"
-
 	subpackage "github.com/kazhuravlev/options-gen/examples/library/sub-package"
 	"github.com/kazhuravlev/options-gen/validator"
 	"github.com/pkg/errors"
@@ -17,7 +15,7 @@ type optOptionsMeta struct {
 
 func _Options_service1Validator(o *Options) error {
 	if validator.IsNil(o.service1) {
-		return fmt.Errorf("%w: service1 must be set (type *subpackage.Service1)", ErrInvalidOption)
+		return errors.Wrap(ErrInvalidOption, "service1 must be set (type *subpackage.Service1)")
 	}
 	return nil
 }

@@ -2,7 +2,6 @@
 package {{ .packageName }}
 
 import (
-	"fmt"
     "github.com/pkg/errors"
     "golang.org/x/sync/errgroup"
 	"github.com/kazhuravlev/options-gen/validator"
@@ -20,7 +19,7 @@ type opt{{ .optionsStructName }}Meta struct {
 	func _{{ $.optionsStructName }}_{{ .Field }}Validator(o *{{ $.optionsStructName }}) error {
 		{{ if .TagOption.IsNotEmpty -}}
 			if validator.IsNil(o.{{ .Field }}) {
-				return fmt.Errorf("%w: {{ .Field }} must be set (type {{ .Type }})", ErrInvalidOption)
+				return errors.Wrap(ErrInvalidOption, "{{ .Field }} must be set (type {{ .Type }})")
 			}
 		{{- end }}
 		return nil

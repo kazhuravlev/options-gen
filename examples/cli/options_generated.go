@@ -2,7 +2,6 @@
 package cli
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/kazhuravlev/options-gen/validator"
@@ -17,7 +16,7 @@ type optOptionsMeta struct {
 
 func _Options_httpClientValidator(o *Options) error {
 	if validator.IsNil(o.httpClient) {
-		return fmt.Errorf("%w: httpClient must be set (type *http.Client)", ErrInvalidOption)
+		return errors.Wrap(ErrInvalidOption, "httpClient must be set (type *http.Client)")
 	}
 	return nil
 }

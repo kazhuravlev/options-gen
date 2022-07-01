@@ -9,6 +9,7 @@ import (
 )
 
 const gofile = "generator_test.go"
+const optionsStruct = "TestOptions"
 
 func TestGetImports(t *testing.T) {
 	imports, err := GetFileImports(gofile)
@@ -22,7 +23,7 @@ func TestGetImports(t *testing.T) {
 }
 
 func TestGetOptionSpec(t *testing.T) {
-	data, err := GetOptionSpec(gofile, "TestOptions")
+	data, err := GetOptionSpec(gofile, optionsStruct)
 	req.NoError(t, err)
 	req.Equal(t, []OptionMeta{
 		{
@@ -56,17 +57,15 @@ func TestGetOptionSpec(t *testing.T) {
 }
 
 func TestRenderOptions(t *testing.T) {
-	data, err := GetOptionSpec(gofile, "TestOptions")
+	data, err := GetOptionSpec(gofile, optionsStruct)
 	req.NoError(t, err)
 
 	imports, err := GetFileImports(gofile)
 	req.NoError(t, err)
 
-	res, err := RenderOptions("generator", "TestOptions", imports, data)
+	res, err := RenderOptions("generator", optionsStruct, imports, data)
 	req.NoError(t, err)
 
-	// NOTE(a.telyshev): При наличии ошибок компиляции в файле импорты могут плохо
-	// мержиться, сортироваться и пр.
 	req.Equal(t, testStructGenerated, string(res), "generated file:\n%v", string(res))
 }
 
@@ -107,14 +106,14 @@ type optTestOptionsMeta struct {
 
 func _TestOptions_stringerValidator(o *TestOptions) error {
 	if validator.IsNil(o.stringer) {
-		return fmt.Errorf("%w: stringer must be set (type fmt.Stringer)", ErrInvalidOption)
+		return errors.Wrap(ErrInvalidOption, "stringer must be set (type fmt.Stringer)")
 	}
 	return nil
 }
 
 func _TestOptions_strValidator(o *TestOptions) error {
 	if validator.IsNil(o.str) {
-		return fmt.Errorf("%w: str must be set (type string)", ErrInvalidOption)
+		return errors.Wrap(ErrInvalidOption, "str must be set (type string)")
 	}
 	return nil
 }
