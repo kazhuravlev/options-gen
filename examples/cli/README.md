@@ -1,6 +1,6 @@
 ## CLI example
 
-Code, that you write - `client.go` and `options.go`. To
+Code you write is - `client.go` and `options.go`. To
 generate `options_generated.go` you can just `go generate` like that:
 
 ```bash

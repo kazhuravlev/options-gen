@@ -1,7 +1,7 @@
 # options-gen
 
-Generate an options for your service/client/etc. All that you need - define a
-struct with fields, that can be applied as Option and embed this struct into
+Generate the options for your service/client/etc. All that you need is to define a
+struct with fields, that can be applied as Option then embed this struct into
 yours.
 
 ## Installation
@@ -46,17 +46,17 @@ import (
 )
 
 func NewOptions(
-// required options. you cannot ignore or forgot them because they are 
+// required options. you cannot ignore or forget them because they are 
 //  arguments.
 	logger log.Logger, listenAddr string,
 
-// optional options. you can leave them empty or not.
+// optional: you can leave them empty or not.
 	other ...Option,
 ) {
 	// ...
 }
 
-// Validate will check that all options is in desired state
+// Validate will check that all options are in desired state
 func (o *Options) Validate() error {
 	// ...
 }
@@ -70,11 +70,11 @@ package mypkg
 import "fmt"
 
 type Component struct {
-	opts Options // struct, that you define as options struct
+	opts Options // struct that you define as struct with options 
 }
 
 func New(opts Options) (*Component, error) { // constructor of your service/client/component
-	if err := opts.Validate(); err != nil {  // always add only this lines for all your constructors
+	if err := opts.Validate(); err != nil {  // always add only these lines for all your constructors
 		return nil, fmt.Errorf("cannot validate options: %w", err)
 	}
 
@@ -97,27 +97,27 @@ func main() {
 
 ## Examples
 
-See an [examples](./examples) to gen real-world examples.
+See an [examples](./examples) to get real-world examples.
 
 ## Configuration
 
-To configure this tool you should know two things - how to work with cli tool
+To configure this tool you should know two things: how to work with cli tool
 and how to define options in your `Options` struct.
 
 ### CLI tool
 
-All that need by tool is information about source and target files and packages.
-Tool can be invoked by `options-gen` (after [Installation](#Installation)) has
-the next options:
+All the tool needs is the information about source and target files and packages.
+Tool can be invoked by `options-gen` (after [Installation](#Installation)) and 
+it will have the following arguments:
 
-- `filename` - that is source filename that contains `Options` struct relative
+- `filename` - is a source filename that contains `Options` struct relative
   to the current dir. For example `./pkg/github-client/options.go`.
-- `from-struct` - name of structure, that contains our options. For
+- `from-struct` - name of structure that contains our options. For
   example `Options`.
 - `out-filename` - specifies an output filename. This filename will be rewritten
   with options-gen specific content. For
   example `./pkg/github-client/options_generated.go`.
-- `pkg` - that is name of output filename package. In most cases we can just use
+- `pkg` - name of output filename package. In most cases we can just use
   the same package as the `filename` file. For example `githubclient`.
 
 See an [Examples](#Examples).
