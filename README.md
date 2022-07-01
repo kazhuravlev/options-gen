@@ -129,9 +129,9 @@ should be `required` you can use special field tag, named `option`.
 
 ```go
 type Options struct {
-// this option should be present and should not be empty. 
-MyOption string `option:"required,not-empty"`
-// this option should be present but can be empty.
-MyOption string `option:"required"`
+    // this option should be present and should not be empty. 
+    MyOption string `option:"required,not-empty"`
+    // this option should be present but can be empty.
+    MyOption string `option:"required"`
 }
 ```
