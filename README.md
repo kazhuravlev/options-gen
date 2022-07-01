@@ -97,7 +97,7 @@ func main() {
 
 ## Examples
 
-See an [examples](./examples/README.md) to gen real-world examples.
+See an [examples](./examples) to gen real-world examples.
 
 ## Configuration
 
