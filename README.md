@@ -45,20 +45,19 @@ import (
 	"log"
 )
 
-func NewOptions(
-// mandatory options. you cannot ignore or forget them because they are 
-//  arguments.
-	logger log.Logger, listenAddr string,
-
-// optional: you can leave them empty or not.
-	other ...Option,
+func NewOptions( 
+  // mandatory options. you cannot ignore or forget them because they are arguments.
+  logger log.Logger, 
+  listenAddr string,
+  // optional: you can leave them empty or not.
+  other ...Option,
 ) {
-	// ...
+  ...
 }
 
 // Validate will check that all options are in desired state
 func (o *Options) Validate() error {
-	// ...
+  ...
 }
 ```
 
@@ -74,11 +73,11 @@ type Component struct {
 }
 
 func New(opts Options) (*Component, error) { // constructor of your service/client/component
-	if err := opts.Validate(); err != nil {  // always add only these lines for all your constructors
-		return nil, fmt.Errorf("cannot validate options: %w", err)
-	}
-
-	return &Component{opts: opts}, nil // embed options into your component
+  if err := opts.Validate(); err != nil {  // always add only these lines for all your constructors
+    return nil, fmt.Errorf("cannot validate options: %w", err)
+  }
+  
+  return &Component{opts: opts}, nil // embed options into your component
 }
 ```
 
@@ -88,10 +87,10 @@ And after that you can use new constructor in (for ex.) `main.go`:
 package main
 
 func main() {
-	c, err := mypkg.New(mypkg.NewOptions( /* ... */))
-	if err != nil {
-		panic(err)
-	}
+  c, err := mypkg.New(mypkg.NewOptions( /* ... */))
+  if err != nil {
+    panic(err)
+  }
 }
 ```
 
@@ -137,7 +136,7 @@ field to the constructor. Like this:
 ```go
 // Mark Field1 as mandatory
 type Options struct {
-    Field1 string `option:"mandatory"`
+  Field1 string `option:"mandatory"`
 }
 
 // options-gen will generate constructor like this
@@ -150,7 +149,7 @@ the `option:"mandatory"` feature for this field and get something like this:
 ```go
 // Do not mark Field1 as mandatory
 type Options struct {
-    Field1 string
+  Field1 string
 }
 
 // options-gen will generate constructor like this
@@ -168,6 +167,6 @@ Just read the docs for `validator` library and add tag to fields like this:
 
 ```go
 type Options struct {
-    maxDbConn int `validate:"required,min=1,max=16"`
+  maxDbConn int `validate:"required,min=1,max=16"`
 }
 ```
