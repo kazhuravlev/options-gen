@@ -3,6 +3,7 @@ package generator
 import (
 	"bytes"
 	"embed"
+	"fmt"
 	"github.com/pkg/errors"
 	"go/ast"
 	"go/parser"
@@ -104,8 +105,12 @@ func makeTypeName(expr ast.Expr) (string, error) {
 		}
 
 		return "*" + tName, nil
+	case *ast.MapType:
+		tName := fmt.Sprintf("map[%s]%s", t.Key, t.Value)
+
+		return tName, nil
 	default:
-		return "", errors.Errorf("unknown field type (%T). use only local-defined interfaces", expr)
+		return "", errors.Errorf("unknown field type (%T)", expr)
 	}
 
 	return typeName, nil

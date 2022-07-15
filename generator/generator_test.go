@@ -45,6 +45,15 @@ func TestGetOptionSpec(t *testing.T) {
 			},
 		},
 		{
+			Name:  "SomeMap",
+			Field: "someMap",
+			Type:  "map[string]string",
+			TagOption: TagOption{
+				IsRequired: true,
+				IsNotEmpty: true,
+			},
+		},
+		{
 			Name:  "NoValidation",
 			Field: "noValidation",
 			Type:  "string",
@@ -83,8 +92,9 @@ func TestToStopCIFromComplaining(t *testing.T) {
 }
 
 type TestOptions struct {
-	stringer     fmt.Stringer `option:"required,not-empty"`
-	str          string       `option:"not-empty"`
+	stringer     fmt.Stringer      `option:"required,not-empty"`
+	str          string            `option:"not-empty"`
+	someMap      map[string]string `option:"required,not-empty"`
 	noValidation string
 }
 
@@ -125,6 +135,13 @@ func WithStr(opt string) optTestOptionsMeta {
 	}
 }
 
+func _TestOptions_someMapValidator(o *TestOptions) error {
+	if validator.IsNil(o.someMap) {
+		return errors.Wrap(ErrInvalidOption, "someMap must be set (type map[string]string)")
+	}
+	return nil
+}
+
 func _TestOptions_noValidationValidator(o *TestOptions) error {
 
 	return nil
@@ -139,11 +156,13 @@ func WithNoValidation(opt string) optTestOptionsMeta {
 
 func NewTestOptions(
 	stringer fmt.Stringer,
+	someMap map[string]string,
 
 	options ...optTestOptionsMeta,
 ) TestOptions {
 	o := TestOptions{}
 	o.stringer = stringer
+	o.someMap = someMap
 
 	for i := range options {
 		options[i].setter(&o)
@@ -164,6 +183,11 @@ func (o *TestOptions) Validate() error {
 		err := _TestOptions_strValidator(o)
 
 		return errors.Wrap(err, "invalid value for option WithStr")
+	})
+	g.Go(func() error {
+		err := _TestOptions_someMapValidator(o)
+
+		return errors.Wrap(err, "invalid value for option WithSomeMap")
 	})
 	g.Go(func() error {
 		err := _TestOptions_noValidationValidator(o)

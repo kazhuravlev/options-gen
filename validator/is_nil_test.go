@@ -68,6 +68,14 @@ func TestIsNil(t *testing.T) {
 			isNil: false,
 		},
 		{
+			obj:   map[string]string{},
+			isNil: false,
+		},
+		{
+			obj:   (map[string]string)(nil),
+			isNil: true,
+		},
+		{
 			obj:   []int{},
 			isNil: false,
 		},
