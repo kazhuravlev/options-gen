@@ -42,7 +42,7 @@ This will generate `out-filename` file with options constructor. Like this:
 package mypkg
 
 import (
-	"log"
+  "log"
 )
 
 func NewOptions( 
@@ -69,7 +69,7 @@ package mypkg
 import "fmt"
 
 type Component struct {
-	opts Options // struct that you define as struct with options 
+  opts Options // struct that you define as struct with options 
 }
 
 func New(opts Options) (*Component, error) { // constructor of your service/client/component
