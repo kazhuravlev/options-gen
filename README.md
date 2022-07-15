@@ -16,18 +16,18 @@ go install github.com/kazhuravlev/options-gen/cmd/options-gen
 package mypkg
 
 import (
-	"errors"
-	"io"
-	"log"
+  "errors"
+  "io"
+  "log"
 )
 
 var ErrInvalidOption = errors.New("invalid option")
 
 //go:generate options-gen -filename=$GOFILE -out-filename=options_generated.go -pkg=mypkg -from-struct=Options
 type Options struct {
-	logger     log.Logger `option:"mandatory"`
-	listenAddr string     `option:"mandatory" validate:"required,hostname_port"`
-	closer     io.Closer  `validate:"required"`
+  logger     log.Logger `option:"mandatory"`
+  listenAddr string     `option:"mandatory" validate:"required,hostname_port"`
+  closer     io.Closer  `validate:"required"`
 }
 ```
 
