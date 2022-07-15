@@ -16,18 +16,18 @@ go install github.com/kazhuravlev/options-gen/cmd/options-gen
 package mypkg
 
 import (
-	"errors"
-	"io"
-	"log"
+  "errors"
+  "io"
+  "log"
 )
 
 var ErrInvalidOption = errors.New("invalid option")
 
 //go:generate options-gen -filename=$GOFILE -out-filename=options_generated.go -pkg=mypkg -from-struct=Options
 type Options struct {
-	logger     log.Logger `option:"required"`
-	listenAddr string     `option:"required,not-empty"`
-	closer     io.Closer  `option:"not-empty"`
+  logger     log.Logger `option:"mandatory"`
+  listenAddr string     `option:"mandatory" validate:"required,hostname_port"`
+  closer     io.Closer  `validate:"required"`
 }
 ```
 
@@ -42,23 +42,22 @@ This will generate `out-filename` file with options constructor. Like this:
 package mypkg
 
 import (
-	"log"
+  "log"
 )
 
-func NewOptions(
-// required options. you cannot ignore or forget them because they are 
-//  arguments.
-	logger log.Logger, listenAddr string,
-
-// optional: you can leave them empty or not.
-	other ...Option,
+func NewOptions( 
+  // mandatory options. you cannot ignore or forget them because they are arguments.
+  logger log.Logger, 
+  listenAddr string,
+  // optional: you can leave them empty or not.
+  other ...Option,
 ) {
-	// ...
+  ...
 }
 
 // Validate will check that all options are in desired state
 func (o *Options) Validate() error {
-	// ...
+  ...
 }
 ```
 
@@ -70,15 +69,15 @@ package mypkg
 import "fmt"
 
 type Component struct {
-	opts Options // struct that you define as struct with options 
+  opts Options // struct that you define as struct with options 
 }
 
 func New(opts Options) (*Component, error) { // constructor of your service/client/component
-	if err := opts.Validate(); err != nil {  // always add only these lines for all your constructors
-		return nil, fmt.Errorf("cannot validate options: %w", err)
-	}
-
-	return &Component{opts: opts}, nil // embed options into your component
+  if err := opts.Validate(); err != nil {  // always add only these lines for all your constructors
+    return nil, fmt.Errorf("cannot validate options: %w", err)
+  }
+  
+  return &Component{opts: opts}, nil // embed options into your component
 }
 ```
 
@@ -88,10 +87,10 @@ And after that you can use new constructor in (for ex.) `main.go`:
 package main
 
 func main() {
-	c, err := mypkg.New(mypkg.NewOptions( /* ... */))
-	if err != nil {
-		panic(err)
-	}
+  c, err := mypkg.New(mypkg.NewOptions( /* ... */))
+  if err != nil {
+    panic(err)
+  }
 }
 ```
 
@@ -124,14 +123,50 @@ See an [Examples](#Examples).
 
 ### Option tag
 
-To define which options should be detected by options-gen and which of them
-should be `required` you can use special field tag, named `option`.
+You can control two important things. The first is about the options constructor
+- how `options-gen` will generate `NewOptions` constructor. The second is about
+how to validate data, that has been passed as value for this field.
+
+#### Control the constructor
+
+`options-gen` can generate a constructor that can receive all option fields as
+separate arguments. It will force the user to pass each (or someone) option
+field to the constructor. Like this:
+
+```go
+// Mark Field1 as mandatory
+type Options struct {
+  Field1 string `option:"mandatory"`
+}
+
+// options-gen will generate constructor like this
+func NewOptions(field1 string, otherOptions ...option)...
+```
+
+But, if we do not want to force the user to pass each argument - we can remove
+the `option:"mandatory"` feature for this field and get something like this:
+
+```go
+// Do not mark Field1 as mandatory
+type Options struct {
+  Field1 string
+}
+
+// options-gen will generate constructor like this
+func NewOptions(otherOptions ...option)...
+```
+
+So, this allows setting only those options fields that user is want to set.
+
+#### Validate field data
+
+After we define the fields, we want to restrict the values of these fields. To
+do that we can use a well-known library [validator](https://github.com/go-playground/validator)
+
+Just read the docs for `validator` library and add tag to fields like this:
 
 ```go
 type Options struct {
-    // this option should be present and should not be empty. 
-    MyOption string `option:"required,not-empty"`
-    // this option should be present but can be empty.
-    MyOption string `option:"required"`
+  maxDbConn int `validate:"required,min=1,max=16"`
 }
 ```

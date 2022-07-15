@@ -29,8 +29,9 @@ type OptionMeta struct {
 }
 
 type TagOption struct {
-	IsRequired bool
-	IsNotEmpty bool
+	IsRequired  bool
+	IsNotEmpty  bool
+	GoValidator string
 }
 
 func RenderOptions(packageName, optionsStructName string, fileImports []string, data []OptionMeta) ([]byte, error) {
@@ -57,7 +58,7 @@ func RenderOptions(packageName, optionsStructName string, fileImports []string, 
 }
 
 //nolint:gocognit,nestif
-func findInterfaceMethods(packages map[string]*ast.Package, typeName string) []*ast.Field {
+func findStructFields(packages map[string]*ast.Package, typeName string) []*ast.Field {
 	var methods []*ast.Field
 
 	for _, pkg := range packages {
@@ -123,11 +124,14 @@ func GetOptionSpec(filePath, optionsStructName string) ([]OptionMeta, error) {
 		return nil, errors.Wrap(err, "cannot parse dir")
 	}
 
-	methods := findInterfaceMethods(node, optionsStructName)
+	fields := findStructFields(node, optionsStructName)
 
-	options := make([]OptionMeta, len(methods))
-	for i := range methods {
-		field := methods[i]
+	options := make([]OptionMeta, len(fields))
+	for i := range fields {
+		field := fields[i]
+
+		fieldName := field.Names[0].Name
+
 		typeName, err := makeTypeName(field.Type)
 		if err != nil {
 			return nil, errors.Wrap(err, "cannot make type name")
@@ -137,22 +141,30 @@ func GetOptionSpec(filePath, optionsStructName string) ([]OptionMeta, error) {
 		if field.Tag != nil {
 			value := field.Tag.Value
 
-			tag := reflect.StructTag(strings.Trim(value, "`")).Get("option")
-
-			for _, opt := range strings.Split(tag, ",") {
+			optionTag := reflect.StructTag(strings.Trim(value, "`")).Get("option")
+			for _, opt := range strings.Split(optionTag, ",") {
 				if opt == "required" {
+					fmt.Printf("Deprecated: use `option:\"mandatory\"` instead for field `%s` to force the passing option in the constructor argument\n", fieldName)
 					tagOpt.IsRequired = true
 				}
+				if opt == "mandatory" {
+					tagOpt.IsRequired = true
+				}
+				// TODO: remove the tag
 				if opt == "not-empty" {
+					fmt.Printf("Deprecated: use github.com/go-playground/validator tag to check the field `%s` content\n", fieldName)
 					tagOpt.IsNotEmpty = true
 				}
 			}
+
+			validatorTag := reflect.StructTag(strings.Trim(value, "`")).Get("validate")
+			tagOpt.GoValidator = validatorTag
 		}
 
 		title := cases.Title(language.English, cases.NoLower)
 		options[i] = OptionMeta{
-			Name:      title.String(field.Names[0].Name),
-			Field:     field.Names[0].Name,
+			Name:      title.String(fieldName),
+			Field:     fieldName,
 			Type:      typeName,
 			TagOption: tagOpt,
 		}
