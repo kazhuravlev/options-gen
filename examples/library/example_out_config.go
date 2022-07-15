@@ -11,18 +11,6 @@ type optConfigMeta struct {
 	validator func(o *Config) error
 }
 
-func _Config_nameValidator(o *Config) error {
-
-	return nil
-}
-
-func WithName(opt string) optConfigMeta {
-	return optConfigMeta{
-		setter:    func(o *Config) { o.name = opt },
-		validator: _Config_nameValidator,
-	}
-}
-
 func NewConfig(
 
 	options ...optConfigMeta,
@@ -36,6 +24,13 @@ func NewConfig(
 	return o
 }
 
+func WithName(opt string) optConfigMeta {
+	return optConfigMeta{
+		setter:    func(o *Config) { o.name = opt },
+		validator: _Config_nameValidator,
+	}
+}
+
 func (o *Config) Validate() error {
 	g := new(errgroup.Group)
 
@@ -45,4 +40,9 @@ func (o *Config) Validate() error {
 		return errors.Wrap(err, "invalid value for option WithName")
 	})
 	return g.Wait()
+}
+
+func _Config_nameValidator(o *Config) error {
+
+	return nil
 }

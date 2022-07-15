@@ -25,9 +25,9 @@ var ErrInvalidOption = errors.New("invalid option")
 
 //go:generate options-gen -filename=$GOFILE -out-filename=options_generated.go -pkg=mypkg -from-struct=Options
 type Options struct {
-	logger     log.Logger `option:"required"`
-	listenAddr string     `option:"required,not-empty"`
-	closer     io.Closer  `option:"not-empty"`
+	logger     log.Logger `option:"mandatory"`
+	listenAddr string     `option:"mandatory" validate:"required,hostname_port"`
+	closer     io.Closer  `validate:"required"`
 }
 ```
 
@@ -46,7 +46,7 @@ import (
 )
 
 func NewOptions(
-// required options. you cannot ignore or forget them because they are 
+// mandatory options. you cannot ignore or forget them because they are 
 //  arguments.
 	logger log.Logger, listenAddr string,
 
@@ -124,14 +124,50 @@ See an [Examples](#Examples).
 
 ### Option tag
 
-To define which options should be detected by options-gen and which of them
-should be `required` you can use special field tag, named `option`.
+You can control two important things. The first is about the options constructor
+- how `options-gen` will generate `NewOptions` constructor. The second is about
+how to validate data, that has been passed as value for this field.
+
+#### Control the constructor
+
+`options-gen` can generate a constructor that can receive all option fields as
+separate arguments. It will force the user to pass each (or someone) option
+field to the constructor. Like this:
+
+```go
+// Mark Field1 as mandatory
+type Options struct {
+    Field1 string `option:"mandatory"`
+}
+
+// options-gen will generate constructor like this
+func NewOptions(field1 string, otherOptions ...option)...
+```
+
+But, if we do not want to force the user to pass each argument - we can remove
+the `option:"mandatory"` feature for this field and get something like this:
+
+```go
+// Do not mark Field1 as mandatory
+type Options struct {
+    Field1 string
+}
+
+// options-gen will generate constructor like this
+func NewOptions(otherOptions ...option)...
+```
+
+So, this allows setting only those options fields that user is want to set.
+
+#### Validate field data
+
+After we define the fields, we want to restrict the values of these fields. To
+do that we can use a well-known library [validator](https://github.com/go-playground/validator)
+
+Just read the docs for `validator` library and add tag to fields like this:
 
 ```go
 type Options struct {
-    // this option should be present and should not be empty. 
-    MyOption string `option:"required,not-empty"`
-    // this option should be present but can be empty.
-    MyOption string `option:"required"`
+    maxDbConn int `validate:"required,min=1,max=16"`
 }
 ```

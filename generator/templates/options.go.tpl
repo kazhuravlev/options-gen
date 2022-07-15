@@ -5,6 +5,7 @@ import (
     "github.com/pkg/errors"
     "golang.org/x/sync/errgroup"
 	"github.com/kazhuravlev/options-gen/validator"
+	goplvalidator "github.com/go-playground/validator/v10"
 	{{- range $import := .imports }}
 	{{ $import -}}
 	{{- end }}
@@ -15,31 +16,12 @@ type opt{{ .optionsStructName }}Meta struct {
 	validator func(o *{{ .optionsStructName }}) error
 }
 
-{{ range .options }}
-	func _{{ $.optionsStructName }}_{{ .Field }}Validator(o *{{ $.optionsStructName }}) error {
-		{{ if .TagOption.IsNotEmpty -}}
-			if validator.IsNil(o.{{ .Field }}) {
-				return errors.Wrap(ErrInvalidOption, "{{ .Field }} must be set (type {{ .Type }})")
-			}
-		{{- end }}
-		return nil
-	}
-
-	{{ if not .TagOption.IsRequired }}
-		func With{{ .Name }}(opt {{ .Type }}) opt{{ $.optionsStructName }}Meta {
-			 return opt{{ $.optionsStructName }}Meta{
-				 setter: func(o *{{ $.optionsStructName }}) { o.{{ .Field }} = opt },
-				 validator: _{{ $.optionsStructName }}_{{ .Field }}Validator,
-			 }
-		}
-	{{ end }}
-{{ end }}
-
-
 func New{{ .optionsStructName }}(
-	{{ range .options }}{{ if .TagOption.IsRequired -}}
-		{{ .Field }} {{ .Type }},
-	{{ end }}{{ end }}
+	{{ range .options -}}
+        {{ if .TagOption.IsRequired -}}
+            {{ .Field }} {{ .Type }},
+        {{ end }}
+	{{- end }}
 	options ...opt{{ .optionsStructName }}Meta,
 ) {{ .optionsStructName }} {
 	o := {{ .optionsStructName }}{}
@@ -54,6 +36,18 @@ func New{{ .optionsStructName }}(
 	return o
 }
 
+{{ range .options }}
+	{{ if not .TagOption.IsRequired }}
+		func With{{ .Name }}(opt {{ .Type }}) opt{{ $.optionsStructName }}Meta {
+			 return opt{{ $.optionsStructName }}Meta{
+				 setter: func(o *{{ $.optionsStructName }}) { o.{{ .Field }} = opt },
+				 validator: _{{ $.optionsStructName }}_{{ .Field }}Validator,
+			 }
+		}
+	{{ end }}
+{{ end }}
+
+
 func (o *{{ .optionsStructName }}) Validate() error {
     g := new(errgroup.Group)
 
@@ -67,3 +61,21 @@ func (o *{{ .optionsStructName }}) Validate() error {
 
 	return g.Wait()
 }
+
+{{ range .options }}
+	func _{{ $.optionsStructName }}_{{ .Field }}Validator(o *{{ $.optionsStructName }}) error {
+		{{ if .TagOption.IsNotEmpty -}}
+			if validator.IsNil(o.{{ .Field }}) {
+				return errors.Wrap(ErrInvalidOption, "{{ .Field }} must be present (type {{ .Type }})")
+			}
+		{{- end }}
+
+		{{ if .TagOption.GoValidator -}}
+            if err := goplvalidator.New().Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
+                return errors.Wrap(err, "field `{{ .Field }}` did not pass the test")
+            }
+		{{- end }}
+
+		return nil
+	}
+{{ end }}

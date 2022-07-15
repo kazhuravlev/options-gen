@@ -8,7 +8,9 @@ import (
 var ErrInvalidOption = errors.New("invalid option")
 
 type Options struct {
-	service1 *subpackage.Service1 `option:"required,not-empty"`
+	service1   *subpackage.Service1 `option:"mandatory" validate:"required"`
+	s3Endpoint string               `option:"mandatory" validate:"required,url"`
+	port       int                  `validate:"required,min=10"`
 }
 
 type Config struct {

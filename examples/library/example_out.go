@@ -2,8 +2,8 @@
 package main
 
 import (
+	goplvalidator "github.com/go-playground/validator/v10"
 	subpackage "github.com/kazhuravlev/options-gen/examples/library/sub-package"
-	"github.com/kazhuravlev/options-gen/validator"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
@@ -13,26 +13,28 @@ type optOptionsMeta struct {
 	validator func(o *Options) error
 }
 
-func _Options_service1Validator(o *Options) error {
-	if validator.IsNil(o.service1) {
-		return errors.Wrap(ErrInvalidOption, "service1 must be set (type *subpackage.Service1)")
-	}
-	return nil
-}
-
 func NewOptions(
 	service1 *subpackage.Service1,
+	s3Endpoint string,
 
 	options ...optOptionsMeta,
 ) Options {
 	o := Options{}
 	o.service1 = service1
+	o.s3Endpoint = s3Endpoint
 
 	for i := range options {
 		options[i].setter(&o)
 	}
 
 	return o
+}
+
+func WithPort(opt int) optOptionsMeta {
+	return optOptionsMeta{
+		setter:    func(o *Options) { o.port = opt },
+		validator: _Options_portValidator,
+	}
 }
 
 func (o *Options) Validate() error {
@@ -43,5 +45,42 @@ func (o *Options) Validate() error {
 
 		return errors.Wrap(err, "invalid value for option WithService1")
 	})
+	g.Go(func() error {
+		err := _Options_s3EndpointValidator(o)
+
+		return errors.Wrap(err, "invalid value for option WithS3Endpoint")
+	})
+	g.Go(func() error {
+		err := _Options_portValidator(o)
+
+		return errors.Wrap(err, "invalid value for option WithPort")
+	})
 	return g.Wait()
+}
+
+func _Options_service1Validator(o *Options) error {
+
+	if err := goplvalidator.New().Var(o.service1, "required"); err != nil {
+		return errors.Wrap(err, "field `service1` did not pass the test")
+	}
+
+	return nil
+}
+
+func _Options_s3EndpointValidator(o *Options) error {
+
+	if err := goplvalidator.New().Var(o.s3Endpoint, "required,url"); err != nil {
+		return errors.Wrap(err, "field `s3Endpoint` did not pass the test")
+	}
+
+	return nil
+}
+
+func _Options_portValidator(o *Options) error {
+
+	if err := goplvalidator.New().Var(o.port, "required,min=10"); err != nil {
+		return errors.Wrap(err, "field `port` did not pass the test")
+	}
+
+	return nil
 }
