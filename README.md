@@ -23,7 +23,7 @@ import (
 
 var ErrInvalidOption = errors.New("invalid option")
 
-//go:generate options-gen -filename=$GOFILE -out-filename=options_generated.go -pkg=mypkg -from-struct=Options
+//go:generate options-gen -out-filename=options_generated.go -from-struct=Options
 type Options struct {
   logger     log.Logger `option:"mandatory"`
   listenAddr string     `option:"mandatory" validate:"required,hostname_port"`
@@ -111,13 +111,15 @@ it will have the following arguments:
 
 - `filename` - is a source filename that contains `Options` struct relative
   to the current dir. For example `./pkg/github-client/options.go`.
+  Default: `$GOFILE` (file where you placed `//go:generate`).
+- `pkg` - name of output filename package. In most cases we can just use
+  the same package as the `filename` file. For example `githubclient`.
+  Default: `$GOPACKAGE`. Package name same as file where you placed `//go:generate`.
 - `from-struct` - name of structure that contains our options. For
   example `Options`.
 - `out-filename` - specifies an output filename. This filename will be rewritten
   with options-gen specific content. For
   example `./pkg/github-client/options_generated.go`.
-- `pkg` - name of output filename package. In most cases we can just use
-  the same package as the `filename` file. For example `githubclient`.
 
 See an [Examples](#Examples).
 
