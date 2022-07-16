@@ -69,22 +69,11 @@ func TestGetOptionSpec(t *testing.T) {
 	}, data)
 }
 
-func TestToStopCIFromComplaining(t *testing.T) {
-	s := TestOptions{
-		stringer:     nil,
-		str:          "123",
-		noValidation: "qwe",
-	}
-	req.Equal(t, TestOptions{
-		stringer:     nil,
-		str:          "123",
-		noValidation: "qwe",
-	}, s)
-}
+// NOTE: this struct is used by testcases in current file
 
 type TestOptions struct {
-	stringer     fmt.Stringer      `option:"mandatory" validate:"required"`
-	str          string            `validate:"required"`
-	someMap      map[string]string `option:"mandatory" validate:"required"`
-	noValidation string
+	stringer     fmt.Stringer      `option:"mandatory" validate:"required"` //nolint:unused
+	str          string            `validate:"required"`                    //nolint:unused
+	someMap      map[string]string `option:"mandatory" validate:"required"` //nolint:unused
+	noValidation string            //nolint:unused
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 
 	optionsgen "github.com/kazhuravlev/options-gen/options-gen"
 )
@@ -14,9 +15,12 @@ func main() {
 
 	var outPackageName string
 
-	flag.StringVar(&inFilename, "filename", "", "input filename")
+	fmt.Println(os.Getenv("GOFILE"))
+	fmt.Println(os.Getenv("GOPACKAGE"))
+
+	flag.StringVar(&inFilename, "filename", os.Getenv("GOFILE"), "input filename")
+	flag.StringVar(&outPackageName, "pkg", os.Getenv("GOPACKAGE"), "output package name")
 	flag.StringVar(&outFilename, "out-filename", "", "output filename")
-	flag.StringVar(&outPackageName, "pkg", "", "output package name")
 	flag.StringVar(&optionsStructName, "from-struct", "", "struct that contains options")
 	flag.Parse()
 
