@@ -75,6 +75,24 @@ func TestGetOptionSpec(t *testing.T) {
 				GoValidator: "",
 			},
 		},
+		{
+			Name:      "StarOpt",
+			Field:     "starOpt",
+			Type:      "*int",
+			TagOption: generator.TagOption{IsRequired: true, IsNotEmpty: false, GoValidator: ""},
+		},
+		{
+			Name:      "SliceOpt",
+			Field:     "sliceOpt",
+			Type:      "[]int",
+			TagOption: generator.TagOption{IsRequired: true, IsNotEmpty: false, GoValidator: ""},
+		},
+		{
+			Name:      "OldStyleOpt",
+			Field:     "oldStyleOpt",
+			Type:      "string",
+			TagOption: generator.TagOption{IsRequired: true, IsNotEmpty: true, GoValidator: ""},
+		},
 	}, data)
 }
 
@@ -85,4 +103,7 @@ type TestOptions struct {
 	str          string            `validate:"required"`                    //nolint:unused
 	someMap      map[string]string `option:"mandatory" validate:"required"` //nolint:unused
 	noValidation string            //nolint:unused
+	starOpt      *int              `option:"mandatory"`          //nolint:unused
+	sliceOpt     []int             `option:"mandatory"`          //nolint:unused
+	oldStyleOpt  string            `option:"required,not-empty"` //nolint:unused
 }
