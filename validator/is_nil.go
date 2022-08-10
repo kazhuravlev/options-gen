@@ -3,7 +3,7 @@ package validator
 import "reflect"
 
 // IsNil check that object not empty for their type.
-// Deprecated: use go-playground/validate ant these tags to validate fields
+// Deprecated: use go-playground/validate ant these tags to validate fields.
 func IsNil(object interface{}) bool {
 	if object == nil {
 		return true
@@ -11,6 +11,7 @@ func IsNil(object interface{}) bool {
 
 	value := reflect.ValueOf(object)
 	kind := value.Kind()
+
 	if kind >= reflect.Chan && kind <= reflect.Slice && value.IsNil() {
 		return true
 	}

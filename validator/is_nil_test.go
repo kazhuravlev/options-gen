@@ -1,19 +1,24 @@
-package validator
+package validator_test
 
 import (
 	"fmt"
 	"net"
 	"testing"
 
+	"github.com/kazhuravlev/options-gen/validator"
 	"github.com/stretchr/testify/require"
 )
 
-func TestIsNil(t *testing.T) {
-	var emptyIface interface{}
-	var emptyStringer fmt.Stringer
-	var emptyChan chan int
-	var emptyFun func()
-	var emptyPtr *int
+func TestIsNil(t *testing.T) { //nolint:funlen
+	t.Parallel()
+
+	var (
+		emptyIface    interface{}
+		emptyStringer fmt.Stringer
+		emptyChan     chan int
+		emptyFun      func()
+		emptyPtr      *int
+	)
 
 	cases := []struct {
 		obj   interface{}
@@ -81,6 +86,6 @@ func TestIsNil(t *testing.T) {
 		},
 	}
 	for i, tt := range cases {
-		require.Equal(t, tt.isNil, IsNil(tt.obj), "case %d; value: (%T)[%v]", i, tt.obj, tt.obj)
+		require.Equal(t, tt.isNil, validator.IsNil(tt.obj), "case %d; value: (%T)[%v]", i, tt.obj, tt.obj)
 	}
 }

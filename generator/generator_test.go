@@ -1,36 +1,45 @@
-package generator
+package generator_test
 
 import (
 	"fmt"
 	"testing"
 
+	"github.com/kazhuravlev/options-gen/generator"
 	// test named imports.
 	req "github.com/stretchr/testify/require"
 )
 
-const gofile = "generator_test.go"
-const optionsStruct = "TestOptions"
+const (
+	gofile        = "generator_test.go"
+	optionsStruct = "TestOptions"
+)
 
 func TestGetImports(t *testing.T) {
-	imports, err := GetFileImports(gofile)
+	t.Parallel()
+
+	imports, err := generator.GetFileImports(gofile)
 	req.NoError(t, err)
+
 	requiredImports := []string{
 		`"fmt"`,
 		`"testing"`,
+		`"github.com/kazhuravlev/options-gen/generator"`,
 		`req "github.com/stretchr/testify/require"`,
 	}
-	req.Equal(t, requiredImports, imports)
+	req.EqualValues(t, requiredImports, imports)
 }
 
 func TestGetOptionSpec(t *testing.T) {
-	data, err := GetOptionSpec(gofile, optionsStruct)
+	t.Parallel()
+
+	data, err := generator.GetOptionSpec(gofile, optionsStruct)
 	req.NoError(t, err)
-	req.Equal(t, []OptionMeta{
+	req.Equal(t, []generator.OptionMeta{
 		{
 			Name:  "Stringer",
 			Field: "stringer",
 			Type:  "fmt.Stringer",
-			TagOption: TagOption{
+			TagOption: generator.TagOption{
 				IsRequired:  true,
 				IsNotEmpty:  false,
 				GoValidator: "required",
@@ -40,7 +49,7 @@ func TestGetOptionSpec(t *testing.T) {
 			Name:  "Str",
 			Field: "str",
 			Type:  "string",
-			TagOption: TagOption{
+			TagOption: generator.TagOption{
 				IsRequired:  false,
 				IsNotEmpty:  false,
 				GoValidator: "required",
@@ -50,7 +59,7 @@ func TestGetOptionSpec(t *testing.T) {
 			Name:  "SomeMap",
 			Field: "someMap",
 			Type:  "map[string]string",
-			TagOption: TagOption{
+			TagOption: generator.TagOption{
 				IsRequired:  true,
 				IsNotEmpty:  false,
 				GoValidator: "required",
@@ -60,7 +69,7 @@ func TestGetOptionSpec(t *testing.T) {
 			Name:  "NoValidation",
 			Field: "noValidation",
 			Type:  "string",
-			TagOption: TagOption{
+			TagOption: generator.TagOption{
 				IsRequired:  false,
 				IsNotEmpty:  false,
 				GoValidator: "",

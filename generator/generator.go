@@ -3,18 +3,20 @@ package generator
 import (
 	"bytes"
 	"embed"
-	"fmt"
-	"github.com/pkg/errors"
+	"go/ast"
 	"go/parser"
 	"go/token"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
-	"golang.org/x/tools/imports"
 	"io/ioutil"
+	"log"
 	"path"
 	"reflect"
 	"strings"
 	"text/template"
+
+	"github.com/pkg/errors"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+	"golang.org/x/tools/imports"
 )
 
 //go:embed templates/options.go.tpl
@@ -33,7 +35,7 @@ type TagOption struct {
 	GoValidator string
 }
 
-// RenderOptions will render file and out it's content
+// RenderOptions will render file and out it's content.
 func RenderOptions(packageName, optionsStructName string, fileImports []string, data []OptionMeta) ([]byte, error) {
 	tmpl := template.Must(template.ParseFS(templates, "templates/options.go.tpl"))
 
@@ -61,6 +63,7 @@ func RenderOptions(packageName, optionsStructName string, fileImports []string, 
 // and scan for options.
 func GetOptionSpec(filePath, optionsStructName string) ([]OptionMeta, error) {
 	fset := token.NewFileSet()
+
 	node, err := parser.ParseDir(fset, path.Dir(filePath), nil, parser.ParseComments)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot parse dir")
@@ -79,29 +82,7 @@ func GetOptionSpec(filePath, optionsStructName string) ([]OptionMeta, error) {
 			return nil, errors.Wrap(err, "cannot make type name")
 		}
 
-		var tagOpt TagOption
-		if field.Tag != nil {
-			value := field.Tag.Value
-
-			optionTag := reflect.StructTag(strings.Trim(value, "`")).Get("option")
-			for _, opt := range strings.Split(optionTag, ",") {
-				if opt == "required" {
-					fmt.Printf("Deprecated: use `option:\"mandatory\"` instead for field `%s` to force the passing option in the constructor argument\n", fieldName)
-					tagOpt.IsRequired = true
-				}
-				if opt == "mandatory" {
-					tagOpt.IsRequired = true
-				}
-				// TODO: remove the tag
-				if opt == "not-empty" {
-					fmt.Printf("Deprecated: use github.com/go-playground/validator tag to check the field `%s` content\n", fieldName)
-					tagOpt.IsNotEmpty = true
-				}
-			}
-
-			validatorTag := reflect.StructTag(strings.Trim(value, "`")).Get("validate")
-			tagOpt.GoValidator = validatorTag
-		}
+		tagOpt := parseTag(field.Tag, fieldName)
 
 		title := cases.Title(language.English, cases.NoLower)
 		options[i] = OptionMeta{
@@ -113,6 +94,49 @@ func GetOptionSpec(filePath, optionsStructName string) ([]OptionMeta, error) {
 	}
 
 	return options, nil
+}
+
+func parseTag(tag *ast.BasicLit, fieldName string) TagOption {
+	tagOpt := TagOption{
+		IsRequired:  false,
+		IsNotEmpty:  false,
+		GoValidator: "",
+	}
+
+	if tag == nil {
+		return tagOpt
+	}
+
+	value := tag.Value
+	tagOpt.GoValidator = reflect.StructTag(strings.Trim(value, "`")).Get("validate")
+
+	optionTag := reflect.StructTag(strings.Trim(value, "`")).Get("option")
+	for _, opt := range strings.Split(optionTag, ",") {
+		if opt == "required" {
+			log.Printf(
+				"Deprecated: use `option:\"mandatory\"` "+
+					"instead for field `%s` to force the passing "+
+					"option in the constructor argument\n", fieldName)
+
+			tagOpt.IsRequired = true
+		}
+
+		if opt == "mandatory" {
+			tagOpt.IsRequired = true
+		}
+
+		// NOTE: remove the tag
+		if opt == "not-empty" {
+			log.Printf(
+				"Deprecated: use "+
+					"github.com/go-playground/validator tag to check "+
+					"the field `%s` content\n", fieldName)
+
+			tagOpt.IsNotEmpty = true
+		}
+	}
+
+	return tagOpt
 }
 
 // GetFileImports read the file and parse the imports section. Return all found

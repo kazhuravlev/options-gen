@@ -1,9 +1,10 @@
 package optionsgen
 
 import (
+	"io/ioutil"
+
 	"github.com/kazhuravlev/options-gen/generator"
 	"github.com/pkg/errors"
-	"io/ioutil"
 )
 
 func Run(inFilename, outFilename, structName, packageName string) error {
@@ -22,7 +23,8 @@ func Run(inFilename, outFilename, structName, packageName string) error {
 		return errors.Wrap(err, "cannot renderOptions template")
 	}
 
-	if err := ioutil.WriteFile(outFilename, res, 0o644); err != nil { //nolint:gosec
+	const perm = 0o644
+	if err := ioutil.WriteFile(outFilename, res, perm); err != nil {
 		return errors.Wrap(err, "cannot write result")
 	}
 
