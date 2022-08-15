@@ -7,32 +7,48 @@ import (
 	"github.com/pkg/errors"
 )
 
-//nolint:gocognit,nestif
 func findStructFields(packages map[string]*ast.Package, typeName string) []*ast.Field {
 	var methods []*ast.Field
 
-	for _, pkg := range packages {
-		for _, fileObj := range pkg.Files {
-			for _, decl := range fileObj.Decls {
-				if x, ok := decl.(*ast.GenDecl); ok {
-					for _, spec := range x.Specs {
-						if typ, ok := spec.(*ast.TypeSpec); ok {
-							if xType, ok := typ.Type.(*ast.StructType); ok {
-								if typ.Name.Name == typeName {
-									methods = append(
-										methods,
-										xType.Fields.List...,
-									)
-								}
-							}
-						}
-					}
-				}
+	decls := getDecls(packages)
+	for _, decl := range decls {
+		x, ok := decl.(*ast.GenDecl)
+		if !ok {
+			continue
+		}
+
+		for _, spec := range x.Specs {
+			typeSpec, ok := spec.(*ast.TypeSpec) //nolint:varnamelen
+			if !ok {
+				continue
 			}
+
+			if typeSpec.Name.Name != typeName {
+				continue
+			}
+
+			structType, ok := typeSpec.Type.(*ast.StructType)
+			if !ok {
+				continue
+			}
+
+			methods = append(methods, structType.Fields.List...)
 		}
 	}
 
 	return methods
+}
+
+func getDecls(packages map[string]*ast.Package) []ast.Decl {
+	var res []ast.Decl
+
+	for _, pkg := range packages {
+		for _, fileObj := range pkg.Files {
+			res = append(res, fileObj.Decls...)
+		}
+	}
+
+	return res
 }
 
 func makeTypeName(expr ast.Expr) (string, error) {
