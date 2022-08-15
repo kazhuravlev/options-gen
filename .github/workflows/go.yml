@@ -1,12 +1,15 @@
 name: Go
-on: [ push ]
+on:
+  push:
+    tags:
+      - '*'
 jobs:
   build:
     name: Build on golang ${{ matrix.go_version }} and ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        go_version: [ 1.18 ]
+        go_version: [ 1.18, 1.19 ]
         os: [ ubuntu-latest, macOS-latest ]
 
     steps:
@@ -28,4 +31,7 @@ jobs:
           go build -v -o /dev/null ./cmd/options-gen
 
       - name: Test
-        run: go test -v ./...
+        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
