@@ -46,6 +46,7 @@ func RenderOptions(packageName, optionsStructName string, fileImports []string, 
 		"options":           data,
 	}
 	buf := new(bytes.Buffer)
+
 	if err := tmpl.Execute(buf, tplContext); err != nil {
 		return nil, errors.Wrap(err, "cannot render template")
 	}
@@ -70,10 +71,10 @@ func GetOptionSpec(filePath, optionsStructName string) ([]OptionMeta, error) {
 	}
 
 	fields := findStructFields(node, optionsStructName)
-
 	options := make([]OptionMeta, len(fields))
-	for i := range fields {
-		field := fields[i]
+
+	for idx := range fields {
+		field := fields[idx]
 
 		fieldName := field.Names[0].Name
 
@@ -85,7 +86,7 @@ func GetOptionSpec(filePath, optionsStructName string) ([]OptionMeta, error) {
 		tagOpt := parseTag(field.Tag, fieldName)
 
 		title := cases.Title(language.English, cases.NoLower)
-		options[i] = OptionMeta{
+		options[idx] = OptionMeta{
 			Name:      title.String(fieldName),
 			Field:     fieldName,
 			Type:      typeName,
@@ -148,12 +149,14 @@ func GetFileImports(filePath string) ([]string, error) {
 	}
 
 	fset := token.NewFileSet()
+
 	file, err := parser.ParseFile(fset, filePath, source, 0)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot parse file %q", filePath)
 	}
 
 	fileImports := make([]string, 0, len(file.Imports))
+
 	for _, importSpec := range file.Imports {
 		imp := string(source[importSpec.Pos()-1 : importSpec.End()-1])
 		fileImports = append(fileImports, imp)

@@ -29,7 +29,7 @@ func TestGetImports(t *testing.T) {
 	req.EqualValues(t, requiredImports, imports)
 }
 
-func TestGetOptionSpec(t *testing.T) {
+func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	data, err := generator.GetOptionSpec(gofile, optionsStruct)
