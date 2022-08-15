@@ -4,7 +4,7 @@ package {{ .packageName }}
 import (
     "github.com/pkg/errors"
     "golang.org/x/sync/errgroup"
-	"github.com/kazhuravlev/options-gen/validator"
+	"github.com/kazhuravlev/options-gen/pkg/validator"
 	goplvalidator "github.com/go-playground/validator/v10"
 	{{- range $import := .imports }}
 	{{ $import -}}

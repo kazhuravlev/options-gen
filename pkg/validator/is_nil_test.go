@@ -5,7 +5,7 @@ import (
 	"net"
 	"testing"
 
-	"github.com/kazhuravlev/options-gen/validator"
+	"github.com/kazhuravlev/options-gen/pkg/validator"
 	"github.com/stretchr/testify/require"
 )
 

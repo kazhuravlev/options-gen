@@ -2,10 +2,10 @@ package generator_test
 
 import (
 	"fmt"
-	"github.com/kazhuravlev/options-gen/internal/generator"
 	"sort"
 	"testing"
 
+	"github.com/kazhuravlev/options-gen/internal/generator"
 	// test named imports.
 	req "github.com/stretchr/testify/require"
 )
