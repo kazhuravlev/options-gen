@@ -2,9 +2,10 @@ package generator_test
 
 import (
 	"fmt"
+	"github.com/kazhuravlev/options-gen/internal/generator"
+	"sort"
 	"testing"
 
-	"github.com/kazhuravlev/options-gen/generator"
 	// test named imports.
 	req "github.com/stretchr/testify/require"
 )
@@ -22,10 +23,13 @@ func TestGetImports(t *testing.T) {
 
 	requiredImports := []string{
 		`"fmt"`,
+		`"sort"`,
 		`"testing"`,
-		`"github.com/kazhuravlev/options-gen/generator"`,
+		`"github.com/kazhuravlev/options-gen/internal/generator"`,
 		`req "github.com/stretchr/testify/require"`,
 	}
+	sort.Strings(requiredImports)
+	sort.Strings(imports)
 	req.EqualValues(t, requiredImports, imports)
 }
 

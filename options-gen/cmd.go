@@ -1,9 +1,9 @@
 package optionsgen
 
 import (
+	"github.com/kazhuravlev/options-gen/internal/generator"
 	"io/ioutil"
 
-	"github.com/kazhuravlev/options-gen/generator"
 	"github.com/pkg/errors"
 )
 
