@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -68,43 +67,59 @@ func (o *Options) Validate() error {
 
 	g.Go(func() error {
 		err := _Options_AnyValidator(o)
-
-		return errors.Wrap(err, "invalid value for option WithAny")
+		if err != nil {
+			return fmt.Errorf("invalid value for option WithAny: %w", err)
+		}
+		return nil
 	})
 	g.Go(func() error {
 		err := _Options_StringerValidator(o)
-
-		return errors.Wrap(err, "invalid value for option WithStringer")
+		if err != nil {
+			return fmt.Errorf("invalid value for option WithStringer: %w", err)
+		}
+		return nil
 	})
 	g.Go(func() error {
 		err := _Options_RWCloserValidator(o)
-
-		return errors.Wrap(err, "invalid value for option WithRWCloser")
+		if err != nil {
+			return fmt.Errorf("invalid value for option WithRWCloser: %w", err)
+		}
+		return nil
 	})
 	g.Go(func() error {
 		err := _Options_LocalValidator(o)
-
-		return errors.Wrap(err, "invalid value for option WithLocal")
+		if err != nil {
+			return fmt.Errorf("invalid value for option WithLocal: %w", err)
+		}
+		return nil
 	})
 	g.Go(func() error {
 		err := _Options_OptAnyValidator(o)
-
-		return errors.Wrap(err, "invalid value for option WithOptAny")
+		if err != nil {
+			return fmt.Errorf("invalid value for option WithOptAny: %w", err)
+		}
+		return nil
 	})
 	g.Go(func() error {
 		err := _Options_OptStringerValidator(o)
-
-		return errors.Wrap(err, "invalid value for option WithOptStringer")
+		if err != nil {
+			return fmt.Errorf("invalid value for option WithOptStringer: %w", err)
+		}
+		return nil
 	})
 	g.Go(func() error {
 		err := _Options_OptRWCloserValidator(o)
-
-		return errors.Wrap(err, "invalid value for option WithOptRWCloser")
+		if err != nil {
+			return fmt.Errorf("invalid value for option WithOptRWCloser: %w", err)
+		}
+		return nil
 	})
 	g.Go(func() error {
 		err := _Options_OptLocalValidator(o)
-
-		return errors.Wrap(err, "invalid value for option WithOptLocal")
+		if err != nil {
+			return fmt.Errorf("invalid value for option WithOptLocal: %w", err)
+		}
+		return nil
 	})
 	return g.Wait()
 }

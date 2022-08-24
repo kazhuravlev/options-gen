@@ -2,11 +2,14 @@
 package main
 
 import (
+	"fmt"
+
 	goplvalidator "github.com/go-playground/validator/v10"
 	subpackage "github.com/kazhuravlev/options-gen/examples/library/sub-package"
-	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
+
+var v = goplvalidator.New()
 
 type optOptionsMeta struct {
 	setter    func(o *Options)
@@ -42,26 +45,32 @@ func (o *Options) Validate() error {
 
 	g.Go(func() error {
 		err := _Options_service1Validator(o)
-
-		return errors.Wrap(err, "invalid value for option WithService1")
+		if err != nil {
+			return fmt.Errorf("invalid value for option WithService1: %w", err)
+		}
+		return nil
 	})
 	g.Go(func() error {
 		err := _Options_s3EndpointValidator(o)
-
-		return errors.Wrap(err, "invalid value for option WithS3Endpoint")
+		if err != nil {
+			return fmt.Errorf("invalid value for option WithS3Endpoint: %w", err)
+		}
+		return nil
 	})
 	g.Go(func() error {
 		err := _Options_portValidator(o)
-
-		return errors.Wrap(err, "invalid value for option WithPort")
+		if err != nil {
+			return fmt.Errorf("invalid value for option WithPort: %w", err)
+		}
+		return nil
 	})
 	return g.Wait()
 }
 
 func _Options_service1Validator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.service1, "required"); err != nil {
-		return errors.Wrap(err, "field `service1` did not pass the test")
+	if err := v.Var(o.service1, "required"); err != nil {
+		return fmt.Errorf("field `service1` did not pass the test: %w", err)
 	}
 
 	return nil
@@ -69,8 +78,8 @@ func _Options_service1Validator(o *Options) error {
 
 func _Options_s3EndpointValidator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.s3Endpoint, "required,url"); err != nil {
-		return errors.Wrap(err, "field `s3Endpoint` did not pass the test")
+	if err := v.Var(o.s3Endpoint, "required,url"); err != nil {
+		return fmt.Errorf("field `s3Endpoint` did not pass the test: %w", err)
 	}
 
 	return nil
@@ -78,8 +87,8 @@ func _Options_s3EndpointValidator(o *Options) error {
 
 func _Options_portValidator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.port, "required,min=10"); err != nil {
-		return errors.Wrap(err, "field `port` did not pass the test")
+	if err := v.Var(o.port, "required,min=10"); err != nil {
+		return fmt.Errorf("field `port` did not pass the test: %w", err)
 	}
 
 	return nil

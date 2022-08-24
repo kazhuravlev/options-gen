@@ -22,6 +22,13 @@ import (
 //go:embed templates/options.go.tpl
 var templates embed.FS
 
+var templateImports = []string{
+	`"fmt"`,
+	`"golang.org/x/sync/errgroup"`,
+	`"github.com/kazhuravlev/options-gen/pkg/validator"`,
+	`goplvalidator "github.com/go-playground/validator/v10"`,
+}
+
 type OptionSpec struct {
 	Options []OptionMeta
 }
@@ -54,7 +61,7 @@ func RenderOptions(packageName, optionsStructName string, fileImports []string, 
 
 	tplContext := map[string]interface{}{
 		"packageName":       packageName,
-		"imports":           fileImports,
+		"imports":           filterImports(fileImports, templateImports),
 		"optionsStructName": optionsStructName,
 		"options":           spec.Options,
 		"hasValidation":     spec.HasValidation(),
@@ -72,6 +79,20 @@ func RenderOptions(packageName, optionsStructName string, fileImports []string, 
 	}
 
 	return formatted, nil
+}
+
+func filterImports(srcImports []string, existentImports []string) []string {
+	result := make([]string, 0, len(srcImports))
+L:
+	for _, i := range srcImports {
+		for _, ii := range existentImports { // Small O(n^2).
+			if i == ii {
+				continue L
+			}
+			result = append(result, i)
+		}
+	}
+	return result
 }
 
 // GetOptionSpec read the input filename by filePath, find optionsStructName

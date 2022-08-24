@@ -2,12 +2,14 @@
 package cli
 
 import (
+	"fmt"
 	"net/http"
 
 	goplvalidator "github.com/go-playground/validator/v10"
-	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 )
+
+var v = goplvalidator.New()
 
 type optOptionsMeta struct {
 	setter    func(o *Options)
@@ -36,21 +38,25 @@ func (o *Options) Validate() error {
 
 	g.Go(func() error {
 		err := _Options_httpClientValidator(o)
-
-		return errors.Wrap(err, "invalid value for option WithHttpClient")
+		if err != nil {
+			return fmt.Errorf("invalid value for option WithHttpClient: %w", err)
+		}
+		return nil
 	})
 	g.Go(func() error {
 		err := _Options_tokenValidator(o)
-
-		return errors.Wrap(err, "invalid value for option WithToken")
+		if err != nil {
+			return fmt.Errorf("invalid value for option WithToken: %w", err)
+		}
+		return nil
 	})
 	return g.Wait()
 }
 
 func _Options_httpClientValidator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.httpClient, "required"); err != nil {
-		return errors.Wrap(err, "field `httpClient` did not pass the test")
+	if err := v.Var(o.httpClient, "required"); err != nil {
+		return fmt.Errorf("field `httpClient` did not pass the test: %w", err)
 	}
 
 	return nil

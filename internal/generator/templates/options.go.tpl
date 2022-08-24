@@ -2,7 +2,7 @@
 package {{ .packageName }}
 
 import (
-    "github.com/pkg/errors"
+    "fmt"
     "golang.org/x/sync/errgroup"
 	"github.com/kazhuravlev/options-gen/pkg/validator"
 	goplvalidator "github.com/go-playground/validator/v10"
@@ -57,8 +57,10 @@ func (o *{{ .optionsStructName }}) Validate() error {
 	{{ range .options -}}
 	    g.Go(func() error {
 	        err := _{{ $.optionsStructName }}_{{ .Field }}Validator(o)
-
-	        return errors.Wrap(err, "invalid value for option With{{ .Name }}")
+	        if err != nil {
+	            return fmt.Errorf("invalid value for option With{{ .Name }}: %w", err)
+	        }
+	        return nil
 	    })
 	{{ end -}}
 
@@ -69,13 +71,13 @@ func (o *{{ .optionsStructName }}) Validate() error {
 	func _{{ $.optionsStructName }}_{{ .Field }}Validator(o *{{ $.optionsStructName }}) error {
 		{{ if .TagOption.IsNotEmpty -}}
 			if validator.IsNil(o.{{ .Field }}) {
-				return errors.Wrap(ErrInvalidOption, "{{ .Field }} must be present (type {{ .Type }})")
+				return fmt.Errorf("%w: {{ .Field }} must be present (type {{ .Type }})", ErrInvalidOption)
 			}
 		{{- end }}
 
 		{{ if .TagOption.GoValidator -}}
             if err := v.Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
-                return errors.Wrap(err, "field `{{ .Field }}` did not pass the test")
+                return fmt.Errorf("field `{{ .Field }}` did not pass the test: %w", err)
             }
 		{{- end }}
 

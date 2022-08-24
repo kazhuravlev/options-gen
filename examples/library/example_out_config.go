@@ -2,7 +2,8 @@
 package main
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
+
 	"golang.org/x/sync/errgroup"
 )
 
@@ -36,8 +37,10 @@ func (o *Config) Validate() error {
 
 	g.Go(func() error {
 		err := _Config_nameValidator(o)
-
-		return errors.Wrap(err, "invalid value for option WithName")
+		if err != nil {
+			return fmt.Errorf("invalid value for option WithName: %w", err)
+		}
+		return nil
 	})
 	return g.Wait()
 }

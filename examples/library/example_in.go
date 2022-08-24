@@ -1,8 +1,9 @@
 package main
 
 import (
+	"errors"
+
 	"github.com/kazhuravlev/options-gen/examples/library/sub-package"
-	"github.com/pkg/errors"
 )
 
 var ErrInvalidOption = errors.New("invalid option")
