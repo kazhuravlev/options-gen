@@ -10,6 +10,9 @@ import (
 	{{ $import -}}
 	{{- end }}
 )
+{{ if .hasValidation }}
+var v = goplvalidator.New()
+{{- end }}
 
 type opt{{ .optionsStructName }}Meta struct {
 	setter    func(o *{{ .optionsStructName }})
@@ -71,7 +74,7 @@ func (o *{{ .optionsStructName }}) Validate() error {
 		{{- end }}
 
 		{{ if .TagOption.GoValidator -}}
-            if err := goplvalidator.New().Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
+            if err := v.Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
                 return errors.Wrap(err, "field `{{ .Field }}` did not pass the test")
             }
 		{{- end }}

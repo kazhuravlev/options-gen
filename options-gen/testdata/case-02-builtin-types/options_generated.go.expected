@@ -7,6 +7,8 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+var v = goplvalidator.New()
+
 type optOptionsMeta struct {
 	setter    func(o *Options)
 	validator func(o *Options) error
@@ -393,7 +395,7 @@ func _Options_ValBoolValidator(o *Options) error {
 
 func _Options_OptValIntValidator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.OptValInt, "required"); err != nil {
+	if err := v.Var(o.OptValInt, "required"); err != nil {
 		return errors.Wrap(err, "field `OptValInt` did not pass the test")
 	}
 
@@ -402,7 +404,7 @@ func _Options_OptValIntValidator(o *Options) error {
 
 func _Options_OptValInt8Validator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.OptValInt8, "required"); err != nil {
+	if err := v.Var(o.OptValInt8, "required"); err != nil {
 		return errors.Wrap(err, "field `OptValInt8` did not pass the test")
 	}
 
@@ -411,7 +413,7 @@ func _Options_OptValInt8Validator(o *Options) error {
 
 func _Options_OptValInt16Validator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.OptValInt16, "required"); err != nil {
+	if err := v.Var(o.OptValInt16, "required"); err != nil {
 		return errors.Wrap(err, "field `OptValInt16` did not pass the test")
 	}
 
@@ -420,7 +422,7 @@ func _Options_OptValInt16Validator(o *Options) error {
 
 func _Options_OptValInt32Validator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.OptValInt32, "required"); err != nil {
+	if err := v.Var(o.OptValInt32, "required"); err != nil {
 		return errors.Wrap(err, "field `OptValInt32` did not pass the test")
 	}
 
@@ -429,7 +431,7 @@ func _Options_OptValInt32Validator(o *Options) error {
 
 func _Options_OptValInt64Validator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.OptValInt64, "required"); err != nil {
+	if err := v.Var(o.OptValInt64, "required"); err != nil {
 		return errors.Wrap(err, "field `OptValInt64` did not pass the test")
 	}
 
@@ -438,7 +440,7 @@ func _Options_OptValInt64Validator(o *Options) error {
 
 func _Options_OptValUIntValidator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.OptValUInt, "required"); err != nil {
+	if err := v.Var(o.OptValUInt, "required"); err != nil {
 		return errors.Wrap(err, "field `OptValUInt` did not pass the test")
 	}
 
@@ -447,7 +449,7 @@ func _Options_OptValUIntValidator(o *Options) error {
 
 func _Options_OptValUInt8Validator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.OptValUInt8, "required"); err != nil {
+	if err := v.Var(o.OptValUInt8, "required"); err != nil {
 		return errors.Wrap(err, "field `OptValUInt8` did not pass the test")
 	}
 
@@ -456,7 +458,7 @@ func _Options_OptValUInt8Validator(o *Options) error {
 
 func _Options_OptValUInt16Validator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.OptValUInt16, "required"); err != nil {
+	if err := v.Var(o.OptValUInt16, "required"); err != nil {
 		return errors.Wrap(err, "field `OptValUInt16` did not pass the test")
 	}
 
@@ -465,7 +467,7 @@ func _Options_OptValUInt16Validator(o *Options) error {
 
 func _Options_OptValUInt32Validator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.OptValUInt32, "required"); err != nil {
+	if err := v.Var(o.OptValUInt32, "required"); err != nil {
 		return errors.Wrap(err, "field `OptValUInt32` did not pass the test")
 	}
 
@@ -474,7 +476,7 @@ func _Options_OptValUInt32Validator(o *Options) error {
 
 func _Options_OptValUInt64Validator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.OptValUInt64, "required"); err != nil {
+	if err := v.Var(o.OptValUInt64, "required"); err != nil {
 		return errors.Wrap(err, "field `OptValUInt64` did not pass the test")
 	}
 
@@ -483,7 +485,7 @@ func _Options_OptValUInt64Validator(o *Options) error {
 
 func _Options_OptValFloat32Validator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.OptValFloat32, "required"); err != nil {
+	if err := v.Var(o.OptValFloat32, "required"); err != nil {
 		return errors.Wrap(err, "field `OptValFloat32` did not pass the test")
 	}
 
@@ -492,7 +494,7 @@ func _Options_OptValFloat32Validator(o *Options) error {
 
 func _Options_OptValFloat64Validator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.OptValFloat64, "required"); err != nil {
+	if err := v.Var(o.OptValFloat64, "required"); err != nil {
 		return errors.Wrap(err, "field `OptValFloat64` did not pass the test")
 	}
 
@@ -501,7 +503,7 @@ func _Options_OptValFloat64Validator(o *Options) error {
 
 func _Options_OptValStringValidator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.OptValString, "required"); err != nil {
+	if err := v.Var(o.OptValString, "required"); err != nil {
 		return errors.Wrap(err, "field `OptValString` did not pass the test")
 	}
 
@@ -510,7 +512,7 @@ func _Options_OptValStringValidator(o *Options) error {
 
 func _Options_OptValBytesValidator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.OptValBytes, "required"); err != nil {
+	if err := v.Var(o.OptValBytes, "required"); err != nil {
 		return errors.Wrap(err, "field `OptValBytes` did not pass the test")
 	}
 
@@ -519,7 +521,7 @@ func _Options_OptValBytesValidator(o *Options) error {
 
 func _Options_OptValBoolValidator(o *Options) error {
 
-	if err := goplvalidator.New().Var(o.OptValBool, "required"); err != nil {
+	if err := v.Var(o.OptValBool, "required"); err != nil {
 		return errors.Wrap(err, "field `OptValBool` did not pass the test")
 	}
 

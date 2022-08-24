@@ -22,6 +22,19 @@ import (
 //go:embed templates/options.go.tpl
 var templates embed.FS
 
+type OptionSpec struct {
+	Options []OptionMeta
+}
+
+func (s OptionSpec) HasValidation() bool {
+	for _, o := range s.Options {
+		if o.TagOption.GoValidator != "" {
+			return true
+		}
+	}
+	return false
+}
+
 type OptionMeta struct {
 	Name      string
 	Field     string
@@ -36,14 +49,15 @@ type TagOption struct {
 }
 
 // RenderOptions will render file and out it's content.
-func RenderOptions(packageName, optionsStructName string, fileImports []string, data []OptionMeta) ([]byte, error) {
+func RenderOptions(packageName, optionsStructName string, fileImports []string, spec *OptionSpec) ([]byte, error) {
 	tmpl := template.Must(template.ParseFS(templates, "templates/options.go.tpl"))
 
 	tplContext := map[string]interface{}{
 		"packageName":       packageName,
 		"imports":           fileImports,
 		"optionsStructName": optionsStructName,
-		"options":           data,
+		"options":           spec.Options,
+		"hasValidation":     spec.HasValidation(),
 	}
 	buf := new(bytes.Buffer)
 
@@ -62,7 +76,7 @@ func RenderOptions(packageName, optionsStructName string, fileImports []string, 
 
 // GetOptionSpec read the input filename by filePath, find optionsStructName
 // and scan for options.
-func GetOptionSpec(filePath, optionsStructName string) ([]OptionMeta, error) {
+func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, error) {
 	fset := token.NewFileSet()
 
 	node, err := parser.ParseDir(fset, path.Dir(filePath), nil, parser.ParseComments)
@@ -94,7 +108,7 @@ func GetOptionSpec(filePath, optionsStructName string) ([]OptionMeta, error) {
 		}
 	}
 
-	return options, nil
+	return &OptionSpec{Options: options}, nil
 }
 
 func parseTag(tag *ast.BasicLit, fieldName string) TagOption {

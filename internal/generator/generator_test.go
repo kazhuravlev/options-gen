@@ -36,7 +36,7 @@ func TestGetImports(t *testing.T) {
 func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	data, err := generator.GetOptionSpec(gofile, optionsStruct)
+	spec, err := generator.GetOptionSpec(gofile, optionsStruct)
 	req.NoError(t, err)
 	req.Equal(t, []generator.OptionMeta{
 		{
@@ -97,7 +97,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 			Type:      "string",
 			TagOption: generator.TagOption{IsRequired: true, IsNotEmpty: true, GoValidator: ""},
 		},
-	}, data)
+	}, spec.Options)
 }
 
 // NOTE: this struct is used by testcases in current file
