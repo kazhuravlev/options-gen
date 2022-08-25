@@ -9,7 +9,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var v = goplvalidator.New()
+var _validator461e464ebed9 = goplvalidator.New()
 
 type optOptionsMeta struct {
 	setter    func(o *Options)
@@ -55,7 +55,7 @@ func (o *Options) Validate() error {
 
 func _Options_httpClientValidator(o *Options) error {
 
-	if err := v.Var(o.httpClient, "required"); err != nil {
+	if err := _validator461e464ebed9.Var(o.httpClient, "required"); err != nil {
 		return fmt.Errorf("field `httpClient` did not pass the test: %w", err)
 	}
 

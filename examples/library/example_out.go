@@ -9,7 +9,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var v = goplvalidator.New()
+var _validator461e464ebed9 = goplvalidator.New()
 
 type optOptionsMeta struct {
 	setter    func(o *Options)
@@ -69,7 +69,7 @@ func (o *Options) Validate() error {
 
 func _Options_service1Validator(o *Options) error {
 
-	if err := v.Var(o.service1, "required"); err != nil {
+	if err := _validator461e464ebed9.Var(o.service1, "required"); err != nil {
 		return fmt.Errorf("field `service1` did not pass the test: %w", err)
 	}
 
@@ -78,7 +78,7 @@ func _Options_service1Validator(o *Options) error {
 
 func _Options_s3EndpointValidator(o *Options) error {
 
-	if err := v.Var(o.s3Endpoint, "required,url"); err != nil {
+	if err := _validator461e464ebed9.Var(o.s3Endpoint, "required,url"); err != nil {
 		return fmt.Errorf("field `s3Endpoint` did not pass the test: %w", err)
 	}
 
@@ -87,7 +87,7 @@ func _Options_s3EndpointValidator(o *Options) error {
 
 func _Options_portValidator(o *Options) error {
 
-	if err := v.Var(o.port, "required,min=10"); err != nil {
+	if err := _validator461e464ebed9.Var(o.port, "required,min=10"); err != nil {
 		return fmt.Errorf("field `port` did not pass the test: %w", err)
 	}
 
