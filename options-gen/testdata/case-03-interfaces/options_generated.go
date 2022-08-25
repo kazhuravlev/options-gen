@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"golang.org/x/sync/errgroup"
+	uniqprefixformultierror "github.com/hashicorp/go-multierror"
 )
 
 type optOptionsMeta struct {
@@ -63,7 +63,7 @@ func WithOptLocal(opt localInterface) optOptionsMeta {
 }
 
 func (o *Options) Validate() error {
-	g := new(errgroup.Group)
+	var g uniqprefixformultierror.Group
 
 	g.Go(func() error {
 		err := _Options_AnyValidator(o)

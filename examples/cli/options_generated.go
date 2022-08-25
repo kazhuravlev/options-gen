@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	goplvalidator "github.com/go-playground/validator/v10"
-	"golang.org/x/sync/errgroup"
+	uniqprefixformultierror "github.com/hashicorp/go-multierror"
 )
 
 var _validator461e464ebed9 = goplvalidator.New()
@@ -34,7 +34,7 @@ func NewOptions(
 }
 
 func (o *Options) Validate() error {
-	g := new(errgroup.Group)
+	var g uniqprefixformultierror.Group
 
 	g.Go(func() error {
 		err := _Options_httpClientValidator(o)

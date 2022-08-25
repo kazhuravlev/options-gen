@@ -2,7 +2,7 @@
 package testcase
 
 import (
-	"golang.org/x/sync/errgroup"
+	uniqprefixformultierror "github.com/hashicorp/go-multierror"
 )
 
 type optOptionsMeta struct {
@@ -24,7 +24,7 @@ func NewOptions(
 }
 
 func (o *Options) Validate() error {
-	g := new(errgroup.Group)
+	var g uniqprefixformultierror.Group
 
 	return g.Wait()
 }

@@ -4,7 +4,7 @@ package main
 import (
 	"fmt"
 
-	"golang.org/x/sync/errgroup"
+	uniqprefixformultierror "github.com/hashicorp/go-multierror"
 )
 
 type optConfigMeta struct {
@@ -33,7 +33,7 @@ func WithName(opt string) optConfigMeta {
 }
 
 func (o *Config) Validate() error {
-	g := new(errgroup.Group)
+	var g uniqprefixformultierror.Group
 
 	g.Go(func() error {
 		err := _Config_nameValidator(o)
