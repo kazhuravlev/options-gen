@@ -2,7 +2,7 @@
 package {{ .packageName }}
 
 import (
-    "github.com/pkg/errors"
+    "fmt"
     "golang.org/x/sync/errgroup"
 	"github.com/kazhuravlev/options-gen/pkg/validator"
 	goplvalidator "github.com/go-playground/validator/v10"
@@ -10,6 +10,9 @@ import (
 	{{ $import -}}
 	{{- end }}
 )
+{{ if .hasValidation }}
+var _validator461e464ebed9 = goplvalidator.New()
+{{- end }}
 
 type opt{{ .optionsStructName }}Meta struct {
 	setter    func(o *{{ .optionsStructName }})
@@ -54,8 +57,10 @@ func (o *{{ .optionsStructName }}) Validate() error {
 	{{ range .options -}}
 	    g.Go(func() error {
 	        err := _{{ $.optionsStructName }}_{{ .Field }}Validator(o)
-
-	        return errors.Wrap(err, "invalid value for option With{{ .Name }}")
+	        if err != nil {
+	            return fmt.Errorf("invalid value for option With{{ .Name }}: %w", err)
+	        }
+	        return nil
 	    })
 	{{ end -}}
 
@@ -66,13 +71,13 @@ func (o *{{ .optionsStructName }}) Validate() error {
 	func _{{ $.optionsStructName }}_{{ .Field }}Validator(o *{{ $.optionsStructName }}) error {
 		{{ if .TagOption.IsNotEmpty -}}
 			if validator.IsNil(o.{{ .Field }}) {
-				return errors.Wrap(ErrInvalidOption, "{{ .Field }} must be present (type {{ .Type }})")
+				return fmt.Errorf("%w: {{ .Field }} must be present (type {{ .Type }})", ErrInvalidOption)
 			}
 		{{- end }}
 
 		{{ if .TagOption.GoValidator -}}
-            if err := goplvalidator.New().Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
-                return errors.Wrap(err, "field `{{ .Field }}` did not pass the test")
+            if err := _validator461e464ebed9.Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
+                return fmt.Errorf("field `{{ .Field }}` did not pass the test: %w", err)
             }
 		{{- end }}
 
