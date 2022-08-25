@@ -1,12 +1,8 @@
 package main
 
 import (
-	"errors"
-
 	"github.com/kazhuravlev/options-gen/examples/library/sub-package"
 )
-
-var ErrInvalidOption = errors.New("invalid option")
 
 type Options struct {
 	service1   *subpackage.Service1 `option:"mandatory" validate:"required"`

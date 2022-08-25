@@ -22,12 +22,9 @@ go install github.com/kazhuravlev/options-gen/cmd/options-gen
 package mypkg
 
 import (
-  "errors"
   "io"
   "log"
 )
-
-var ErrInvalidOption = errors.New("invalid option")
 
 //go:generate options-gen -out-filename=options_generated.go -from-struct=Options
 type Options struct {
