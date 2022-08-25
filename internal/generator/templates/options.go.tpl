@@ -3,7 +3,7 @@ package {{ .packageName }}
 
 import (
     "fmt"
-    "golang.org/x/sync/errgroup"
+    uniqprefixformultierror "github.com/hashicorp/go-multierror"
 	"github.com/kazhuravlev/options-gen/pkg/validator"
 	goplvalidator "github.com/go-playground/validator/v10"
 	{{- range $import := .imports }}
@@ -52,7 +52,7 @@ func New{{ .optionsStructName }}(
 
 
 func (o *{{ .optionsStructName }}) Validate() error {
-    g := new(errgroup.Group)
+    var g uniqprefixformultierror.Group
 
 	{{ range .options -}}
 	    g.Go(func() error {
