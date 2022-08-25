@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	goplvalidator "github.com/go-playground/validator/v10"
-	"golang.org/x/sync/errgroup"
+	uniqprefixformultierror "github.com/hashicorp/go-multierror"
 )
 
 var _validator461e464ebed9 = goplvalidator.New()
@@ -164,7 +164,7 @@ func WithOptValBool(opt bool) optOptionsMeta {
 }
 
 func (o *Options) Validate() error {
-	g := new(errgroup.Group)
+	var g uniqprefixformultierror.Group
 
 	g.Go(func() error {
 		err := _Options_ValIntValidator(o)
