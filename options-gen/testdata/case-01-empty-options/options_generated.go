@@ -26,5 +26,5 @@ func NewOptions(
 func (o *Options) Validate() error {
 	var g uniqprefixformultierror.Group
 
-	return g.Wait()
+	return g.Wait().ErrorOrNil()
 }

@@ -64,7 +64,7 @@ func (o *{{ .optionsStructName }}) Validate() error {
 	    })
 	{{ end -}}
 
-	return g.Wait()
+	return g.Wait().ErrorOrNil()
 }
 
 {{ range .options }}
