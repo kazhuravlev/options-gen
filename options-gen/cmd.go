@@ -1,7 +1,7 @@
 package optionsgen
 
 import (
-	"io/ioutil"
+	"os"
 
 	"github.com/kazhuravlev/options-gen/internal/generator"
 	"github.com/pkg/errors"
@@ -24,7 +24,7 @@ func Run(inFilename, outFilename, structName, packageName string) error {
 	}
 
 	const perm = 0o644
-	if err := ioutil.WriteFile(outFilename, res, perm); err != nil {
+	if err := os.WriteFile(outFilename, res, perm); err != nil {
 		return errors.Wrap(err, "cannot write result")
 	}
 
