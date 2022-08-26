@@ -9,10 +9,16 @@ vars:
   GO_FILES:
     sh: find . -type f -name '*.go' -not -path "./.gocache/*" -not -path "./.go/*" -not -path "_generated.go" | tr "\n" " "
 
+  TOOL_BIN_DIR: ./bin/tools
+
+  TOOL_LINT_SRC: github.com/golangci/golangci-lint/cmd/golangci-lint@v1.48.0
+  TOOL_LINT: ./{{ .TOOL_BIN_DIR }}/golangci-lint
+
 tasks:
   default:
     cmds:
       - task: tidy
+      - task: tools:install
       - task: fmt
       - task: lint
       - task: install
@@ -27,10 +33,22 @@ tasks:
     - echo "- Format"
     - go fmt ./...
 
+  tools:install:
+    run: once
+    env:
+      GOBIN:
+        sh: "echo `pwd`/{{ .TOOL_BIN_DIR }}"
+    cmds:
+      - echo "- Run install tools"
+      - mkdir -p {{ .TOOL_BIN_DIR }}
+      - go install {{ .TOOL_LINT_SRC }}
+
   lint:
+    deps:
+      - "tools:install"
     cmds:
       - echo "- Lint"
-      - golangci-lint run --fix ./...
+      - "{{ .TOOL_LINT }} run --fix ./..."
 
   install:
     cmds:
