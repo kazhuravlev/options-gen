@@ -45,10 +45,15 @@ tasks:
   examples:update:
     cmds:
       - echo "- Update examples"
-      - cmd: go generate ./...
+      - task: examples:update:cli
       - task: examples:update:library
 
   examples:update:library:
     dir: examples/library
     cmds:
       - go run main.go
+
+  examples:update:cli:
+    dir: examples/cli
+    cmds:
+      - go generate ./...
