@@ -1,0 +1,54 @@
+# https://taskfile.dev
+
+version: '3'
+
+silent: true
+
+vars:
+  GO_MODULE: github.com/kazhuravlev/options-gen
+  GO_FILES:
+    sh: find . -type f -name '*.go' -not -path "./.gocache/*" -not -path "./.go/*" -not -path "_generated.go" | tr "\n" " "
+
+tasks:
+  default:
+    cmds:
+      - task: tidy
+      - task: fmt
+      - task: lint
+      - task: install
+      - task: tests
+      - task: examples:update
+
+  tidy:
+    - echo "- Tidy"
+    - go mod tidy
+
+  fmt:
+    - echo "- Format"
+    - go fmt ./...
+
+  lint:
+    cmds:
+      - echo "- Lint"
+      - golangci-lint run --fix ./...
+
+  install:
+    cmds:
+      - echo "- Install"
+      - go install ./cmd/options-gen
+
+  tests:
+    cmds:
+      - echo "- Tests"
+      - go test -race ./...
+
+  examples:update:
+    cmds:
+      - echo "- Update examples"
+      - cmd: go generate ./...
+      - task: examples:update:library
+
+  examples:update:library:
+    dir: examples/library
+    cmds:
+      - go run main.go
