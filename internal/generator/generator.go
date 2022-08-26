@@ -6,8 +6,8 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
 	"log"
+	"os"
 	"path"
 	"reflect"
 	"strings"
@@ -157,7 +157,7 @@ func parseTag(tag *ast.BasicLit, fieldName string) TagOption {
 // GetFileImports read the file and parse the imports section. Return all found
 // imports with aliases.
 func GetFileImports(filePath string) ([]string, error) {
-	source, err := ioutil.ReadFile(filePath)
+	source, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to read file %q", filePath)
 	}
