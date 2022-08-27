@@ -1,9 +1,10 @@
 package generator
 
 import (
-	"github.com/pkg/errors"
 	"go/ast"
 	"go/types"
+
+	"github.com/pkg/errors"
 )
 
 func findStructFields(packages map[string]*ast.Package, typeName string) []*ast.Field {

@@ -17,6 +17,7 @@ func NewOptions(
 	FnTypeParam FnType,
 	FnParam func(server *http.Server) error,
 	HandlerFunc http.HandlerFunc,
+	Middleware func(next http.HandlerFunc) http.HandlerFunc,
 	Local localFnType,
 
 	options ...optOptionsMeta,
@@ -25,6 +26,7 @@ func NewOptions(
 	o.FnTypeParam = FnTypeParam
 	o.FnParam = FnParam
 	o.HandlerFunc = HandlerFunc
+	o.Middleware = Middleware
 	o.Local = Local
 
 	for i := range options {
@@ -52,6 +54,13 @@ func WithOptHandlerFunc(opt http.HandlerFunc) optOptionsMeta {
 	return optOptionsMeta{
 		setter:    func(o *Options) { o.OptHandlerFunc = opt },
 		validator: _Options_OptHandlerFuncValidator,
+	}
+}
+
+func WithOptMiddleware(opt func(next http.HandlerFunc) http.HandlerFunc) optOptionsMeta {
+	return optOptionsMeta{
+		setter:    func(o *Options) { o.OptMiddleware = opt },
+		validator: _Options_OptMiddlewareValidator,
 	}
 }
 
@@ -87,6 +96,13 @@ func (o *Options) Validate() error {
 		return nil
 	})
 	g.Go(func() error {
+		err := _Options_MiddlewareValidator(o)
+		if err != nil {
+			return fmt.Errorf("invalid value for option WithMiddleware: %w", err)
+		}
+		return nil
+	})
+	g.Go(func() error {
 		err := _Options_LocalValidator(o)
 		if err != nil {
 			return fmt.Errorf("invalid value for option WithLocal: %w", err)
@@ -115,13 +131,20 @@ func (o *Options) Validate() error {
 		return nil
 	})
 	g.Go(func() error {
+		err := _Options_OptMiddlewareValidator(o)
+		if err != nil {
+			return fmt.Errorf("invalid value for option WithOptMiddleware: %w", err)
+		}
+		return nil
+	})
+	g.Go(func() error {
 		err := _Options_OptLocalValidator(o)
 		if err != nil {
 			return fmt.Errorf("invalid value for option WithOptLocal: %w", err)
 		}
 		return nil
 	})
-	return g.Wait()
+	return g.Wait().ErrorOrNil()
 }
 
 func _Options_FnTypeParamValidator(o *Options) error {
@@ -135,6 +158,11 @@ func _Options_FnParamValidator(o *Options) error {
 }
 
 func _Options_HandlerFuncValidator(o *Options) error {
+
+	return nil
+}
+
+func _Options_MiddlewareValidator(o *Options) error {
 
 	return nil
 }
@@ -155,6 +183,11 @@ func _Options_OptFnParamValidator(o *Options) error {
 }
 
 func _Options_OptHandlerFuncValidator(o *Options) error {
+
+	return nil
+}
+
+func _Options_OptMiddlewareValidator(o *Options) error {
 
 	return nil
 }
