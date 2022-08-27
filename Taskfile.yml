@@ -26,14 +26,18 @@ tasks:
       - task: examples:update
 
   tidy:
-    - echo "- Tidy"
-    - go mod tidy
+    cmds:
+      - echo "- Tidy"
+      - go mod tidy
 
   fmt:
-    - echo "- Format"
-    - go fmt ./...
+    desc: Run code formatter
+    cmds:
+      - echo "- Format"
+      - go fmt ./...
 
   tools:install:
+    desc: Install required tools (into local project dir)
     run: once
     env:
       GOBIN:
@@ -44,6 +48,7 @@ tasks:
       - go install {{ .TOOL_LINT_SRC }}
 
   lint:
+    desc: Run linter
     deps:
       - "tools:install"
     cmds:
@@ -61,6 +66,7 @@ tasks:
       - go test -race ./...
 
   examples:update:
+    desc: Update examples directory
     cmds:
       - echo "- Update examples"
       - task: examples:update:cli
