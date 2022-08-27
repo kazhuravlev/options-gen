@@ -6,8 +6,8 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
 	"log"
+	"os"
 	"path"
 	"reflect"
 	"strings"
@@ -127,21 +127,20 @@ func parseTag(tag *ast.BasicLit, fieldName string) TagOption {
 
 	optionTag := reflect.StructTag(strings.Trim(value, "`")).Get("option")
 	for _, opt := range strings.Split(optionTag, ",") {
-		if opt == "required" {
+		switch opt {
+		case "required":
 			log.Printf(
 				"Deprecated: use `option:\"mandatory\"` "+
 					"instead for field `%s` to force the passing "+
 					"option in the constructor argument\n", fieldName)
 
 			tagOpt.IsRequired = true
-		}
 
-		if opt == "mandatory" {
+		case "mandatory":
 			tagOpt.IsRequired = true
-		}
 
-		// NOTE: remove the tag
-		if opt == "not-empty" {
+		case "not-empty":
+			// NOTE: remove the tag
 			log.Printf(
 				"Deprecated: use "+
 					"github.com/go-playground/validator tag to check "+
@@ -157,7 +156,7 @@ func parseTag(tag *ast.BasicLit, fieldName string) TagOption {
 // GetFileImports read the file and parse the imports section. Return all found
 // imports with aliases.
 func GetFileImports(filePath string) ([]string, error) {
-	source, err := ioutil.ReadFile(filePath)
+	source, err := os.ReadFile(filePath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to read file %q", filePath)
 	}

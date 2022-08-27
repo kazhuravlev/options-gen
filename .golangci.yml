@@ -1,0 +1,73 @@
+run:
+  tests: true
+
+issues:
+  max-same-issues: 0
+
+linters-settings:
+  lll:
+    line-length: 120
+
+linters:
+  disable-all: true
+  enable:
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - deadcode
+    - depguard
+    - durationcheck
+    - errcheck
+    - errchkjson
+    - errname
+    - execinquery
+    - exhaustive
+    - exhaustruct
+    - exportloopref
+    - forbidigo
+    - gci
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - godox
+    - gofmt
+    - gofumpt
+    - goheader
+    - goimports
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - importas
+    - ineffassign
+    - nilnil
+    - lll
+    - makezero
+    - misspell
+    - nakedret
+    - nilerr
+    - nestif
+    - noctx
+    - nolintlint
+    - nosprintfhostport
+    - prealloc
+    - predeclared
+    - revive
+    - staticcheck
+    - stylecheck
+    - tagliatelle
+    - tenv
+    - testpackage
+    - thelper
+    - tparallel
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - usestdlibvars
+    - varcheck
+    - whitespace

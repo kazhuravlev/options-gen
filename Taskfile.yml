@@ -1,0 +1,89 @@
+# https://taskfile.dev
+
+version: '3'
+
+silent: true
+
+vars:
+  GO_MODULE: github.com/kazhuravlev/options-gen
+  GO_FILES:
+    sh: find . -type f -name '*.go' -not -path "./.gocache/*" -not -path "./.go/*" -not -path "_generated.go" | tr "\n" " "
+
+  TOOL_BIN_DIR: ./bin/tools
+
+  TOOL_LINT_SRC: github.com/golangci/golangci-lint/cmd/golangci-lint@v1.48.0
+  TOOL_LINT: ./{{ .TOOL_BIN_DIR }}/golangci-lint
+
+tasks:
+  default:
+    cmds:
+      - task --list-all
+
+  check:
+    desc: Run all project checks
+    cmds:
+      - echo "- Run all routines"
+      - task: tidy
+      - task: tools:install
+      - task: fmt
+      - task: lint
+      - task: install
+      - task: tests
+      - task: examples:update
+
+  tidy:
+    cmds:
+      - echo "- Tidy"
+      - go mod tidy
+
+  fmt:
+    desc: Run code formatter
+    cmds:
+      - echo "- Format"
+      - go fmt ./...
+
+  tools:install:
+    desc: Install required tools (into local project dir)
+    run: once
+    env:
+      GOBIN:
+        sh: "echo `pwd`/{{ .TOOL_BIN_DIR }}"
+    cmds:
+      - echo "- Run install tools"
+      - mkdir -p {{ .TOOL_BIN_DIR }}
+      - go install {{ .TOOL_LINT_SRC }}
+
+  lint:
+    desc: Run linter
+    deps:
+      - "tools:install"
+    cmds:
+      - echo "- Lint"
+      - "{{ .TOOL_LINT }} run --fix ./..."
+
+  install:
+    cmds:
+      - echo "- Install"
+      - go install ./cmd/options-gen
+
+  tests:
+    cmds:
+      - echo "- Tests"
+      - go test -race ./...
+
+  examples:update:
+    desc: Update examples directory
+    cmds:
+      - echo "- Update examples"
+      - task: examples:update:cli
+      - task: examples:update:library
+
+  examples:update:library:
+    dir: examples/library
+    cmds:
+      - go run main.go
+
+  examples:update:cli:
+    dir: examples/cli
+    cmds:
+      - go generate ./...

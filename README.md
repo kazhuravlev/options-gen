@@ -175,3 +175,22 @@ type Options struct {
   maxDbConn int `validate:"required,min=1,max=16"`
 }
 ```
+
+## Contributing
+
+The development process is pretty simple:
+
+- [Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) the repo
+  on GitHub
+- [Clone](https://docs.github.com/en/get-started/quickstart/fork-a-repo#cloning-your-forked-repository)
+  your copy of the repo
+- [Create a new branch](https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging)
+  for your goals
+- Install the [Task](https://taskfile.dev/installation/). It's like `Make`, but
+  simple
+- Check that your working copy is ready to start development by
+  running `task check` in repo workdir
+- Reach your goals!
+- Check that all is ok by `task check`
+- [Create](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)
+  a Pull Request

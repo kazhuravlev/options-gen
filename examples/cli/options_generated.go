@@ -50,7 +50,7 @@ func (o *Options) Validate() error {
 		}
 		return nil
 	})
-	return g.Wait()
+	return g.Wait().ErrorOrNil()
 }
 
 func _Options_httpClientValidator(o *Options) error {

@@ -1,7 +1,7 @@
 package optionsgen_test
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -19,7 +19,7 @@ func TestRun(t *testing.T) {
 		var testDirs []string
 		{
 			const testdataDir = "./testdata"
-			fileInfos, err := ioutil.ReadDir(testdataDir)
+			fileInfos, err := os.ReadDir(testdataDir)
 			require.NoError(t, err)
 
 			for _, file := range fileInfos {
@@ -49,7 +49,7 @@ func TestRun(t *testing.T) {
 		}
 	})
 
-	t.Run("soource_not_found", func(t *testing.T) {
+	t.Run("source_not_found", func(t *testing.T) {
 		t.Parallel()
 
 		dir := t.TempDir()
@@ -66,10 +66,10 @@ func TestRun(t *testing.T) {
 func helpEqualFiles(t *testing.T, filename1, filename2 string) {
 	t.Helper()
 
-	f1Bytes, err := ioutil.ReadFile(filename1)
+	f1Bytes, err := os.ReadFile(filename1)
 	require.NoError(t, err)
 
-	f2Bytes, err := ioutil.ReadFile(filename2)
+	f2Bytes, err := os.ReadFile(filename2)
 	require.NoError(t, err)
 
 	assert.Equal(t, string(f1Bytes), string(f2Bytes))
