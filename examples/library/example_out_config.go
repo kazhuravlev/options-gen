@@ -42,7 +42,7 @@ func (o *Config) Validate() error {
 		}
 		return nil
 	})
-	return g.Wait()
+	return g.Wait().ErrorOrNil()
 }
 
 func _Config_nameValidator(o *Config) error {
