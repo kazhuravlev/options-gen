@@ -17,6 +17,12 @@ vars:
 tasks:
   default:
     cmds:
+      - task --list-all
+
+  check:
+    desc: Run all project checks
+    cmds:
+      - echo "- Run all routines"
       - task: tidy
       - task: tools:install
       - task: fmt
