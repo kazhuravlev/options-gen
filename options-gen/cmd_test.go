@@ -49,7 +49,7 @@ func TestRun(t *testing.T) {
 		}
 	})
 
-	t.Run("soource_not_found", func(t *testing.T) {
+	t.Run("source_not_found", func(t *testing.T) {
 		t.Parallel()
 
 		dir := t.TempDir()
