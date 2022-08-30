@@ -3,6 +3,7 @@ package generator
 import (
 	"bytes"
 	"embed"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -13,7 +14,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/pkg/errors"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"golang.org/x/tools/imports"
@@ -62,13 +62,13 @@ func RenderOptions(packageName, optionsStructName string, fileImports []string, 
 	buf := new(bytes.Buffer)
 
 	if err := tmpl.Execute(buf, tplContext); err != nil {
-		return nil, errors.Wrap(err, "cannot render template")
+		return nil, fmt.Errorf("cannot render template: %w", err)
 	}
 
 	// reformat, remove unused and duplicate imports, sort them
 	formatted, err := imports.Process("", buf.Bytes(), nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot optimize imports")
+		return nil, fmt.Errorf("cannot optimize imports: %w", err)
 	}
 
 	return formatted, nil
@@ -81,7 +81,7 @@ func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, error) {
 
 	node, err := parser.ParseDir(fset, path.Dir(filePath), nil, parser.ParseComments)
 	if err != nil {
-		return nil, errors.Wrap(err, "cannot parse dir")
+		return nil, fmt.Errorf("cannot parse dir: %w", err)
 	}
 
 	fields := findStructFields(node, optionsStructName)
@@ -94,7 +94,7 @@ func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, error) {
 
 		typeName, err := makeTypeName(field.Type)
 		if err != nil {
-			return nil, errors.Wrap(err, "cannot make type name")
+			return nil, fmt.Errorf("cannot make type name: %w", err)
 		}
 
 		tagOpt := parseTag(field.Tag, fieldName)
@@ -158,14 +158,14 @@ func parseTag(tag *ast.BasicLit, fieldName string) TagOption {
 func GetFileImports(filePath string) ([]string, error) {
 	source, err := os.ReadFile(filePath)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to read file %q", filePath)
+		return nil, fmt.Errorf("failed to read file (%q): %w", filePath, err)
 	}
 
 	fset := token.NewFileSet()
 
 	file, err := parser.ParseFile(fset, filePath, source, 0)
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot parse file %q", filePath)
+		return nil, fmt.Errorf("cannot parse file (%q): %w", filePath, err)
 	}
 
 	fileImports := make([]string, 0, len(file.Imports))

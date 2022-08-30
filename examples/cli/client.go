@@ -2,7 +2,7 @@ package cli
 
 import (
 	"context"
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 type Client struct {
@@ -11,7 +11,7 @@ type Client struct {
 
 func New(opts Options) (*Client, error) {
 	if err := opts.Validate(); err != nil {
-		return nil, errors.Wrap(err, "bad configuration")
+		return nil, fmt.Errorf("bad configuration: %w", err)
 	}
 
 	return &Client{opts: opts}, nil

@@ -1,31 +1,31 @@
 package optionsgen
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/kazhuravlev/options-gen/internal/generator"
-	"github.com/pkg/errors"
 )
 
 func Run(inFilename, outFilename, structName, packageName string) error {
 	data, err := generator.GetOptionSpec(inFilename, structName)
 	if err != nil {
-		return errors.Wrap(err, "cannot get options spec")
+		return fmt.Errorf("cannot get options spec: %w", err)
 	}
 
 	imports, err := generator.GetFileImports(inFilename)
 	if err != nil {
-		return errors.Wrap(err, "cannot get imports")
+		return fmt.Errorf("cannot get imports: %w", err)
 	}
 
 	res, err := generator.RenderOptions(packageName, structName, imports, data)
 	if err != nil {
-		return errors.Wrap(err, "cannot renderOptions template")
+		return fmt.Errorf("cannot renderOptions template: %w", err)
 	}
 
 	const perm = 0o644
 	if err := os.WriteFile(outFilename, res, perm); err != nil {
-		return errors.Wrap(err, "cannot write result")
+		return fmt.Errorf("cannot write result: %w", err)
 	}
 
 	return nil
