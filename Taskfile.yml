@@ -45,13 +45,15 @@ tasks:
   tools:install:
     desc: Install required tools (into local project dir)
     run: once
-    env:
+    # `env` is not working due to
+    # https://github.com/go-task/task/issues/693
+    vars:
       GOBIN:
         sh: "echo `pwd`/{{ .TOOL_BIN_DIR }}"
     cmds:
       - echo "- Run install tools"
       - mkdir -p {{ .TOOL_BIN_DIR }}
-      - go install {{ .TOOL_LINT_SRC }}
+      - export GOBIN="{{.GOBIN}}" && go install {{ .TOOL_LINT_SRC }}
 
   lint:
     desc: Run linter
