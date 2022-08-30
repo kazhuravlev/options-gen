@@ -1,8 +1,8 @@
 package generator
 
 import (
-	"fmt"
 	"go/ast"
+	"go/types"
 
 	"github.com/pkg/errors"
 )
@@ -52,35 +52,11 @@ func getDecls(packages map[string]*ast.Package) []ast.Decl {
 }
 
 func makeTypeName(expr ast.Expr) (string, error) {
-	switch concreteType := expr.(type) {
-	case *ast.SelectorExpr:
-		ident, ok := concreteType.X.(*ast.Ident)
-		if !ok {
-			return "", errors.New("cast to *ast.Ident")
-		}
-
-		return ident.Name + "." + concreteType.Sel.Name, nil
-	case *ast.Ident:
-		return concreteType.Name, nil
-	case *ast.ArrayType:
-		eltName, err := makeTypeName(concreteType.Elt)
-		if err != nil {
-			return "", err
-		}
-
-		return "[]" + eltName, nil
-	case *ast.StarExpr:
-		tName, err := makeTypeName(concreteType.X)
-		if err != nil {
-			return "", errors.Wrap(err, "cannot make type name for star expr")
-		}
-
-		return "*" + tName, nil
-	case *ast.MapType:
-		tName := fmt.Sprintf("map[%s]%s", concreteType.Key, concreteType.Value)
-
-		return tName, nil
+	switch expr.(type) {
+	case *ast.SelectorExpr, *ast.Ident, *ast.ArrayType, *ast.StarExpr, *ast.MapType, *ast.FuncType:
 	default:
-		return "", errors.Errorf("unknown field type (%T)", expr)
+		return "", errors.Errorf("unsupported field type (%T)", expr)
 	}
+
+	return types.ExprString(expr), nil
 }
