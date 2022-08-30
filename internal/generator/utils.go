@@ -1,10 +1,9 @@
 package generator
 
 import (
+	"fmt"
 	"go/ast"
 	"go/types"
-
-	"github.com/pkg/errors"
 )
 
 func findStructFields(packages map[string]*ast.Package, typeName string) []*ast.Field {
@@ -55,7 +54,7 @@ func makeTypeName(expr ast.Expr) (string, error) {
 	switch expr.(type) {
 	case *ast.SelectorExpr, *ast.Ident, *ast.ArrayType, *ast.StarExpr, *ast.MapType, *ast.FuncType:
 	default:
-		return "", errors.Errorf("unsupported field type (%T)", expr)
+		return "", fmt.Errorf("unsupported field type (%T)", expr)
 	}
 
 	return types.ExprString(expr), nil

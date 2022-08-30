@@ -3,6 +3,7 @@ package optionsgen_test
 import (
 	"os"
 	"path/filepath"
+	"syscall"
 	"testing"
 
 	optionsgen "github.com/kazhuravlev/options-gen/options-gen"
@@ -59,7 +60,7 @@ func TestRun(t *testing.T) {
 			"Options",
 			"testcase",
 		)
-		assert.Error(t, err)
+		assert.ErrorIs(t, err, syscall.ENOENT)
 	})
 }
 
