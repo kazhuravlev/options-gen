@@ -3,13 +3,14 @@ package {{ .packageName }}
 
 import (
     "fmt"
-    uniqprefixformultierror "github.com/hashicorp/go-multierror"
+	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
 	"github.com/kazhuravlev/options-gen/pkg/validator"
 	goplvalidator "github.com/go-playground/validator/v10"
 	{{- range $import := .imports }}
 	{{ $import -}}
 	{{- end }}
 )
+
 {{ if .hasValidation }}
 var _validator461e464ebed9 = goplvalidator.New()
 {{- end }}
@@ -52,19 +53,17 @@ func New{{ .optionsStructName }}(
 
 
 func (o *{{ .optionsStructName }}) Validate() error {
-    var g uniqprefixformultierror.Group
+    {{- if not .options -}}
+        return nil
+    {{ else }}
+        errs := new(errors461e464ebed9.ValidationErrors)
 
-	{{ range .options -}}
-	    g.Go(func() error {
-	        err := _{{ $.optionsStructName }}_{{ .Field }}Validator(o)
-	        if err != nil {
-	            return fmt.Errorf("invalid value for option With{{ .Name }}: %w", err)
-	        }
-	        return nil
-	    })
-	{{ end -}}
+        {{ range .options -}}
+            errs.Add(errors461e464ebed9.NewValidationError("{{ .Name }}", _{{ $.optionsStructName }}_{{ .Field }}Validator(o)))
+        {{ end -}}
 
-	return g.Wait().ErrorOrNil()
+        return errs.AsError()
+    {{- end }}
 }
 
 {{ range .options }}
@@ -74,13 +73,11 @@ func (o *{{ .optionsStructName }}) Validate() error {
 				return fmt.Errorf("%w: {{ .Field }} must be present (type {{ .Type }})", ErrInvalidOption)
 			}
 		{{- end }}
-
-		{{ if .TagOption.GoValidator -}}
+		{{- if .TagOption.GoValidator -}}
             if err := _validator461e464ebed9.Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
                 return fmt.Errorf("field `{{ .Field }}` did not pass the test: %w", err)
             }
 		{{- end }}
-
 		return nil
 	}
 {{ end }}

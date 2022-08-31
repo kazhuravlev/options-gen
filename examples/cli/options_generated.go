@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	goplvalidator "github.com/go-playground/validator/v10"
-	uniqprefixformultierror "github.com/hashicorp/go-multierror"
+	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
 )
 
 var _validator461e464ebed9 = goplvalidator.New()
@@ -34,31 +34,17 @@ func NewOptions(
 }
 
 func (o *Options) Validate() error {
-	var g uniqprefixformultierror.Group
+	errs := new(errors461e464ebed9.ValidationErrors)
 
-	g.Go(func() error {
-		err := _Options_httpClientValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithHttpClient: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_tokenValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithToken: %w", err)
-		}
-		return nil
-	})
-	return g.Wait().ErrorOrNil()
+	errs.Add(errors461e464ebed9.NewValidationError("HttpClient", _Options_httpClientValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("Token", _Options_tokenValidator(o)))
+	return errs.AsError()
 }
 
 func _Options_httpClientValidator(o *Options) error {
-
 	if err := _validator461e464ebed9.Var(o.httpClient, "required"); err != nil {
 		return fmt.Errorf("field `httpClient` did not pass the test: %w", err)
 	}
-
 	return nil
 }
 
