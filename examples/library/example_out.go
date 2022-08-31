@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	goplvalidator "github.com/go-playground/validator/v10"
-	uniqprefixformultierror "github.com/hashicorp/go-multierror"
 	subpackage "github.com/kazhuravlev/options-gen/examples/library/sub-package"
+	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
 )
 
 var _validator461e464ebed9 = goplvalidator.New()
@@ -41,55 +41,31 @@ func WithPort(opt int) optOptionsMeta {
 }
 
 func (o *Options) Validate() error {
-	var g uniqprefixformultierror.Group
+	errs := new(errors461e464ebed9.ValidationErrors)
 
-	g.Go(func() error {
-		err := _Options_service1Validator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithService1: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_s3EndpointValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithS3Endpoint: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_portValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithPort: %w", err)
-		}
-		return nil
-	})
-	return g.Wait().ErrorOrNil()
+	errs.Add(errors461e464ebed9.NewValidationError("Service1", _Options_service1Validator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("S3Endpoint", _Options_s3EndpointValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("Port", _Options_portValidator(o)))
+	return errs.AsError()
 }
 
 func _Options_service1Validator(o *Options) error {
-
 	if err := _validator461e464ebed9.Var(o.service1, "required"); err != nil {
 		return fmt.Errorf("field `service1` did not pass the test: %w", err)
 	}
-
 	return nil
 }
 
 func _Options_s3EndpointValidator(o *Options) error {
-
 	if err := _validator461e464ebed9.Var(o.s3Endpoint, "required,url"); err != nil {
 		return fmt.Errorf("field `s3Endpoint` did not pass the test: %w", err)
 	}
-
 	return nil
 }
 
 func _Options_portValidator(o *Options) error {
-
 	if err := _validator461e464ebed9.Var(o.port, "required,min=10"); err != nil {
 		return fmt.Errorf("field `port` did not pass the test: %w", err)
 	}
-
 	return nil
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	uniqprefixformultierror "github.com/hashicorp/go-multierror"
+	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
 )
 
 type optOptionsMeta struct {
@@ -63,65 +63,17 @@ func WithOptLocal(opt localInterface) optOptionsMeta {
 }
 
 func (o *Options) Validate() error {
-	var g uniqprefixformultierror.Group
+	errs := new(errors461e464ebed9.ValidationErrors)
 
-	g.Go(func() error {
-		err := _Options_AnyValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithAny: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_StringerValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithStringer: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_RWCloserValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithRWCloser: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_LocalValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithLocal: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_OptAnyValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithOptAny: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_OptStringerValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithOptStringer: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_OptRWCloserValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithOptRWCloser: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_OptLocalValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithOptLocal: %w", err)
-		}
-		return nil
-	})
-	return g.Wait().ErrorOrNil()
+	errs.Add(errors461e464ebed9.NewValidationError("Any", _Options_AnyValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("Stringer", _Options_StringerValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("RWCloser", _Options_RWCloserValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("Local", _Options_LocalValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("OptAny", _Options_OptAnyValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("OptStringer", _Options_OptStringerValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("OptRWCloser", _Options_OptRWCloserValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("OptLocal", _Options_OptLocalValidator(o)))
+	return errs.AsError()
 }
 
 func _Options_AnyValidator(o *Options) error {

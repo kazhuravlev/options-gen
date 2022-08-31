@@ -2,9 +2,7 @@
 package main
 
 import (
-	"fmt"
-
-	uniqprefixformultierror "github.com/hashicorp/go-multierror"
+	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
 )
 
 type optConfigMeta struct {
@@ -33,16 +31,10 @@ func WithName(opt string) optConfigMeta {
 }
 
 func (o *Config) Validate() error {
-	var g uniqprefixformultierror.Group
+	errs := new(errors461e464ebed9.ValidationErrors)
 
-	g.Go(func() error {
-		err := _Config_nameValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithName: %w", err)
-		}
-		return nil
-	})
-	return g.Wait().ErrorOrNil()
+	errs.Add(errors461e464ebed9.NewValidationError("Name", _Config_nameValidator(o)))
+	return errs.AsError()
 }
 
 func _Config_nameValidator(o *Config) error {

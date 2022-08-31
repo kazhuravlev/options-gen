@@ -2,10 +2,9 @@
 package testcase
 
 import (
-	"fmt"
 	"net/http"
 
-	uniqprefixformultierror "github.com/hashicorp/go-multierror"
+	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
 )
 
 type optOptionsMeta struct {
@@ -72,79 +71,19 @@ func WithOptLocal(opt localFnType) optOptionsMeta {
 }
 
 func (o *Options) Validate() error {
-	var g uniqprefixformultierror.Group
+	errs := new(errors461e464ebed9.ValidationErrors)
 
-	g.Go(func() error {
-		err := _Options_FnTypeParamValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithFnTypeParam: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_FnParamValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithFnParam: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_HandlerFuncValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithHandlerFunc: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_MiddlewareValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithMiddleware: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_LocalValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithLocal: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_OptFnTypeParamValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithOptFnTypeParam: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_OptFnParamValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithOptFnParam: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_OptHandlerFuncValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithOptHandlerFunc: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_OptMiddlewareValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithOptMiddleware: %w", err)
-		}
-		return nil
-	})
-	g.Go(func() error {
-		err := _Options_OptLocalValidator(o)
-		if err != nil {
-			return fmt.Errorf("invalid value for option WithOptLocal: %w", err)
-		}
-		return nil
-	})
-	return g.Wait().ErrorOrNil()
+	errs.Add(errors461e464ebed9.NewValidationError("FnTypeParam", _Options_FnTypeParamValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("FnParam", _Options_FnParamValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("HandlerFunc", _Options_HandlerFuncValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("Middleware", _Options_MiddlewareValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("Local", _Options_LocalValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("OptFnTypeParam", _Options_OptFnTypeParamValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("OptFnParam", _Options_OptFnParamValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("OptHandlerFunc", _Options_OptHandlerFuncValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("OptMiddleware", _Options_OptMiddlewareValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("OptLocal", _Options_OptLocalValidator(o)))
+	return errs.AsError()
 }
 
 func _Options_FnTypeParamValidator(o *Options) error {

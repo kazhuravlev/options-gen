@@ -64,6 +64,7 @@ tasks:
       - "{{ .TOOL_LINT }} run --fix ./..."
 
   install:
+    run: once
     cmds:
       - echo "- Install"
       - go install ./cmd/options-gen
@@ -88,4 +89,5 @@ tasks:
   examples:update:cli:
     dir: examples/cli
     cmds:
+      - task: "install"
       - go generate ./...
