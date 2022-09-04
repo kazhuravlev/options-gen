@@ -11,14 +11,14 @@ import (
 
 var _validator461e464ebed9 = goplvalidator.New()
 
-type optionsSetter[KeyT int | string, TT any] func(o *Options[KeyT, TT])
+type optOptionsSetter[KeyT int | string, TT any] func(o *Options[KeyT, TT])
 
 func NewOptions[KeyT int | string, TT any](
 	RequiredHandler http.Handler,
 	RequiredKey KeyT,
 	Handler http.Handler,
 	Key KeyT,
-	options ...optionsSetter[KeyT, TT],
+	options ...optOptionsSetter[KeyT, TT],
 ) Options[KeyT, TT] {
 	o := Options[KeyT, TT]{}
 	o.RequiredHandler = RequiredHandler
@@ -32,19 +32,19 @@ func NewOptions[KeyT int | string, TT any](
 	return o
 }
 
-func WithOptHandler[KeyT int | string, TT any](opt http.Handler) optionsSetter[KeyT, TT] {
+func WithOptHandler[KeyT int | string, TT any](opt http.Handler) optOptionsSetter[KeyT, TT] {
 	return func(o *Options[KeyT, TT]) {
 		o.OptHandler = opt
 	}
 }
 
-func WithOptKey[KeyT int | string, TT any](opt KeyT) optionsSetter[KeyT, TT] {
+func WithOptKey[KeyT int | string, TT any](opt KeyT) optOptionsSetter[KeyT, TT] {
 	return func(o *Options[KeyT, TT]) {
 		o.OptKey = opt
 	}
 }
 
-func WithAnyOpt[KeyT int | string, TT any](opt TT) optionsSetter[KeyT, TT] {
+func WithAnyOpt[KeyT int | string, TT any](opt TT) optOptionsSetter[KeyT, TT] {
 	return func(o *Options[KeyT, TT]) {
 		o.AnyOpt = opt
 	}

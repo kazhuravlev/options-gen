@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-type optionsSetter func(o *Options)
+type optOptionsSetter func(o *Options)
 
 func NewOptions(
 	FnTypeParam FnType,
@@ -13,7 +13,7 @@ func NewOptions(
 	HandlerFunc http.HandlerFunc,
 	Middleware func(next http.HandlerFunc) http.HandlerFunc,
 	Local localFnType,
-	options ...optionsSetter,
+	options ...optOptionsSetter,
 ) Options {
 	o := Options{}
 	o.FnTypeParam = FnTypeParam
@@ -28,31 +28,31 @@ func NewOptions(
 	return o
 }
 
-func WithOptFnTypeParam(opt FnType) optionsSetter {
+func WithOptFnTypeParam(opt FnType) optOptionsSetter {
 	return func(o *Options) {
 		o.OptFnTypeParam = opt
 	}
 }
 
-func WithOptFnParam(opt func(server *http.Server) error) optionsSetter {
+func WithOptFnParam(opt func(server *http.Server) error) optOptionsSetter {
 	return func(o *Options) {
 		o.OptFnParam = opt
 	}
 }
 
-func WithOptHandlerFunc(opt http.HandlerFunc) optionsSetter {
+func WithOptHandlerFunc(opt http.HandlerFunc) optOptionsSetter {
 	return func(o *Options) {
 		o.OptHandlerFunc = opt
 	}
 }
 
-func WithOptMiddleware(opt func(next http.HandlerFunc) http.HandlerFunc) optionsSetter {
+func WithOptMiddleware(opt func(next http.HandlerFunc) http.HandlerFunc) optOptionsSetter {
 	return func(o *Options) {
 		o.OptMiddleware = opt
 	}
 }
 
-func WithOptLocal(opt localFnType) optionsSetter {
+func WithOptLocal(opt localFnType) optOptionsSetter {
 	return func(o *Options) {
 		o.OptLocal = opt
 	}

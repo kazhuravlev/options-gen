@@ -72,7 +72,7 @@ tasks:
   tests:
     cmds:
       - echo "- Tests"
-      - go test -race ./...
+      - go test -race -count 1 ./...
 
   examples:update:
     desc: Update examples directory

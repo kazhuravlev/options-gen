@@ -14,7 +14,7 @@ import (
 var _validator461e464ebed9 = goplvalidator.New()
 {{- end }}
 
-type optionsSetter{{ $.optionsTypeParamsSpec }} func(o *{{ .optionsStructInstanceType }})
+type opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParamsSpec }} func(o *{{ .optionsStructInstanceType }})
 
 func New{{ .optionsStructType }}(
 	{{ range .options -}}
@@ -22,7 +22,7 @@ func New{{ .optionsStructType }}(
 			{{ .Field }} {{ .Type }},
 		{{ end }}
 	{{- end -}}
-	options ...optionsSetter{{ $.optionsTypeParams }},
+	options ...opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }},
 ) {{ .optionsStructInstanceType }} {
 	o := {{ .optionsStructInstanceType }}{}
 	{{ range .options }}{{ if .TagOption.IsRequired -}}
@@ -37,7 +37,7 @@ func New{{ .optionsStructType }}(
 
 {{ range .options }}
 	{{ if not .TagOption.IsRequired }}
-		func With{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{ .Type }}) optionsSetter{{ $.optionsTypeParams }} {
+		func With{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{ .Type }}) opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }} {
 			return func(o *{{ $.optionsStructInstanceType }}) {
 				o.{{ .Field }} = opt
 			}

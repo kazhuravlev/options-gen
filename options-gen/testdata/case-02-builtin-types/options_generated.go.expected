@@ -10,7 +10,7 @@ import (
 
 var _validator461e464ebed9 = goplvalidator.New()
 
-type optionsSetter func(o *Options)
+type optOptionsSetter func(o *Options)
 
 func NewOptions(
 	ValInt int,
@@ -28,7 +28,7 @@ func NewOptions(
 	ValString string,
 	ValBytes []byte,
 	ValBool bool,
-	options ...optionsSetter,
+	options ...optOptionsSetter,
 ) Options {
 	o := Options{}
 	o.ValInt = ValInt
@@ -53,91 +53,91 @@ func NewOptions(
 	return o
 }
 
-func WithOptValInt(opt int) optionsSetter {
+func WithOptValInt(opt int) optOptionsSetter {
 	return func(o *Options) {
 		o.OptValInt = opt
 	}
 }
 
-func WithOptValInt8(opt int8) optionsSetter {
+func WithOptValInt8(opt int8) optOptionsSetter {
 	return func(o *Options) {
 		o.OptValInt8 = opt
 	}
 }
 
-func WithOptValInt16(opt int16) optionsSetter {
+func WithOptValInt16(opt int16) optOptionsSetter {
 	return func(o *Options) {
 		o.OptValInt16 = opt
 	}
 }
 
-func WithOptValInt32(opt int32) optionsSetter {
+func WithOptValInt32(opt int32) optOptionsSetter {
 	return func(o *Options) {
 		o.OptValInt32 = opt
 	}
 }
 
-func WithOptValInt64(opt int64) optionsSetter {
+func WithOptValInt64(opt int64) optOptionsSetter {
 	return func(o *Options) {
 		o.OptValInt64 = opt
 	}
 }
 
-func WithOptValUInt(opt uint) optionsSetter {
+func WithOptValUInt(opt uint) optOptionsSetter {
 	return func(o *Options) {
 		o.OptValUInt = opt
 	}
 }
 
-func WithOptValUInt8(opt uint8) optionsSetter {
+func WithOptValUInt8(opt uint8) optOptionsSetter {
 	return func(o *Options) {
 		o.OptValUInt8 = opt
 	}
 }
 
-func WithOptValUInt16(opt uint16) optionsSetter {
+func WithOptValUInt16(opt uint16) optOptionsSetter {
 	return func(o *Options) {
 		o.OptValUInt16 = opt
 	}
 }
 
-func WithOptValUInt32(opt uint32) optionsSetter {
+func WithOptValUInt32(opt uint32) optOptionsSetter {
 	return func(o *Options) {
 		o.OptValUInt32 = opt
 	}
 }
 
-func WithOptValUInt64(opt uint64) optionsSetter {
+func WithOptValUInt64(opt uint64) optOptionsSetter {
 	return func(o *Options) {
 		o.OptValUInt64 = opt
 	}
 }
 
-func WithOptValFloat32(opt float32) optionsSetter {
+func WithOptValFloat32(opt float32) optOptionsSetter {
 	return func(o *Options) {
 		o.OptValFloat32 = opt
 	}
 }
 
-func WithOptValFloat64(opt float64) optionsSetter {
+func WithOptValFloat64(opt float64) optOptionsSetter {
 	return func(o *Options) {
 		o.OptValFloat64 = opt
 	}
 }
 
-func WithOptValString(opt string) optionsSetter {
+func WithOptValString(opt string) optOptionsSetter {
 	return func(o *Options) {
 		o.OptValString = opt
 	}
 }
 
-func WithOptValBytes(opt []byte) optionsSetter {
+func WithOptValBytes(opt []byte) optOptionsSetter {
 	return func(o *Options) {
 		o.OptValBytes = opt
 	}
 }
 
-func WithOptValBool(opt bool) optionsSetter {
+func WithOptValBool(opt bool) optOptionsSetter {
 	return func(o *Options) {
 		o.OptValBool = opt
 	}

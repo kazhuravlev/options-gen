@@ -11,12 +11,12 @@ import (
 
 var _validator461e464ebed9 = goplvalidator.New()
 
-type optionsSetter func(o *Options)
+type optOptionsSetter func(o *Options)
 
 func NewOptions(
 	httpClient *http.Client,
 	token string,
-	options ...optionsSetter,
+	options ...optOptionsSetter,
 ) Options {
 	o := Options{}
 	o.httpClient = httpClient

@@ -6,14 +6,14 @@ import (
 	"io"
 )
 
-type optionsSetter func(o *Options)
+type optOptionsSetter func(o *Options)
 
 func NewOptions(
 	Any any,
 	Stringer fmt.Stringer,
 	RWCloser io.ReadWriteCloser,
 	Local localInterface,
-	options ...optionsSetter,
+	options ...optOptionsSetter,
 ) Options {
 	o := Options{}
 	o.Any = Any
@@ -27,25 +27,25 @@ func NewOptions(
 	return o
 }
 
-func WithOptAny(opt any) optionsSetter {
+func WithOptAny(opt any) optOptionsSetter {
 	return func(o *Options) {
 		o.OptAny = opt
 	}
 }
 
-func WithOptStringer(opt fmt.Stringer) optionsSetter {
+func WithOptStringer(opt fmt.Stringer) optOptionsSetter {
 	return func(o *Options) {
 		o.OptStringer = opt
 	}
 }
 
-func WithOptRWCloser(opt io.ReadWriteCloser) optionsSetter {
+func WithOptRWCloser(opt io.ReadWriteCloser) optOptionsSetter {
 	return func(o *Options) {
 		o.OptRWCloser = opt
 	}
 }
 
-func WithOptLocal(opt localInterface) optionsSetter {
+func WithOptLocal(opt localInterface) optOptionsSetter {
 	return func(o *Options) {
 		o.OptLocal = opt
 	}
