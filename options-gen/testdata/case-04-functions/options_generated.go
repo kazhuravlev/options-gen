@@ -87,51 +87,41 @@ func (o *Options) Validate() error {
 }
 
 func _Options_FnTypeParamValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_FnParamValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_HandlerFuncValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_MiddlewareValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_LocalValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_OptFnTypeParamValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_OptFnParamValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_OptHandlerFuncValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_OptMiddlewareValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_OptLocalValidator(o *Options) error {
-
 	return nil
 }

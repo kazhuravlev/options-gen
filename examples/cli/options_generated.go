@@ -49,6 +49,5 @@ func _Options_httpClientValidator(o *Options) error {
 }
 
 func _Options_tokenValidator(o *Options) error {
-
 	return nil
 }

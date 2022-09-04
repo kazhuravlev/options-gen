@@ -45,7 +45,6 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 			Type:  "fmt.Stringer",
 			TagOption: generator.TagOption{
 				IsRequired:  true,
-				IsNotEmpty:  false,
 				GoValidator: "required",
 			},
 		},
@@ -55,7 +54,6 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 			Type:  "string",
 			TagOption: generator.TagOption{
 				IsRequired:  false,
-				IsNotEmpty:  false,
 				GoValidator: "required",
 			},
 		},
@@ -65,7 +63,6 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 			Type:  "map[string]string",
 			TagOption: generator.TagOption{
 				IsRequired:  true,
-				IsNotEmpty:  false,
 				GoValidator: "required",
 			},
 		},
@@ -75,7 +72,6 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 			Type:  "string",
 			TagOption: generator.TagOption{
 				IsRequired:  false,
-				IsNotEmpty:  false,
 				GoValidator: "",
 			},
 		},
@@ -83,19 +79,13 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 			Name:      "StarOpt",
 			Field:     "starOpt",
 			Type:      "*int",
-			TagOption: generator.TagOption{IsRequired: true, IsNotEmpty: false, GoValidator: ""},
+			TagOption: generator.TagOption{IsRequired: true, GoValidator: ""},
 		},
 		{
 			Name:      "SliceOpt",
 			Field:     "sliceOpt",
 			Type:      "[]int",
-			TagOption: generator.TagOption{IsRequired: true, IsNotEmpty: false, GoValidator: ""},
-		},
-		{
-			Name:      "OldStyleOpt",
-			Field:     "oldStyleOpt",
-			Type:      "string",
-			TagOption: generator.TagOption{IsRequired: true, IsNotEmpty: true, GoValidator: ""},
+			TagOption: generator.TagOption{IsRequired: true, GoValidator: ""},
 		},
 	}, spec.Options)
 }
@@ -107,7 +97,6 @@ type TestOptions struct {
 	str          string            `validate:"required"`                    //nolint:unused
 	someMap      map[string]string `option:"mandatory" validate:"required"` //nolint:unused
 	noValidation string            //nolint:unused
-	starOpt      *int              `option:"mandatory"`          //nolint:unused
-	sliceOpt     []int             `option:"mandatory"`          //nolint:unused
-	oldStyleOpt  string            `option:"required,not-empty"` //nolint:unused
+	starOpt      *int              `option:"mandatory"` //nolint:unused
+	sliceOpt     []int             `option:"mandatory"` //nolint:unused
 }

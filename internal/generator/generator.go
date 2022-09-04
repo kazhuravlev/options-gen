@@ -47,7 +47,6 @@ type OptionMeta struct {
 
 type TagOption struct {
 	IsRequired  bool
-	IsNotEmpty  bool
 	GoValidator string
 }
 
@@ -123,7 +122,7 @@ func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, error) {
 			return nil, fmt.Errorf("cannot make type name: %w", err)
 		}
 
-		tagOpt := parseTag(field.Tag, fieldName)
+		tagOpt := parseTag(field.Tag)
 
 		title := cases.Title(language.English, cases.NoLower)
 		options[idx] = OptionMeta{
@@ -143,10 +142,9 @@ func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, error) {
 	}, nil
 }
 
-func parseTag(tag *ast.BasicLit, fieldName string) TagOption {
+func parseTag(tag *ast.BasicLit) TagOption {
 	tagOpt := TagOption{
 		IsRequired:  false,
-		IsNotEmpty:  false,
 		GoValidator: "",
 	}
 
@@ -159,26 +157,8 @@ func parseTag(tag *ast.BasicLit, fieldName string) TagOption {
 
 	optionTag := reflect.StructTag(strings.Trim(value, "`")).Get("option")
 	for _, opt := range strings.Split(optionTag, ",") {
-		switch opt {
-		case "required":
-			log.Printf(
-				"Deprecated: use `option:\"mandatory\"` "+
-					"instead for field `%s` to force the passing "+
-					"option in the constructor argument\n", fieldName)
-
+		if opt == "mandatory" {
 			tagOpt.IsRequired = true
-
-		case "mandatory":
-			tagOpt.IsRequired = true
-
-		case "not-empty":
-			// NOTE: remove the tag
-			log.Printf(
-				"Deprecated: use "+
-					"github.com/go-playground/validator tag to check "+
-					"the field `%s` content\n", fieldName)
-
-			tagOpt.IsNotEmpty = true
 		}
 	}
 

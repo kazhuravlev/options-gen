@@ -38,6 +38,5 @@ func (o *Config) Validate() error {
 }
 
 func _Config_nameValidator(o *Config) error {
-
 	return nil
 }

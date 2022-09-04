@@ -200,77 +200,62 @@ func (o *Options) Validate() error {
 }
 
 func _Options_ValIntValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_ValInt8Validator(o *Options) error {
-
 	return nil
 }
 
 func _Options_ValInt16Validator(o *Options) error {
-
 	return nil
 }
 
 func _Options_ValInt32Validator(o *Options) error {
-
 	return nil
 }
 
 func _Options_ValInt64Validator(o *Options) error {
-
 	return nil
 }
 
 func _Options_ValUIntValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_ValUInt8Validator(o *Options) error {
-
 	return nil
 }
 
 func _Options_ValUInt16Validator(o *Options) error {
-
 	return nil
 }
 
 func _Options_ValUInt32Validator(o *Options) error {
-
 	return nil
 }
 
 func _Options_ValUInt64Validator(o *Options) error {
-
 	return nil
 }
 
 func _Options_ValFloat32Validator(o *Options) error {
-
 	return nil
 }
 
 func _Options_ValFloat64Validator(o *Options) error {
-
 	return nil
 }
 
 func _Options_ValStringValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_ValBytesValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_ValBoolValidator(o *Options) error {
-
 	return nil
 }
 

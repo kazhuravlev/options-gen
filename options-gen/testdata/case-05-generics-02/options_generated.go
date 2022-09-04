@@ -86,26 +86,21 @@ func _Options_RequiredKeyValidator[KeyT int | string, TT any](o *Options[KeyT, T
 }
 
 func _Options_HandlerValidator[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
-
 	return nil
 }
 
 func _Options_KeyValidator[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
-
 	return nil
 }
 
 func _Options_OptHandlerValidator[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
-
 	return nil
 }
 
 func _Options_OptKeyValidator[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
-
 	return nil
 }
 
 func _Options_AnyOptValidator[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
-
 	return nil
 }

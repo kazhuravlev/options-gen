@@ -56,11 +56,9 @@ func _Options_RequiredKeyValidator[T string](o *Options[T]) error {
 }
 
 func _Options_KeyValidator[T string](o *Options[T]) error {
-
 	return nil
 }
 
 func _Options_OptKeyValidator[T string](o *Options[T]) error {
-
 	return nil
 }

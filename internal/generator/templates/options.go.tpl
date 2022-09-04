@@ -68,12 +68,7 @@ func (o *{{ .optionsStructInstanceType }}) Validate() error {
 
 {{ range .options }}
 	func _{{ $.optionsStructName }}_{{ .Field }}Validator{{ $.optionsTypeParamsSpec }}(o *{{ $.optionsStructInstanceType }}) error {
-		{{ if .TagOption.IsNotEmpty -}}
-			if validator.IsNil(o.{{ .Field }}) {
-				return fmt.Errorf("%w: {{ .Field }} must be present (type {{ .Type }})", ErrInvalidOption)
-			}
-		{{- end }}
-		{{- if .TagOption.GoValidator -}}
+		{{- if .TagOption.GoValidator }}
             if err := _validator461e464ebed9.Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
                 return fmt.Errorf("field `{{ .Field }}` did not pass the test: %w", err)
             }

@@ -77,41 +77,33 @@ func (o *Options) Validate() error {
 }
 
 func _Options_AnyValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_StringerValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_RWCloserValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_LocalValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_OptAnyValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_OptStringerValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_OptRWCloserValidator(o *Options) error {
-
 	return nil
 }
 
 func _Options_OptLocalValidator(o *Options) error {
-
 	return nil
 }
