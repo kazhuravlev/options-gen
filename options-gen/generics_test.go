@@ -1,11 +1,12 @@
 package optionsgen_test
 
 import (
-	testcase "github.com/kazhuravlev/options-gen/options-gen/testdata/case-05-generics"
-	"github.com/stretchr/testify/assert"
 	"net"
 	"net/http"
 	"testing"
+
+	testcase "github.com/kazhuravlev/options-gen/options-gen/testdata/case-05-generics-02"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGenericsOptions(t *testing.T) {

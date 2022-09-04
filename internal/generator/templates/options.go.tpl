@@ -15,20 +15,20 @@ import (
 var _validator461e464ebed9 = goplvalidator.New()
 {{- end }}
 
-type opt{{ .optionsStructName }}Meta struct {
-	setter    func(o *{{ .optionsStructName }})
-	validator func(o *{{ .optionsStructName }}) error
+type opt{{ .optionsMetaStructType }} struct {
+	setter    func(o *{{ .optionsStructInstanceType }})
+	validator func(o *{{ .optionsStructInstanceType }}) error
 }
 
-func New{{ .optionsStructName }}(
+func New{{ .optionsStructType }}(
 	{{ range .options -}}
         {{ if .TagOption.IsRequired -}}
             {{ .Field }} {{ .Type }},
         {{ end }}
 	{{- end }}
-	options ...opt{{ .optionsStructName }}Meta,
-) {{ .optionsStructName }} {
-	o := {{ .optionsStructName }}{}
+	options ...opt{{ .optionsMetaStructInstanceType }},
+) {{ .optionsStructInstanceType }} {
+	o := {{ .optionsStructInstanceType }}{}
 	{{ range .options }}{{ if .TagOption.IsRequired -}}
 		o.{{ .Field }} = {{ .Field }}
 	{{ end }}{{ end }}
@@ -42,17 +42,17 @@ func New{{ .optionsStructName }}(
 
 {{ range .options }}
 	{{ if not .TagOption.IsRequired }}
-		func With{{ .Name }}(opt {{ .Type }}) opt{{ $.optionsStructName }}Meta {
-			 return opt{{ $.optionsStructName }}Meta{
-				 setter: func(o *{{ $.optionsStructName }}) { o.{{ .Field }} = opt },
-				 validator: _{{ $.optionsStructName }}_{{ .Field }}Validator,
+		func With{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{ .Type }}) opt{{ $.optionsMetaStructInstanceType }} {
+			 return opt{{ $.optionsMetaStructInstanceType }}{
+				 setter: func(o *{{ $.optionsStructInstanceType }}) { o.{{ .Field }} = opt },
+				 validator: _{{ $.optionsStructName }}_{{ .Field }}Validator{{ $.optionsTypeParams }},
 			 }
 		}
 	{{ end }}
 {{ end }}
 
 
-func (o *{{ .optionsStructName }}) Validate() error {
+func (o *{{ .optionsStructInstanceType }}) Validate() error {
     {{- if not .options -}}
         return nil
     {{ else }}
@@ -67,7 +67,7 @@ func (o *{{ .optionsStructName }}) Validate() error {
 }
 
 {{ range .options }}
-	func _{{ $.optionsStructName }}_{{ .Field }}Validator(o *{{ $.optionsStructName }}) error {
+	func _{{ $.optionsStructName }}_{{ .Field }}Validator{{ $.optionsTypeParamsSpec }}(o *{{ $.optionsStructInstanceType }}) error {
 		{{ if .TagOption.IsNotEmpty -}}
 			if validator.IsNil(o.{{ .Field }}) {
 				return fmt.Errorf("%w: {{ .Field }} must be present (type {{ .Type }})", ErrInvalidOption)
