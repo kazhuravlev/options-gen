@@ -4,7 +4,6 @@ package {{ .packageName }}
 import (
     "fmt"
 	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
-	"github.com/kazhuravlev/options-gen/pkg/validator"
 	goplvalidator "github.com/go-playground/validator/v10"
 	{{- range $import := .imports }}
 	{{ $import -}}
@@ -15,64 +14,59 @@ import (
 var _validator461e464ebed9 = goplvalidator.New()
 {{- end }}
 
-type opt{{ .optionsMetaStructType }} struct {
-	setter    func(o *{{ .optionsStructInstanceType }})
-	validator func(o *{{ .optionsStructInstanceType }}) error
-}
+type optionsSetter{{ $.optionsTypeParamsSpec }} func(o *{{ .optionsStructInstanceType }})
 
 func New{{ .optionsStructType }}(
 	{{ range .options -}}
-        {{ if .TagOption.IsRequired -}}
-            {{ .Field }} {{ .Type }},
-        {{ end }}
-	{{- end }}
-	options ...opt{{ .optionsMetaStructInstanceType }},
+		{{ if .TagOption.IsRequired -}}
+			{{ .Field }} {{ .Type }},
+		{{ end }}
+	{{- end -}}
+	options ...optionsSetter{{ $.optionsTypeParams }},
 ) {{ .optionsStructInstanceType }} {
 	o := {{ .optionsStructInstanceType }}{}
 	{{ range .options }}{{ if .TagOption.IsRequired -}}
 		o.{{ .Field }} = {{ .Field }}
 	{{ end }}{{ end }}
 
-	for i := range options{
-		options[i].setter(&o)
+	for _, opt := range options {
+		opt(&o)
 	}
-
 	return o
 }
 
 {{ range .options }}
 	{{ if not .TagOption.IsRequired }}
-		func With{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{ .Type }}) opt{{ $.optionsMetaStructInstanceType }} {
-			 return opt{{ $.optionsMetaStructInstanceType }}{
-				 setter: func(o *{{ $.optionsStructInstanceType }}) { o.{{ .Field }} = opt },
-				 validator: _{{ $.optionsStructName }}_{{ .Field }}Validator{{ $.optionsTypeParams }},
-			 }
+		func With{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{ .Type }}) optionsSetter{{ $.optionsTypeParams }} {
+			return func(o *{{ $.optionsStructInstanceType }}) {
+				o.{{ .Field }} = opt
+			}
 		}
 	{{ end }}
 {{ end }}
 
 
 func (o *{{ .optionsStructInstanceType }}) Validate() error {
-    {{- if not .options -}}
-        return nil
-    {{ else }}
-        errs := new(errors461e464ebed9.ValidationErrors)
-
-        {{ range .options -}}
-            errs.Add(errors461e464ebed9.NewValidationError("{{ .Name }}", _{{ $.optionsStructName }}_{{ .Field }}Validator(o)))
-        {{ end -}}
-
-        return errs.AsError()
-    {{- end }}
+	{{- if not .hasValidation -}}
+		return nil
+	{{- else }}
+		errs := new(errors461e464ebed9.ValidationErrors)
+		{{- range .options }}
+			{{- if .TagOption.GoValidator }}
+				errs.Add(errors461e464ebed9.NewValidationError("{{ .Name }}", _validate_{{ $.optionsStructName }}_{{ .Field }}{{ $.optionsTypeParams }}(o)))
+			{{- end }}
+		{{- end }}
+		return errs.AsError()
+	{{- end }}
 }
 
 {{ range .options }}
-	func _{{ $.optionsStructName }}_{{ .Field }}Validator{{ $.optionsTypeParamsSpec }}(o *{{ $.optionsStructInstanceType }}) error {
-		{{- if .TagOption.GoValidator }}
-            if err := _validator461e464ebed9.Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
-                return fmt.Errorf("field `{{ .Field }}` did not pass the test: %w", err)
-            }
-		{{- end }}
-		return nil
-	}
+	{{- if .TagOption.GoValidator }}
+		func _validate_{{ $.optionsStructName }}_{{ .Field }}{{ $.optionsTypeParamsSpec }}(o *{{ $.optionsStructInstanceType }}) error {
+			if err := _validator461e464ebed9.Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
+				return fmt.Errorf("field `{{ .Field }}` did not pass the test: %w", err)
+			}
+			return nil
+		}
+	{{- end }}
 {{ end }}

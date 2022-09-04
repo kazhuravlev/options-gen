@@ -11,18 +11,14 @@ import (
 
 var _validator461e464ebed9 = goplvalidator.New()
 
-type optOptionsMeta[KeyT int | string, TT any] struct {
-	setter    func(o *Options[KeyT, TT])
-	validator func(o *Options[KeyT, TT]) error
-}
+type optionsSetter[KeyT int | string, TT any] func(o *Options[KeyT, TT])
 
 func NewOptions[KeyT int | string, TT any](
 	RequiredHandler http.Handler,
 	RequiredKey KeyT,
 	Handler http.Handler,
 	Key KeyT,
-
-	options ...optOptionsMeta[KeyT, TT],
+	options ...optionsSetter[KeyT, TT],
 ) Options[KeyT, TT] {
 	o := Options[KeyT, TT]{}
 	o.RequiredHandler = RequiredHandler
@@ -30,77 +26,47 @@ func NewOptions[KeyT int | string, TT any](
 	o.Handler = Handler
 	o.Key = Key
 
-	for i := range options {
-		options[i].setter(&o)
+	for _, opt := range options {
+		opt(&o)
 	}
-
 	return o
 }
 
-func WithOptHandler[KeyT int | string, TT any](opt http.Handler) optOptionsMeta[KeyT, TT] {
-	return optOptionsMeta[KeyT, TT]{
-		setter:    func(o *Options[KeyT, TT]) { o.OptHandler = opt },
-		validator: _Options_OptHandlerValidator[KeyT, TT],
+func WithOptHandler[KeyT int | string, TT any](opt http.Handler) optionsSetter[KeyT, TT] {
+	return func(o *Options[KeyT, TT]) {
+		o.OptHandler = opt
 	}
 }
 
-func WithOptKey[KeyT int | string, TT any](opt KeyT) optOptionsMeta[KeyT, TT] {
-	return optOptionsMeta[KeyT, TT]{
-		setter:    func(o *Options[KeyT, TT]) { o.OptKey = opt },
-		validator: _Options_OptKeyValidator[KeyT, TT],
+func WithOptKey[KeyT int | string, TT any](opt KeyT) optionsSetter[KeyT, TT] {
+	return func(o *Options[KeyT, TT]) {
+		o.OptKey = opt
 	}
 }
 
-func WithAnyOpt[KeyT int | string, TT any](opt TT) optOptionsMeta[KeyT, TT] {
-	return optOptionsMeta[KeyT, TT]{
-		setter:    func(o *Options[KeyT, TT]) { o.AnyOpt = opt },
-		validator: _Options_AnyOptValidator[KeyT, TT],
+func WithAnyOpt[KeyT int | string, TT any](opt TT) optionsSetter[KeyT, TT] {
+	return func(o *Options[KeyT, TT]) {
+		o.AnyOpt = opt
 	}
 }
 
 func (o *Options[KeyT, TT]) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
-
-	errs.Add(errors461e464ebed9.NewValidationError("RequiredHandler", _Options_RequiredHandlerValidator(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("RequiredKey", _Options_RequiredKeyValidator(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("Handler", _Options_HandlerValidator(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("Key", _Options_KeyValidator(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptHandler", _Options_OptHandlerValidator(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptKey", _Options_OptKeyValidator(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("AnyOpt", _Options_AnyOptValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("RequiredHandler", _validate_Options_RequiredHandler[KeyT, TT](o)))
+	errs.Add(errors461e464ebed9.NewValidationError("RequiredKey", _validate_Options_RequiredKey[KeyT, TT](o)))
 	return errs.AsError()
 }
 
-func _Options_RequiredHandlerValidator[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
+func _validate_Options_RequiredHandler[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
 	if err := _validator461e464ebed9.Var(o.RequiredHandler, "required"); err != nil {
 		return fmt.Errorf("field `RequiredHandler` did not pass the test: %w", err)
 	}
 	return nil
 }
 
-func _Options_RequiredKeyValidator[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
+func _validate_Options_RequiredKey[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
 	if err := _validator461e464ebed9.Var(o.RequiredKey, "required"); err != nil {
 		return fmt.Errorf("field `RequiredKey` did not pass the test: %w", err)
 	}
-	return nil
-}
-
-func _Options_HandlerValidator[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
-	return nil
-}
-
-func _Options_KeyValidator[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
-	return nil
-}
-
-func _Options_OptHandlerValidator[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
-	return nil
-}
-
-func _Options_OptKeyValidator[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
-	return nil
-}
-
-func _Options_AnyOptValidator[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
 	return nil
 }

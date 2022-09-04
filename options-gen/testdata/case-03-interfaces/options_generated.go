@@ -4,22 +4,16 @@ package testcase
 import (
 	"fmt"
 	"io"
-
-	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
 )
 
-type optOptionsMeta struct {
-	setter    func(o *Options)
-	validator func(o *Options) error
-}
+type optionsSetter func(o *Options)
 
 func NewOptions(
 	Any any,
 	Stringer fmt.Stringer,
 	RWCloser io.ReadWriteCloser,
 	Local localInterface,
-
-	options ...optOptionsMeta,
+	options ...optionsSetter,
 ) Options {
 	o := Options{}
 	o.Any = Any
@@ -27,83 +21,36 @@ func NewOptions(
 	o.RWCloser = RWCloser
 	o.Local = Local
 
-	for i := range options {
-		options[i].setter(&o)
+	for _, opt := range options {
+		opt(&o)
 	}
-
 	return o
 }
 
-func WithOptAny(opt any) optOptionsMeta {
-	return optOptionsMeta{
-		setter:    func(o *Options) { o.OptAny = opt },
-		validator: _Options_OptAnyValidator,
+func WithOptAny(opt any) optionsSetter {
+	return func(o *Options) {
+		o.OptAny = opt
 	}
 }
 
-func WithOptStringer(opt fmt.Stringer) optOptionsMeta {
-	return optOptionsMeta{
-		setter:    func(o *Options) { o.OptStringer = opt },
-		validator: _Options_OptStringerValidator,
+func WithOptStringer(opt fmt.Stringer) optionsSetter {
+	return func(o *Options) {
+		o.OptStringer = opt
 	}
 }
 
-func WithOptRWCloser(opt io.ReadWriteCloser) optOptionsMeta {
-	return optOptionsMeta{
-		setter:    func(o *Options) { o.OptRWCloser = opt },
-		validator: _Options_OptRWCloserValidator,
+func WithOptRWCloser(opt io.ReadWriteCloser) optionsSetter {
+	return func(o *Options) {
+		o.OptRWCloser = opt
 	}
 }
 
-func WithOptLocal(opt localInterface) optOptionsMeta {
-	return optOptionsMeta{
-		setter:    func(o *Options) { o.OptLocal = opt },
-		validator: _Options_OptLocalValidator,
+func WithOptLocal(opt localInterface) optionsSetter {
+	return func(o *Options) {
+		o.OptLocal = opt
 	}
 }
 
 func (o *Options) Validate() error {
-	errs := new(errors461e464ebed9.ValidationErrors)
-
-	errs.Add(errors461e464ebed9.NewValidationError("Any", _Options_AnyValidator(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("Stringer", _Options_StringerValidator(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("RWCloser", _Options_RWCloserValidator(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("Local", _Options_LocalValidator(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptAny", _Options_OptAnyValidator(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptStringer", _Options_OptStringerValidator(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptRWCloser", _Options_OptRWCloserValidator(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptLocal", _Options_OptLocalValidator(o)))
-	return errs.AsError()
-}
-
-func _Options_AnyValidator(o *Options) error {
-	return nil
-}
-
-func _Options_StringerValidator(o *Options) error {
-	return nil
-}
-
-func _Options_RWCloserValidator(o *Options) error {
-	return nil
-}
-
-func _Options_LocalValidator(o *Options) error {
-	return nil
-}
-
-func _Options_OptAnyValidator(o *Options) error {
-	return nil
-}
-
-func _Options_OptStringerValidator(o *Options) error {
-	return nil
-}
-
-func _Options_OptRWCloserValidator(o *Options) error {
-	return nil
-}
-
-func _Options_OptLocalValidator(o *Options) error {
 	return nil
 }

@@ -57,15 +57,9 @@ func RenderOptions(packageName, optionsStructName string, fileImports []string, 
 	optionsStructType := optionsStructName
 	optionsStructInstanceType := optionsStructName
 
-	optionsMetaStructType := optionsStructName + "Meta"
-	optionsMetaStructInstanceType := optionsStructName + "Meta"
-
 	if spec.TypeParamsSpec != "" {
 		optionsStructType += spec.TypeParamsSpec
 		optionsStructInstanceType += spec.TypeParams
-
-		optionsMetaStructType += spec.TypeParamsSpec
-		optionsMetaStructInstanceType += spec.TypeParams
 	}
 
 	tplContext := map[string]interface{}{
@@ -77,11 +71,9 @@ func RenderOptions(packageName, optionsStructName string, fileImports []string, 
 		"optionsTypeParamsSpec": spec.TypeParamsSpec,
 		"optionsTypeParams":     spec.TypeParams,
 
-		"optionsStructName":             optionsStructName,
-		"optionsStructType":             optionsStructType,
-		"optionsStructInstanceType":     optionsStructInstanceType,
-		"optionsMetaStructType":         optionsMetaStructType,
-		"optionsMetaStructInstanceType": optionsMetaStructInstanceType,
+		"optionsStructName":         optionsStructName,
+		"optionsStructType":         optionsStructType,
+		"optionsStructInstanceType": optionsStructInstanceType,
 	}
 	buf := new(bytes.Buffer)
 
