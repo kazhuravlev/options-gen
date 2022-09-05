@@ -7,6 +7,7 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"go/types"
 	"log"
 	"os"
 	"path"
@@ -23,7 +24,9 @@ import (
 var templates embed.FS
 
 type OptionSpec struct {
-	Options []OptionMeta
+	TypeParamsSpec string // [KeyT int | string, TT any]
+	TypeParams     string // [KeyT, TT]
+	Options        []OptionMeta
 }
 
 func (s OptionSpec) HasValidation() bool {
@@ -52,12 +55,34 @@ type TagOption struct {
 func RenderOptions(packageName, optionsStructName string, fileImports []string, spec *OptionSpec) ([]byte, error) {
 	tmpl := template.Must(template.ParseFS(templates, "templates/options.go.tpl"))
 
+	optionsStructType := optionsStructName
+	optionsStructInstanceType := optionsStructName
+
+	optionsMetaStructType := optionsStructName + "Meta"
+	optionsMetaStructInstanceType := optionsStructName + "Meta"
+
+	if spec.TypeParamsSpec != "" {
+		optionsStructType += spec.TypeParamsSpec
+		optionsStructInstanceType += spec.TypeParams
+
+		optionsMetaStructType += spec.TypeParamsSpec
+		optionsMetaStructInstanceType += spec.TypeParams
+	}
+
 	tplContext := map[string]interface{}{
-		"packageName":       packageName,
-		"imports":           fileImports,
-		"optionsStructName": optionsStructName,
-		"options":           spec.Options,
-		"hasValidation":     spec.HasValidation(),
+		"packageName":   packageName,
+		"imports":       fileImports,
+		"options":       spec.Options,
+		"hasValidation": spec.HasValidation(),
+
+		"optionsTypeParamsSpec": spec.TypeParamsSpec,
+		"optionsTypeParams":     spec.TypeParams,
+
+		"optionsStructName":             optionsStructName,
+		"optionsStructType":             optionsStructType,
+		"optionsStructInstanceType":     optionsStructInstanceType,
+		"optionsMetaStructType":         optionsMetaStructType,
+		"optionsMetaStructInstanceType": optionsMetaStructInstanceType,
 	}
 	buf := new(bytes.Buffer)
 
@@ -68,6 +93,7 @@ func RenderOptions(packageName, optionsStructName string, fileImports []string, 
 	// reformat, remove unused and duplicate imports, sort them
 	formatted, err := imports.Process("", buf.Bytes(), nil)
 	if err != nil {
+		_, _ = os.Stdout.Write(buf.Bytes()) // For issues debug.
 		return nil, fmt.Errorf("cannot optimize imports: %w", err)
 	}
 
@@ -84,7 +110,7 @@ func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, error) {
 		return nil, fmt.Errorf("cannot parse dir: %w", err)
 	}
 
-	fields := findStructFields(node, optionsStructName)
+	typeParams, fields := findStructTypeParamsAndFields(node, optionsStructName)
 	options := make([]OptionMeta, len(fields))
 
 	for idx := range fields {
@@ -108,7 +134,13 @@ func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, error) {
 		}
 	}
 
-	return &OptionSpec{Options: options}, nil
+	tpSpec, tp := typeParamsStr(typeParams)
+
+	return &OptionSpec{
+		TypeParamsSpec: tpSpec,
+		TypeParams:     tp,
+		Options:        options,
+	}, nil
 }
 
 func parseTag(tag *ast.BasicLit, fieldName string) TagOption {
@@ -151,6 +183,40 @@ func parseTag(tag *ast.BasicLit, fieldName string) TagOption {
 	}
 
 	return tagOpt
+}
+
+func typeParamsStr(params []*ast.Field) (string, string) {
+	if len(params) == 0 {
+		return "", ""
+	}
+
+	var tpSpec, tp strings.Builder
+
+	tpSpec.WriteByte('[')
+	tp.WriteByte('[')
+
+	for i, p := range params {
+		if len(p.Names) == 0 {
+			log.Fatal("type param without name")
+		}
+		paramName := p.Names[0].Name
+		typeName := types.ExprString(p.Type)
+
+		tpSpec.WriteString(paramName)
+		tpSpec.WriteByte(' ')
+		tpSpec.WriteString(typeName)
+
+		tp.WriteString(paramName)
+
+		if i != len(params)-1 {
+			tpSpec.WriteByte(',')
+			tp.WriteByte(',')
+		}
+	}
+
+	tpSpec.WriteByte(']')
+	tp.WriteByte(']')
+	return tpSpec.String(), tp.String()
 }
 
 // GetFileImports read the file and parse the imports section. Return all found

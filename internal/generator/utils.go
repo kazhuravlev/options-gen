@@ -6,9 +6,7 @@ import (
 	"go/types"
 )
 
-func findStructFields(packages map[string]*ast.Package, typeName string) []*ast.Field {
-	var methods []*ast.Field
-
+func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName string) ([]*ast.Field, []*ast.Field) {
 	decls := getDecls(packages)
 	for _, decl := range decls {
 		x, ok := decl.(*ast.GenDecl)
@@ -31,11 +29,10 @@ func findStructFields(packages map[string]*ast.Package, typeName string) []*ast.
 				continue
 			}
 
-			methods = append(methods, structType.Fields.List...)
+			return extractFields(typeSpec.TypeParams), extractFields(structType.Fields)
 		}
 	}
-
-	return methods
+	return nil, nil
 }
 
 func getDecls(packages map[string]*ast.Package) []ast.Decl {
@@ -48,6 +45,13 @@ func getDecls(packages map[string]*ast.Package) []ast.Decl {
 	}
 
 	return res
+}
+
+func extractFields(fl *ast.FieldList) []*ast.Field {
+	if fl == nil {
+		return nil
+	}
+	return fl.List
 }
 
 func makeTypeName(expr ast.Expr) (string, error) {
