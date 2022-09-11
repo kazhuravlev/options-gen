@@ -75,6 +75,24 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 				Type:      "[]int",
 				TagOption: generator.TagOption{IsRequired: true, GoValidator: ""},
 			},
+			{
+				Name:      "OldStyleOpt1",
+				Field:     "oldStyleOpt1",
+				Type:      "string",
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required"},
+			},
+			{
+				Name:      "OldStyleOpt2",
+				Field:     "oldStyleOpt2",
+				Type:      "string",
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required"},
+			},
+			{
+				Name:      "OldStyleOpt3",
+				Field:     "oldStyleOpt3",
+				Type:      "string",
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "min=10,required"},
+			},
 		},
 	}, spec)
 }
@@ -119,6 +137,10 @@ type TestOptions struct {
 	noValidation string            //nolint:unused
 	starOpt      *int              `option:"mandatory"` //nolint:unused
 	sliceOpt     []int             `option:"mandatory"` //nolint:unused
+
+	oldStyleOpt1 string `option:"required,not-empty"`                     //nolint:unused
+	oldStyleOpt2 string `option:"required,not-empty" validate:"required"` //nolint:unused
+	oldStyleOpt3 string `option:"required,not-empty" validate:"min=10"`   //nolint:unused
 }
 
 type TestOptionsGen[T1 int | string, T2 any] struct {
