@@ -125,7 +125,10 @@ func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, error) {
 		}
 	}
 
-	tpSpec, tp := typeParamsStr(typeParams)
+	tpSpec, tp, err := typeParamsStr(typeParams)
+	if err != nil {
+		return nil, fmt.Errorf("unable to extract type params %w", err)
+	}
 
 	return &OptionSpec{
 		TypeParamsSpec: tpSpec,
@@ -182,38 +185,32 @@ func parseTag(tag *ast.BasicLit, fieldName string) TagOption {
 	return tagOpt
 }
 
-func typeParamsStr(params []*ast.Field) (string, string) {
+func typeParamsStr(params []*ast.Field) (string, string, error) {
 	if len(params) == 0 {
-		return "", ""
+		return "", "", nil
 	}
 
-	var tpSpec, tp strings.Builder
-
-	tpSpec.WriteByte('[')
-	tp.WriteByte('[')
-
+	paramNames := make([]string, 0, len(params))
+	paramNamesWithTypes := make([]string, len(params))
 	for i, p := range params {
 		if len(p.Names) == 0 {
-			log.Fatal("type param without name")
+			return "", "", fmt.Errorf("unnamed param %s", p.Type)
 		}
-		paramName := p.Names[0].Name
+
+		names := make([]string, len(p.Names))
+		for i := range p.Names {
+			names[i] = p.Names[i].Name
+		}
+
+		paramNames = append(paramNames, names...)
+
 		typeName := types.ExprString(p.Type)
-
-		tpSpec.WriteString(paramName)
-		tpSpec.WriteByte(' ')
-		tpSpec.WriteString(typeName)
-
-		tp.WriteString(paramName)
-
-		if i != len(params)-1 {
-			tpSpec.WriteByte(',')
-			tp.WriteByte(',')
-		}
+		paramNamesWithTypes[i] = fmt.Sprintf("%s %s", strings.Join(names, ", "), typeName)
 	}
 
-	tpSpec.WriteByte(']')
-	tp.WriteByte(']')
-	return tpSpec.String(), tp.String()
+	paramNamesStr := fmt.Sprintf("[%s]", strings.Join(paramNames, ", "))
+	paramExprStr := fmt.Sprintf("[%s]", strings.Join(paramNamesWithTypes, ", "))
+	return paramExprStr, paramNamesStr, nil
 }
 
 // GetFileImports read the file and parse the imports section. Return all found
