@@ -103,8 +103,8 @@ func TestGetOptionSpec_Generics(t *testing.T) {
 	spec, err := generator.GetOptionSpec(gofile, "TestOptionsGen")
 	req.NoError(t, err)
 	req.Equal(t, &generator.OptionSpec{
-		TypeParamsSpec: "[T1 int | string,T2 any]",
-		TypeParams:     "[T1,T2]",
+		TypeParamsSpec: "[T1 int | string, T2, T3 any]",
+		TypeParams:     "[T1, T2, T3]",
 		Options: []generator.OptionMeta{
 			{
 				Name:      "Opt1",
@@ -123,6 +123,12 @@ func TestGetOptionSpec_Generics(t *testing.T) {
 				Field:     "opt3",
 				Type:      "int",
 				TagOption: generator.TagOption{IsRequired: false, GoValidator: "min=10"},
+			},
+			{
+				Name:      "Opt4",
+				Field:     "opt4",
+				Type:      "T3",
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: ""},
 			},
 		},
 	}, spec)
@@ -143,8 +149,9 @@ type TestOptions struct {
 	oldStyleOpt3 string `option:"required,not-empty" validate:"min=10"`   //nolint:unused
 }
 
-type TestOptionsGen[T1 int | string, T2 any] struct {
+type TestOptionsGen[T1 int | string, T2, T3 any] struct {
 	opt1 T1  `option:"mandatory"`                     //nolint:unused
 	opt2 T2  `option:"mandatory" validate:"required"` //nolint:unused
 	opt3 int `validate:"min=10"`                      //nolint:unused
+	opt4 T3  //nolint:unused
 }
