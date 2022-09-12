@@ -14,17 +14,17 @@ var _validator461e464ebed9 = goplvalidator.New()
 type optOptionsSetter[KeyT int | string, TT any] func(o *Options[KeyT, TT])
 
 func NewOptions[KeyT int | string, TT any](
-	RequiredHandler http.Handler,
-	RequiredKey KeyT,
-	Handler http.Handler,
-	Key KeyT,
+	requiredHandler http.Handler,
+	requiredKey KeyT,
+	handler http.Handler,
+	key KeyT,
 	options ...optOptionsSetter[KeyT, TT],
 ) Options[KeyT, TT] {
 	o := Options[KeyT, TT]{}
-	o.RequiredHandler = RequiredHandler
-	o.RequiredKey = RequiredKey
-	o.Handler = Handler
-	o.Key = Key
+	o.requiredHandler = requiredHandler
+	o.requiredKey = requiredKey
+	o.handler = handler
+	o.key = key
 
 	for _, opt := range options {
 		opt(&o)
@@ -34,39 +34,39 @@ func NewOptions[KeyT int | string, TT any](
 
 func WithOptHandler[KeyT int | string, TT any](opt http.Handler) optOptionsSetter[KeyT, TT] {
 	return func(o *Options[KeyT, TT]) {
-		o.OptHandler = opt
+		o.optHandler = opt
 	}
 }
 
 func WithOptKey[KeyT int | string, TT any](opt KeyT) optOptionsSetter[KeyT, TT] {
 	return func(o *Options[KeyT, TT]) {
-		o.OptKey = opt
+		o.optKey = opt
 	}
 }
 
 func WithAnyOpt[KeyT int | string, TT any](opt TT) optOptionsSetter[KeyT, TT] {
 	return func(o *Options[KeyT, TT]) {
-		o.AnyOpt = opt
+		o.anyOpt = opt
 	}
 }
 
 func (o *Options[KeyT, TT]) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
-	errs.Add(errors461e464ebed9.NewValidationError("RequiredHandler", _validate_Options_RequiredHandler[KeyT, TT](o)))
-	errs.Add(errors461e464ebed9.NewValidationError("RequiredKey", _validate_Options_RequiredKey[KeyT, TT](o)))
+	errs.Add(errors461e464ebed9.NewValidationError("RequiredHandler", _validate_Options_requiredHandler[KeyT, TT](o)))
+	errs.Add(errors461e464ebed9.NewValidationError("RequiredKey", _validate_Options_requiredKey[KeyT, TT](o)))
 	return errs.AsError()
 }
 
-func _validate_Options_RequiredHandler[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
-	if err := _validator461e464ebed9.Var(o.RequiredHandler, "required"); err != nil {
-		return fmt.Errorf("field `RequiredHandler` did not pass the test: %w", err)
+func _validate_Options_requiredHandler[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
+	if err := _validator461e464ebed9.Var(o.requiredHandler, "required"); err != nil {
+		return fmt.Errorf("field `requiredHandler` did not pass the test: %w", err)
 	}
 	return nil
 }
 
-func _validate_Options_RequiredKey[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
-	if err := _validator461e464ebed9.Var(o.RequiredKey, "required"); err != nil {
-		return fmt.Errorf("field `RequiredKey` did not pass the test: %w", err)
+func _validate_Options_requiredKey[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
+	if err := _validator461e464ebed9.Var(o.requiredKey, "required"); err != nil {
+		return fmt.Errorf("field `requiredKey` did not pass the test: %w", err)
 	}
 	return nil
 }

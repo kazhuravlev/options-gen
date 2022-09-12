@@ -9,17 +9,17 @@ import (
 type optOptionsSetter func(o *Options)
 
 func NewOptions(
-	Any any,
-	Stringer fmt.Stringer,
-	RWCloser io.ReadWriteCloser,
-	Local localInterface,
+	any any,
+	stringer fmt.Stringer,
+	rWCloser io.ReadWriteCloser,
+	local localInterface,
 	options ...optOptionsSetter,
 ) Options {
 	o := Options{}
-	o.Any = Any
-	o.Stringer = Stringer
-	o.RWCloser = RWCloser
-	o.Local = Local
+	o.any = any
+	o.stringer = stringer
+	o.rWCloser = rWCloser
+	o.local = local
 
 	for _, opt := range options {
 		opt(&o)
@@ -29,25 +29,25 @@ func NewOptions(
 
 func WithOptAny(opt any) optOptionsSetter {
 	return func(o *Options) {
-		o.OptAny = opt
+		o.optAny = opt
 	}
 }
 
 func WithOptStringer(opt fmt.Stringer) optOptionsSetter {
 	return func(o *Options) {
-		o.OptStringer = opt
+		o.optStringer = opt
 	}
 }
 
 func WithOptRWCloser(opt io.ReadWriteCloser) optOptionsSetter {
 	return func(o *Options) {
-		o.OptRWCloser = opt
+		o.optRWCloser = opt
 	}
 }
 
 func WithOptLocal(opt localInterface) optOptionsSetter {
 	return func(o *Options) {
-		o.OptLocal = opt
+		o.optLocal = opt
 	}
 }
 

@@ -8,15 +8,15 @@ type FnType func() (int, error)
 type localFnType func(a, b, c string) error
 
 type Options struct {
-	FnTypeParam FnType                                       `option:"mandatory"`
-	FnParam     func(server *http.Server) error              `option:"mandatory"`
-	HandlerFunc http.HandlerFunc                             `option:"mandatory"`
-	Middleware  func(next http.HandlerFunc) http.HandlerFunc `option:"mandatory"`
-	Local       localFnType                                  `option:"mandatory"`
+	fnTypeParam FnType                                       `option:"mandatory"`
+	fnParam     func(server *http.Server) error              `option:"mandatory"`
+	handlerFunc http.HandlerFunc                             `option:"mandatory"`
+	middleware  func(next http.HandlerFunc) http.HandlerFunc `option:"mandatory"`
+	local       localFnType                                  `option:"mandatory"`
 
-	OptFnTypeParam FnType
-	OptFnParam     func(server *http.Server) error
-	OptHandlerFunc http.HandlerFunc
-	OptMiddleware  func(next http.HandlerFunc) http.HandlerFunc
-	OptLocal       localFnType
+	optFnTypeParam FnType
+	optFnParam     func(server *http.Server) error
+	optHandlerFunc http.HandlerFunc
+	optMiddleware  func(next http.HandlerFunc) http.HandlerFunc
+	optLocal       localFnType
 }

@@ -3,14 +3,14 @@ package testcase
 import "net/http"
 
 type Options[KeyT int | string, TT any] struct {
-	RequiredHandler http.Handler `option:"mandatory" validate:"required"`
-	RequiredKey     KeyT         `option:"mandatory" validate:"required"`
+	requiredHandler http.Handler `option:"mandatory" validate:"required"`
+	requiredKey     KeyT         `option:"mandatory" validate:"required"`
 
-	Handler http.Handler `option:"mandatory"`
-	Key     KeyT         `option:"mandatory"`
+	handler http.Handler `option:"mandatory"`
+	key     KeyT         `option:"mandatory"`
 
-	OptHandler http.Handler
-	OptKey     KeyT
+	optHandler http.Handler
+	optKey     KeyT
 
-	AnyOpt TT
+	anyOpt TT
 }

@@ -10,13 +10,13 @@ type localInterface interface {
 }
 
 type Options struct {
-	Any      any                `option:"mandatory"`
-	Stringer fmt.Stringer       `option:"mandatory"`
-	RWCloser io.ReadWriteCloser `option:"mandatory"`
-	Local    localInterface     `option:"mandatory"`
+	any      any                `option:"mandatory"`
+	stringer fmt.Stringer       `option:"mandatory"`
+	rWCloser io.ReadWriteCloser `option:"mandatory"`
+	local    localInterface     `option:"mandatory"`
 
-	OptAny      any
-	OptStringer fmt.Stringer
-	OptRWCloser io.ReadWriteCloser
-	OptLocal    localInterface
+	optAny      any
+	optStringer fmt.Stringer
+	optRWCloser io.ReadWriteCloser
+	optLocal    localInterface
 }
