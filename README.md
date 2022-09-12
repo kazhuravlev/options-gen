@@ -97,6 +97,20 @@ func main() {
 }
 ```
 
+## Usage with Generics
+
+```go
+package mypkg
+
+//go:generate options-gen -from-struct=Options
+type Options[T any] struct {
+  addr string   `option:"mandatory" validate:"required,hostname_port"`
+  ch   <-chan T `option:"mandatory"`
+}
+```
+
+And just `go generate ./...`.
+
 ## Examples
 
 See an [examples](./examples) to get real-world examples.
