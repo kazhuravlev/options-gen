@@ -43,43 +43,55 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 				Name:      "Stringer",
 				Field:     "stringer",
 				Type:      "fmt.Stringer",
-				TagOption: generator.TagOption{IsRequired: true, IsNotEmpty: false, GoValidator: "required"},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required"},
 			},
 			{
 				Name:      "Str",
 				Field:     "str",
 				Type:      "string",
-				TagOption: generator.TagOption{IsRequired: false, IsNotEmpty: false, GoValidator: "required"},
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: "required"},
 			},
 			{
 				Name:      "SomeMap",
 				Field:     "someMap",
 				Type:      "map[string]string",
-				TagOption: generator.TagOption{IsRequired: true, IsNotEmpty: false, GoValidator: "required"},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required"},
 			},
 			{
 				Name:      "NoValidation",
 				Field:     "noValidation",
 				Type:      "string",
-				TagOption: generator.TagOption{IsRequired: false, IsNotEmpty: false, GoValidator: ""},
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: ""},
 			},
 			{
 				Name:      "StarOpt",
 				Field:     "starOpt",
 				Type:      "*int",
-				TagOption: generator.TagOption{IsRequired: true, IsNotEmpty: false, GoValidator: ""},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: ""},
 			},
 			{
 				Name:      "SliceOpt",
 				Field:     "sliceOpt",
 				Type:      "[]int",
-				TagOption: generator.TagOption{IsRequired: true, IsNotEmpty: false, GoValidator: ""},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: ""},
 			},
 			{
-				Name:      "OldStyleOpt",
-				Field:     "oldStyleOpt",
+				Name:      "OldStyleOpt1",
+				Field:     "oldStyleOpt1",
 				Type:      "string",
-				TagOption: generator.TagOption{IsRequired: true, IsNotEmpty: true, GoValidator: ""},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required"},
+			},
+			{
+				Name:      "OldStyleOpt2",
+				Field:     "oldStyleOpt2",
+				Type:      "string",
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required"},
+			},
+			{
+				Name:      "OldStyleOpt3",
+				Field:     "oldStyleOpt3",
+				Type:      "string",
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "min=10,required"},
 			},
 		},
 	}, spec)
@@ -98,19 +110,19 @@ func TestGetOptionSpec_Generics(t *testing.T) {
 				Name:      "Opt1",
 				Field:     "opt1",
 				Type:      "T1",
-				TagOption: generator.TagOption{IsRequired: true, IsNotEmpty: false, GoValidator: ""},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: ""},
 			},
 			{
 				Name:      "Opt2",
 				Field:     "opt2",
 				Type:      "T2",
-				TagOption: generator.TagOption{IsRequired: true, IsNotEmpty: false, GoValidator: "required"},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required"},
 			},
 			{
 				Name:      "Opt3",
 				Field:     "opt3",
 				Type:      "int",
-				TagOption: generator.TagOption{IsRequired: false, IsNotEmpty: false, GoValidator: "min=10"},
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: "min=10"},
 			},
 		},
 	}, spec)
@@ -123,9 +135,12 @@ type TestOptions struct {
 	str          string            `validate:"required"`                    //nolint:unused
 	someMap      map[string]string `option:"mandatory" validate:"required"` //nolint:unused
 	noValidation string            //nolint:unused
-	starOpt      *int              `option:"mandatory"`          //nolint:unused
-	sliceOpt     []int             `option:"mandatory"`          //nolint:unused
-	oldStyleOpt  string            `option:"required,not-empty"` //nolint:unused
+	starOpt      *int              `option:"mandatory"` //nolint:unused
+	sliceOpt     []int             `option:"mandatory"` //nolint:unused
+
+	oldStyleOpt1 string `option:"required,not-empty"`                     //nolint:unused
+	oldStyleOpt2 string `option:"required,not-empty" validate:"required"` //nolint:unused
+	oldStyleOpt3 string `option:"required,not-empty" validate:"min=10"`   //nolint:unused
 }
 
 type TestOptionsGen[T1 int | string, T2 any] struct {

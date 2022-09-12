@@ -11,59 +11,52 @@ import (
 
 var _validator461e464ebed9 = goplvalidator.New()
 
-type optOptionsMeta struct {
-	setter    func(o *Options)
-	validator func(o *Options) error
-}
+type optOptionsSetter func(o *Options)
 
 func NewOptions(
 	service1 *subpackage.Service1,
 	s3Endpoint string,
-
-	options ...optOptionsMeta,
+	options ...optOptionsSetter,
 ) Options {
 	o := Options{}
 	o.service1 = service1
 	o.s3Endpoint = s3Endpoint
 
-	for i := range options {
-		options[i].setter(&o)
+	for _, opt := range options {
+		opt(&o)
 	}
-
 	return o
 }
 
-func WithPort(opt int) optOptionsMeta {
-	return optOptionsMeta{
-		setter:    func(o *Options) { o.port = opt },
-		validator: _Options_portValidator,
+func WithPort(opt int) optOptionsSetter {
+	return func(o *Options) {
+		o.port = opt
 	}
 }
 
 func (o *Options) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
-
-	errs.Add(errors461e464ebed9.NewValidationError("Service1", _Options_service1Validator(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("S3Endpoint", _Options_s3EndpointValidator(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("Port", _Options_portValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("Service1", _validate_Options_service1(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("S3Endpoint", _validate_Options_s3Endpoint(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("Port", _validate_Options_port(o)))
 	return errs.AsError()
 }
 
-func _Options_service1Validator(o *Options) error {
+func _validate_Options_service1(o *Options) error {
 	if err := _validator461e464ebed9.Var(o.service1, "required"); err != nil {
 		return fmt.Errorf("field `service1` did not pass the test: %w", err)
 	}
 	return nil
 }
 
-func _Options_s3EndpointValidator(o *Options) error {
+func _validate_Options_s3Endpoint(o *Options) error {
 	if err := _validator461e464ebed9.Var(o.s3Endpoint, "required,url"); err != nil {
 		return fmt.Errorf("field `s3Endpoint` did not pass the test: %w", err)
 	}
 	return nil
 }
 
-func _Options_portValidator(o *Options) error {
+func _validate_Options_port(o *Options) error {
 	if err := _validator461e464ebed9.Var(o.port, "required,min=10"); err != nil {
 		return fmt.Errorf("field `port` did not pass the test: %w", err)
 	}

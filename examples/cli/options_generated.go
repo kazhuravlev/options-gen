@@ -11,44 +11,32 @@ import (
 
 var _validator461e464ebed9 = goplvalidator.New()
 
-type optOptionsMeta struct {
-	setter    func(o *Options)
-	validator func(o *Options) error
-}
+type optOptionsSetter func(o *Options)
 
 func NewOptions(
 	httpClient *http.Client,
 	token string,
-
-	options ...optOptionsMeta,
+	options ...optOptionsSetter,
 ) Options {
 	o := Options{}
 	o.httpClient = httpClient
 	o.token = token
 
-	for i := range options {
-		options[i].setter(&o)
+	for _, opt := range options {
+		opt(&o)
 	}
-
 	return o
 }
 
 func (o *Options) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
-
-	errs.Add(errors461e464ebed9.NewValidationError("HttpClient", _Options_httpClientValidator(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("Token", _Options_tokenValidator(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("HttpClient", _validate_Options_httpClient(o)))
 	return errs.AsError()
 }
 
-func _Options_httpClientValidator(o *Options) error {
+func _validate_Options_httpClient(o *Options) error {
 	if err := _validator461e464ebed9.Var(o.httpClient, "required"); err != nil {
 		return fmt.Errorf("field `httpClient` did not pass the test: %w", err)
 	}
-	return nil
-}
-
-func _Options_tokenValidator(o *Options) error {
-
 	return nil
 }

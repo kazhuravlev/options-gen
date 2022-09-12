@@ -47,7 +47,6 @@ type OptionMeta struct {
 
 type TagOption struct {
 	IsRequired  bool
-	IsNotEmpty  bool
 	GoValidator string
 }
 
@@ -58,15 +57,9 @@ func RenderOptions(packageName, optionsStructName string, fileImports []string, 
 	optionsStructType := optionsStructName
 	optionsStructInstanceType := optionsStructName
 
-	optionsMetaStructType := optionsStructName + "Meta"
-	optionsMetaStructInstanceType := optionsStructName + "Meta"
-
 	if spec.TypeParamsSpec != "" {
 		optionsStructType += spec.TypeParamsSpec
 		optionsStructInstanceType += spec.TypeParams
-
-		optionsMetaStructType += spec.TypeParamsSpec
-		optionsMetaStructInstanceType += spec.TypeParams
 	}
 
 	tplContext := map[string]interface{}{
@@ -78,11 +71,9 @@ func RenderOptions(packageName, optionsStructName string, fileImports []string, 
 		"optionsTypeParamsSpec": spec.TypeParamsSpec,
 		"optionsTypeParams":     spec.TypeParams,
 
-		"optionsStructName":             optionsStructName,
-		"optionsStructType":             optionsStructType,
-		"optionsStructInstanceType":     optionsStructInstanceType,
-		"optionsMetaStructType":         optionsMetaStructType,
-		"optionsMetaStructInstanceType": optionsMetaStructInstanceType,
+		"optionsStructName":         optionsStructName,
+		"optionsStructType":         optionsStructType,
+		"optionsStructInstanceType": optionsStructInstanceType,
 	}
 	buf := new(bytes.Buffer)
 
@@ -146,7 +137,6 @@ func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, error) {
 func parseTag(tag *ast.BasicLit, fieldName string) TagOption {
 	tagOpt := TagOption{
 		IsRequired:  false,
-		IsNotEmpty:  false,
 		GoValidator: "",
 	}
 
@@ -161,6 +151,7 @@ func parseTag(tag *ast.BasicLit, fieldName string) TagOption {
 	for _, opt := range strings.Split(optionTag, ",") {
 		switch opt {
 		case "required":
+			// NOTE: remove the tag.
 			log.Printf(
 				"Deprecated: use `option:\"mandatory\"` "+
 					"instead for field `%s` to force the passing "+
@@ -172,13 +163,19 @@ func parseTag(tag *ast.BasicLit, fieldName string) TagOption {
 			tagOpt.IsRequired = true
 
 		case "not-empty":
-			// NOTE: remove the tag
+			// NOTE: remove the tag.
 			log.Printf(
 				"Deprecated: use "+
-					"github.com/go-playground/validator tag to check "+
+					"github.com/go-playground/validator `validate` tag to check "+
 					"the field `%s` content\n", fieldName)
 
-			tagOpt.IsNotEmpty = true
+			if !strings.Contains(tagOpt.GoValidator, "required") {
+				if tagOpt.GoValidator == "" {
+					tagOpt.GoValidator = "required"
+				} else {
+					tagOpt.GoValidator += ",required"
+				}
+			}
 		}
 	}
 
