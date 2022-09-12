@@ -56,7 +56,7 @@ func extractFields(fl *ast.FieldList) []*ast.Field {
 
 func makeTypeName(expr ast.Expr) (string, error) {
 	switch expr.(type) {
-	case *ast.SelectorExpr, *ast.Ident, *ast.ArrayType, *ast.StarExpr, *ast.MapType, *ast.FuncType:
+	case *ast.SelectorExpr, *ast.Ident, *ast.ArrayType, *ast.StarExpr, *ast.MapType, *ast.FuncType, *ast.ChanType:
 	default:
 		return "", fmt.Errorf("unsupported field type (%T)", expr)
 	}
