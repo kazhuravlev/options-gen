@@ -109,19 +109,12 @@ func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, error) {
 
 		fieldName := field.Names[0].Name
 
-		typeName, err := makeTypeName(field.Type)
-		if err != nil {
-			return nil, fmt.Errorf("cannot make type name: %w", err)
-		}
-
-		tagOpt := parseTag(field.Tag, fieldName)
-
 		title := cases.Title(language.English, cases.NoLower)
 		options[idx] = OptionMeta{
 			Name:      title.String(fieldName),
 			Field:     fieldName,
-			Type:      typeName,
-			TagOption: tagOpt,
+			Type:      types.ExprString(field.Type),
+			TagOption: parseTag(field.Tag, fieldName),
 		}
 	}
 
