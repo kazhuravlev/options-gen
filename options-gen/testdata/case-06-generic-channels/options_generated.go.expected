@@ -10,12 +10,12 @@ import (
 
 var _validator461e464ebed9 = goplvalidator.New()
 
-type optOptionsSetter[T any] func(o *Options[T])
+type OptOptionsSetter[T any] func(o *Options[T])
 
 func NewOptions[T any](
 	ch1 chan T,
 	ch2 <-chan T,
-	options ...optOptionsSetter[T],
+	options ...OptOptionsSetter[T],
 ) Options[T] {
 	o := Options[T]{}
 	o.ch1 = ch1
@@ -27,13 +27,13 @@ func NewOptions[T any](
 	return o
 }
 
-func WithCh3[T any](opt chan T) optOptionsSetter[T] {
+func WithCh3[T any](opt chan T) OptOptionsSetter[T] {
 	return func(o *Options[T]) {
 		o.ch3 = opt
 	}
 }
 
-func WithCh4[T any](opt <-chan T) optOptionsSetter[T] {
+func WithCh4[T any](opt <-chan T) OptOptionsSetter[T] {
 	return func(o *Options[T]) {
 		o.ch4 = opt
 	}

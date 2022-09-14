@@ -10,12 +10,12 @@ import (
 
 var _validator461e464ebed9 = goplvalidator.New()
 
-type optOptionsSetter[T string] func(o *Options[T])
+type OptOptionsSetter[T string] func(o *Options[T])
 
 func NewOptions[T string](
 	requiredKey T,
 	key T,
-	options ...optOptionsSetter[T],
+	options ...OptOptionsSetter[T],
 ) Options[T] {
 	o := Options[T]{}
 	o.requiredKey = requiredKey
@@ -27,7 +27,7 @@ func NewOptions[T string](
 	return o
 }
 
-func WithOptKey[T string](opt T) optOptionsSetter[T] {
+func WithOptKey[T string](opt T) OptOptionsSetter[T] {
 	return func(o *Options[T]) {
 		o.optKey = opt
 	}

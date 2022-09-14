@@ -11,12 +11,12 @@ import (
 
 var _validator461e464ebed9 = goplvalidator.New()
 
-type optOptionsSetter func(o *Options)
+type OptOptionsSetter func(o *Options)
 
 func NewOptions(
 	service1 *subpackage.Service1,
 	s3Endpoint string,
-	options ...optOptionsSetter,
+	options ...OptOptionsSetter,
 ) Options {
 	o := Options{}
 	o.service1 = service1
@@ -28,7 +28,7 @@ func NewOptions(
 	return o
 }
 
-func WithPort(opt int) optOptionsSetter {
+func WithPort(opt int) OptOptionsSetter {
 	return func(o *Options) {
 		o.port = opt
 	}
