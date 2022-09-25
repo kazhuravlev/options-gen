@@ -32,7 +32,7 @@ func (o *Options) Validate() error {
 }
 
 func _validate_Options_age(o *Options) error {
-	if err := validator461e464ebed9.GetProvidedValidatorOrDefault(o).Var(o.age, "adult"); err != nil {
+	if err := validator461e464ebed9.GetProvidedValidatorOrDefault(o).Var(o.age, "child"); err != nil {
 		return fmt.Errorf("field `age` did not pass the test: %w", err)
 	}
 	return nil

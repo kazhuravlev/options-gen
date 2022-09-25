@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	goplvalidator "github.com/go-playground/validator/v10"
 	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
+	validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"
 )
-
-var _validator461e464ebed9 = goplvalidator.New()
 
 type OptOptionsSetter func(o *Options)
 
@@ -30,22 +28,13 @@ func NewOptions(
 
 func (o *Options) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
-	errs.Add(errors461e464ebed9.NewValidationError("HttpClient", _validate_Options_httpClient(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("httpClient", _validate_Options_httpClient(o)))
 	return errs.AsError()
 }
 
 func _validate_Options_httpClient(o *Options) error {
-	if err := _getOptsValidatorOrDefault(o).Var(o.httpClient, "required"); err != nil {
+	if err := validator461e464ebed9.GetProvidedValidatorOrDefault(o).Var(o.httpClient, "required"); err != nil {
 		return fmt.Errorf("field `httpClient` did not pass the test: %w", err)
 	}
 	return nil
-}
-
-func _getOptsValidatorOrDefault(opts any) *goplvalidator.Validate {
-	if v, ok := opts.(interface {
-		Validator() *goplvalidator.Validate
-	}); ok {
-		return v.Validator()
-	}
-	return _validator461e464ebed9
 }

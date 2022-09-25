@@ -4,15 +4,11 @@ package {{ .packageName }}
 import (
     "fmt"
 	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
-	goplvalidator "github.com/go-playground/validator/v10"
+{{ if .hasValidation }}validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"{{ end }}
 	{{- range $import := .imports }}
 	{{ $import -}}
 	{{- end }}
 )
-
-{{ if .hasValidation }}
-var _validator461e464ebed9 = goplvalidator.New()
-{{- end }}
 
 type Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParamsSpec }} func(o *{{ .optionsStructInstanceType }})
 
@@ -45,7 +41,6 @@ func New{{ .optionsStructType }}(
 	{{ end }}
 {{ end }}
 
-
 func (o *{{ .optionsStructInstanceType }}) Validate() error {
 	{{- if not .hasValidation -}}
 		return nil
@@ -53,7 +48,7 @@ func (o *{{ .optionsStructInstanceType }}) Validate() error {
 		errs := new(errors461e464ebed9.ValidationErrors)
 		{{- range .options }}
 			{{- if .TagOption.GoValidator }}
-				errs.Add(errors461e464ebed9.NewValidationError("{{ .Name }}", _validate_{{ $.optionsStructName }}_{{ .Field }}{{ $.optionsTypeParams }}(o)))
+				errs.Add(errors461e464ebed9.NewValidationError("{{ .Field }}", _validate_{{ $.optionsStructName }}_{{ .Field }}{{ $.optionsTypeParams }}(o)))
 			{{- end }}
 		{{- end }}
 		return errs.AsError()
@@ -63,21 +58,10 @@ func (o *{{ .optionsStructInstanceType }}) Validate() error {
 {{ range .options }}
 	{{- if .TagOption.GoValidator }}
 		func _validate_{{ $.optionsStructName }}_{{ .Field }}{{ $.optionsTypeParamsSpec }}(o *{{ $.optionsStructInstanceType }}) error {
-			if err := _getOptsValidatorOrDefault(o).Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
+			if err := validator461e464ebed9.GetProvidedValidatorOrDefault(o).Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
 				return fmt.Errorf("field `{{ .Field }}` did not pass the test: %w", err)
 			}
 			return nil
 		}
 	{{- end }}
 {{ end }}
-
-{{ if .hasValidation }}
-func _getOptsValidatorOrDefault(opts any) *goplvalidator.Validate {
-	if v, ok := opts.(interface {
-		Validator() *goplvalidator.Validate
-	}); ok {
-		return v.Validator()
-	}
-	return _validator461e464ebed9
-}
-{{- end }}
