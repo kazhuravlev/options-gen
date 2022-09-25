@@ -5,21 +5,30 @@ import (
 )
 
 func main() {
-	if err := optionsgen.Run(
-		"./example_in.go",
-		"./example_out.go",
-		"Options",
-		"main",
-	); err != nil {
-		panic(err)
-	}
-
-	if err := optionsgen.Run(
-		"./example_in.go",
-		"./example_out_config.go",
-		"Config",
-		"main",
-	); err != nil {
-		panic(err)
+	for _, params := range []struct {
+		outFname   string
+		structName string
+	}{
+		{
+			outFname:   "./example_out_options.go",
+			structName: "Options",
+		},
+		{
+			outFname:   "./example_out_config.go",
+			structName: "Config",
+		},
+		{
+			outFname:   "./example_out_params.go",
+			structName: "Params",
+		},
+	} {
+		if err := optionsgen.Run(
+			"./example_in.go",
+			params.outFname,
+			params.structName,
+			"main",
+		); err != nil {
+			panic(err)
+		}
 	}
 }
