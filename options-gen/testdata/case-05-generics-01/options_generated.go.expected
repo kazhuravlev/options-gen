@@ -40,8 +40,17 @@ func (o *Options[T]) Validate() error {
 }
 
 func _validate_Options_requiredKey[T string](o *Options[T]) error {
-	if err := _validator461e464ebed9.Var(o.requiredKey, "required"); err != nil {
+	if err := _getOptsValidatorOrDefault(o).Var(o.requiredKey, "required"); err != nil {
 		return fmt.Errorf("field `requiredKey` did not pass the test: %w", err)
 	}
 	return nil
+}
+
+func _getOptsValidatorOrDefault(opts any) *goplvalidator.Validate {
+	if v, ok := opts.(interface {
+		Validator() *goplvalidator.Validate
+	}); ok {
+		return v.Validator()
+	}
+	return _validator461e464ebed9
 }

@@ -43,22 +43,31 @@ func (o *Options) Validate() error {
 }
 
 func _validate_Options_service1(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.service1, "required"); err != nil {
+	if err := _getOptsValidatorOrDefault(o).Var(o.service1, "required"); err != nil {
 		return fmt.Errorf("field `service1` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_s3Endpoint(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.s3Endpoint, "required,url"); err != nil {
+	if err := _getOptsValidatorOrDefault(o).Var(o.s3Endpoint, "required,url"); err != nil {
 		return fmt.Errorf("field `s3Endpoint` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_port(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.port, "required,min=10"); err != nil {
+	if err := _getOptsValidatorOrDefault(o).Var(o.port, "required,min=10"); err != nil {
 		return fmt.Errorf("field `port` did not pass the test: %w", err)
 	}
 	return nil
+}
+
+func _getOptsValidatorOrDefault(opts any) *goplvalidator.Validate {
+	if v, ok := opts.(interface {
+		Validator() *goplvalidator.Validate
+	}); ok {
+		return v.Validator()
+	}
+	return _validator461e464ebed9
 }

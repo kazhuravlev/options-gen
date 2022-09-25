@@ -63,10 +63,21 @@ func (o *{{ .optionsStructInstanceType }}) Validate() error {
 {{ range .options }}
 	{{- if .TagOption.GoValidator }}
 		func _validate_{{ $.optionsStructName }}_{{ .Field }}{{ $.optionsTypeParamsSpec }}(o *{{ $.optionsStructInstanceType }}) error {
-			if err := _validator461e464ebed9.Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
+			if err := _getOptsValidatorOrDefault(o).Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
 				return fmt.Errorf("field `{{ .Field }}` did not pass the test: %w", err)
 			}
 			return nil
 		}
 	{{- end }}
 {{ end }}
+
+{{ if .hasValidation }}
+func _getOptsValidatorOrDefault(opts any) *goplvalidator.Validate {
+	if v, ok := opts.(interface {
+		Validator() *goplvalidator.Validate
+	}); ok {
+		return v.Validator()
+	}
+	return _validator461e464ebed9
+}
+{{- end }}

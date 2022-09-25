@@ -190,6 +190,21 @@ type Options struct {
 }
 ```
 
+### Custom validator
+
+You can override `options-gen` validator by implementing the `Validator()` method:
+```go
+package mypkg
+
+import "github.com/mycoolmodule/internal/validator"
+
+// ...
+
+func (Options) Validator() *validator.Validate {
+  return validator.Validator
+}
+```
+
 ## Contributing
 
 The development process is pretty simple:

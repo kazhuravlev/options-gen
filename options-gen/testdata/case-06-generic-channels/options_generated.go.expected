@@ -46,8 +46,17 @@ func (o *Options[T]) Validate() error {
 }
 
 func _validate_Options_ch1[T any](o *Options[T]) error {
-	if err := _validator461e464ebed9.Var(o.ch1, "required"); err != nil {
+	if err := _getOptsValidatorOrDefault(o).Var(o.ch1, "required"); err != nil {
 		return fmt.Errorf("field `ch1` did not pass the test: %w", err)
 	}
 	return nil
+}
+
+func _getOptsValidatorOrDefault(opts any) *goplvalidator.Validate {
+	if v, ok := opts.(interface {
+		Validator() *goplvalidator.Validate
+	}); ok {
+		return v.Validator()
+	}
+	return _validator461e464ebed9
 }
