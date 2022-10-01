@@ -2,7 +2,7 @@
 package cli
 
 import (
-	"fmt"
+	fmt461e464ebed9 "fmt"
 	"net/http"
 
 	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
@@ -33,8 +33,8 @@ func (o *Options) Validate() error {
 }
 
 func _validate_Options_httpClient(o *Options) error {
-	if err := validator461e464ebed9.GetProvidedValidatorOrDefault(o).Var(o.httpClient, "required"); err != nil {
-		return fmt.Errorf("field `httpClient` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.httpClient, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `httpClient` did not pass the test: %w", err)
 	}
 	return nil
 }

@@ -2,7 +2,7 @@
 package testcase
 
 import (
-	"fmt"
+	fmt461e464ebed9 "fmt"
 
 	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
 	validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"
@@ -38,8 +38,8 @@ func (o *Options[T]) Validate() error {
 }
 
 func _validate_Options_requiredKey[T string](o *Options[T]) error {
-	if err := validator461e464ebed9.GetProvidedValidatorOrDefault(o).Var(o.requiredKey, "required"); err != nil {
-		return fmt.Errorf("field `requiredKey` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.requiredKey, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `requiredKey` did not pass the test: %w", err)
 	}
 	return nil
 }

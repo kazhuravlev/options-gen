@@ -2,7 +2,7 @@
 package main
 
 import (
-	"fmt"
+	fmt461e464ebed9 "fmt"
 
 	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
 	validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"
@@ -30,8 +30,8 @@ func (o *Params) Validate() error {
 }
 
 func _validate_Params_hash(o *Params) error {
-	if err := validator461e464ebed9.GetProvidedValidatorOrDefault(o).Var(o.hash, "hexadecimal"); err != nil {
-		return fmt.Errorf("field `hash` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.hash, "hexadecimal"); err != nil {
+		return fmt461e464ebed9.Errorf("field `hash` did not pass the test: %w", err)
 	}
 	return nil
 }

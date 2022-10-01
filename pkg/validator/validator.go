@@ -8,7 +8,7 @@ type validatorProvider interface {
 	Validator() *goplvalidator.Validate
 }
 
-func GetProvidedValidatorOrDefault(opts any) *goplvalidator.Validate {
+func GetValidatorFor(opts any) *goplvalidator.Validate {
 	if v, ok := opts.(validatorProvider); ok {
 		return v.Validator()
 	}

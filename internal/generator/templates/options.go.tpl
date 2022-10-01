@@ -2,7 +2,7 @@
 package {{ .packageName }}
 
 import (
-    "fmt"
+    fmt461e464ebed9 "fmt"
 	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
 {{ if .hasValidation }}validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"{{ end }}
 	{{- range $import := .imports }}
@@ -58,8 +58,8 @@ func (o *{{ .optionsStructInstanceType }}) Validate() error {
 {{ range .options }}
 	{{- if .TagOption.GoValidator }}
 		func _validate_{{ $.optionsStructName }}_{{ .Field }}{{ $.optionsTypeParamsSpec }}(o *{{ $.optionsStructInstanceType }}) error {
-			if err := validator461e464ebed9.GetProvidedValidatorOrDefault(o).Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
-				return fmt.Errorf("field `{{ .Field }}` did not pass the test: %w", err)
+			if err := validator461e464ebed9.GetValidatorFor(o).Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
+				return fmt461e464ebed9.Errorf("field `{{ .Field }}` did not pass the test: %w", err)
 			}
 			return nil
 		}

@@ -2,7 +2,7 @@
 package testcase
 
 import (
-	"fmt"
+	fmt461e464ebed9 "fmt"
 	"net/http"
 
 	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
@@ -56,15 +56,15 @@ func (o *Options[KeyT, TT]) Validate() error {
 }
 
 func _validate_Options_requiredHandler[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
-	if err := validator461e464ebed9.GetProvidedValidatorOrDefault(o).Var(o.requiredHandler, "required"); err != nil {
-		return fmt.Errorf("field `requiredHandler` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.requiredHandler, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `requiredHandler` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_requiredKey[KeyT int | string, TT any](o *Options[KeyT, TT]) error {
-	if err := validator461e464ebed9.GetProvidedValidatorOrDefault(o).Var(o.requiredKey, "required"); err != nil {
-		return fmt.Errorf("field `requiredKey` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.requiredKey, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `requiredKey` did not pass the test: %w", err)
 	}
 	return nil
 }
