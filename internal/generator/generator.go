@@ -8,14 +8,15 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
-	"golang.org/x/tools/imports"
 	"os"
 	"path"
 	"reflect"
 	"strings"
 	"text/template"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+	"golang.org/x/tools/imports"
 )
 
 //go:embed templates/options.go.tpl
