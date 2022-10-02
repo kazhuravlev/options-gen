@@ -10,6 +10,7 @@ func main() {
 		"./example_out.go",
 		"Options",
 		"main",
+		true,
 	); err != nil {
 		panic(err)
 	}
@@ -19,6 +20,7 @@ func main() {
 		"./example_out_config.go",
 		"Config",
 		"main",
+		true,
 	); err != nil {
 		panic(err)
 	}
