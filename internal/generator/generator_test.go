@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/kazhuravlev/options-gen/internal/generator"
 	// test named imports.
@@ -22,6 +23,7 @@ func TestGetImports(t *testing.T) {
 		`"fmt"`,
 		`"sort"`,
 		`"testing"`,
+		`"time"`,
 		`"github.com/kazhuravlev/options-gen/internal/generator"`,
 		`req "github.com/stretchr/testify/require"`,
 	}
@@ -49,67 +51,73 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 				Name:      "Stringer",
 				Field:     "stringer",
 				Type:      "fmt.Stringer",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required"},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
 			},
 			{
 				Name:      "Str",
 				Field:     "str",
 				Type:      "string",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: "required"},
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: "required", Default: ""},
 			},
 			{
 				Name:      "SomeMap",
 				Field:     "someMap",
 				Type:      "map[string]string",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required"},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
 			},
 			{
 				Name:      "NoValidation",
 				Field:     "noValidation",
 				Type:      "string",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: ""},
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
 			},
 			{
 				Name:      "StarOpt",
 				Field:     "starOpt",
 				Type:      "*int",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: ""},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "", Default: ""},
 			},
 			{
 				Name:      "SliceOpt",
 				Field:     "sliceOpt",
 				Type:      "[]int",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: ""},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "", Default: ""},
 			},
 			{
 				Name:      "OldStyleOpt1",
 				Field:     "oldStyleOpt1",
 				Type:      "string",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required"},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
 			},
 			{
 				Name:      "OldStyleOpt2",
 				Field:     "oldStyleOpt2",
 				Type:      "string",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required"},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
 			},
 			{
 				Name:      "OldStyleOpt3",
 				Field:     "oldStyleOpt3",
 				Type:      "string",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "min=10,required"},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "min=10,required", Default: ""},
 			},
 			{
 				Name:      "PublicOption1",
 				Field:     "PublicOption1",
 				Type:      "int",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: ""},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "", Default: ""},
 			},
 			{
 				Name:      "PublicOption2",
 				Field:     "PublicOption2",
 				Type:      "int",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: ""},
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
+			},
+			{
+				Name:      "WithDefaultValue",
+				Field:     "withDefaultValue",
+				Type:      "time.Duration",
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: "1m"},
 			},
 		},
 	}, spec)
@@ -129,25 +137,25 @@ func TestGetOptionSpec_Generics(t *testing.T) {
 				Name:      "Opt1",
 				Field:     "opt1",
 				Type:      "T1",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: ""},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "", Default: ""},
 			},
 			{
 				Name:      "Opt2",
 				Field:     "opt2",
 				Type:      "T2",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required"},
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
 			},
 			{
 				Name:      "Opt3",
 				Field:     "opt3",
 				Type:      "int",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: "min=10"},
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: "min=10", Default: ""},
 			},
 			{
 				Name:      "Opt4",
 				Field:     "opt4",
 				Type:      "T3",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: ""},
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
 			},
 		},
 	}, spec)
@@ -169,6 +177,8 @@ type TestOptions struct {
 
 	PublicOption1 int `option:"mandatory"`
 	PublicOption2 int
+
+	withDefaultValue time.Duration `default:"1m"` //nolint:unused
 }
 
 type TestOptionsGen[T1 int | string, T2, T3 any] struct {

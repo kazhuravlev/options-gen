@@ -155,7 +155,7 @@ field to the constructor. Like this:
 ```go
 // Mark Field1 as mandatory
 type Options struct {
-  Field1 string `option:"mandatory"`
+  field1 string `option:"mandatory"`
 }
 
 // options-gen will generate constructor like this
@@ -168,7 +168,7 @@ the `option:"mandatory"` feature for this field and get something like this:
 ```go
 // Do not mark Field1 as mandatory
 type Options struct {
-  Field1 string
+  field1 string
 }
 
 // options-gen will generate constructor like this
@@ -189,6 +189,21 @@ type Options struct {
   maxDbConn int `validate:"required,min=1,max=16"`
 }
 ```
+
+#### Default value for field
+
+For numbers, strings and `time.Duration` you can set the default value:
+```go
+type Options struct {
+  pingPeriod  time.Duration `default:"3s" validate:"min=100ms,max=30s"`
+  name        string        `default:"unknown" validate:"required"`
+  maxAttempts int           `default:"10" validate:"min=1,max=10"`
+  eps         float32       `default:"0.0001" validate:"gt=0"`
+}
+```
+
+It will be relevant if the field was not filled either explicitly or through functional option. <br>
+Default value must be valid for field type and must satisfy validation rules.
 
 ### Custom validator
 

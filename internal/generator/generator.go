@@ -47,6 +47,7 @@ type OptionMeta struct {
 type TagOption struct {
 	IsRequired  bool
 	GoValidator string
+	Default     string
 }
 
 // RenderOptions will render file and out it's content.
@@ -117,15 +118,27 @@ func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, []string, e
 			)
 		}
 
-		title := cases.Title(language.English, cases.NoLower)
 		tagOption, tagWarnings := parseTag(field.Tag, fieldName)
 		warnings = append(warnings, tagWarnings...)
-		options[idx] = OptionMeta{
-			Name:      title.String(fieldName),
+		optMeta := OptionMeta{
+			Name:      cases.Title(language.English, cases.NoLower).String(fieldName),
 			Field:     fieldName,
 			Type:      types.ExprString(field.Type),
 			TagOption: tagOption,
 		}
+
+		if optMeta.TagOption.Default != "" {
+			if optMeta.TagOption.IsRequired {
+				return nil, nil,
+					fmt.Errorf("field `%s`: mandatory option cannot have a default value", optMeta.Field)
+			}
+
+			if err := checkDefaultValue(optMeta.Type, optMeta.TagOption.Default); err != nil {
+				return nil, nil, fmt.Errorf("field `%s`: invalid `default` tag value: %w", optMeta.Field, err)
+			}
+		}
+
+		options[idx] = optMeta
 	}
 
 	tpSpec, tp, err := typeParamsStr(typeParams)
@@ -141,22 +154,22 @@ func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, []string, e
 }
 
 func parseTag(tag *ast.BasicLit, fieldName string) (TagOption, []string) {
-	tagOpt := TagOption{
-		IsRequired:  false,
-		GoValidator: "",
-	}
-
+	var tagOpt TagOption
 	if tag == nil {
 		return tagOpt, nil
 	}
 
 	value := tag.Value
 	tagOpt.GoValidator = reflect.StructTag(strings.Trim(value, "`")).Get("validate")
+	tagOpt.Default = reflect.StructTag(strings.Trim(value, "`")).Get("default")
 
 	var warnings []string
 	optionTag := reflect.StructTag(strings.Trim(value, "`")).Get("option")
 	for _, opt := range strings.Split(optionTag, ",") {
 		switch opt {
+		case "mandatory":
+			tagOpt.IsRequired = true
+
 		case "required":
 			// NOTE: remove the tag.
 			warnings = append(warnings, fmt.Sprintf(
@@ -164,9 +177,6 @@ func parseTag(tag *ast.BasicLit, fieldName string) (TagOption, []string) {
 					"instead for field `%s` to force the passing "+
 					"option in the constructor argument\n", fieldName))
 
-			tagOpt.IsRequired = true
-
-		case "mandatory":
 			tagOpt.IsRequired = true
 
 		case "not-empty":
