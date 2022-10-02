@@ -2,13 +2,11 @@
 package testcase
 
 import (
-	"fmt"
+	fmt461e464ebed9 "fmt"
 
-	goplvalidator "github.com/go-playground/validator/v10"
 	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
+	validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"
 )
-
-var _validator461e464ebed9 = goplvalidator.New()
 
 type OptOptionsSetter func(o *Options)
 
@@ -145,125 +143,125 @@ func WithOptValBool(opt bool) OptOptionsSetter {
 
 func (o *Options) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
-	errs.Add(errors461e464ebed9.NewValidationError("OptValInt", _validate_Options_optValInt(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptValInt8", _validate_Options_optValInt8(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptValInt16", _validate_Options_optValInt16(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptValInt32", _validate_Options_optValInt32(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptValInt64", _validate_Options_optValInt64(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptValUInt", _validate_Options_optValUInt(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptValUInt8", _validate_Options_optValUInt8(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptValUInt16", _validate_Options_optValUInt16(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptValUInt32", _validate_Options_optValUInt32(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptValUInt64", _validate_Options_optValUInt64(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptValFloat32", _validate_Options_optValFloat32(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptValFloat64", _validate_Options_optValFloat64(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptValString", _validate_Options_optValString(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptValBytes", _validate_Options_optValBytes(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("OptValBool", _validate_Options_optValBool(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("optValInt", _validate_Options_optValInt(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("optValInt8", _validate_Options_optValInt8(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("optValInt16", _validate_Options_optValInt16(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("optValInt32", _validate_Options_optValInt32(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("optValInt64", _validate_Options_optValInt64(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("optValUInt", _validate_Options_optValUInt(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("optValUInt8", _validate_Options_optValUInt8(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("optValUInt16", _validate_Options_optValUInt16(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("optValUInt32", _validate_Options_optValUInt32(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("optValUInt64", _validate_Options_optValUInt64(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("optValFloat32", _validate_Options_optValFloat32(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("optValFloat64", _validate_Options_optValFloat64(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("optValString", _validate_Options_optValString(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("optValBytes", _validate_Options_optValBytes(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("optValBool", _validate_Options_optValBool(o)))
 	return errs.AsError()
 }
 
 func _validate_Options_optValInt(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.optValInt, "required"); err != nil {
-		return fmt.Errorf("field `optValInt` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.optValInt, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `optValInt` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_optValInt8(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.optValInt8, "required"); err != nil {
-		return fmt.Errorf("field `optValInt8` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.optValInt8, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `optValInt8` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_optValInt16(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.optValInt16, "required"); err != nil {
-		return fmt.Errorf("field `optValInt16` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.optValInt16, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `optValInt16` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_optValInt32(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.optValInt32, "required"); err != nil {
-		return fmt.Errorf("field `optValInt32` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.optValInt32, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `optValInt32` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_optValInt64(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.optValInt64, "required"); err != nil {
-		return fmt.Errorf("field `optValInt64` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.optValInt64, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `optValInt64` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_optValUInt(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.optValUInt, "required"); err != nil {
-		return fmt.Errorf("field `optValUInt` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.optValUInt, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `optValUInt` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_optValUInt8(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.optValUInt8, "required"); err != nil {
-		return fmt.Errorf("field `optValUInt8` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.optValUInt8, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `optValUInt8` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_optValUInt16(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.optValUInt16, "required"); err != nil {
-		return fmt.Errorf("field `optValUInt16` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.optValUInt16, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `optValUInt16` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_optValUInt32(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.optValUInt32, "required"); err != nil {
-		return fmt.Errorf("field `optValUInt32` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.optValUInt32, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `optValUInt32` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_optValUInt64(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.optValUInt64, "required"); err != nil {
-		return fmt.Errorf("field `optValUInt64` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.optValUInt64, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `optValUInt64` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_optValFloat32(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.optValFloat32, "required"); err != nil {
-		return fmt.Errorf("field `optValFloat32` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.optValFloat32, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `optValFloat32` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_optValFloat64(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.optValFloat64, "required"); err != nil {
-		return fmt.Errorf("field `optValFloat64` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.optValFloat64, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `optValFloat64` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_optValString(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.optValString, "required"); err != nil {
-		return fmt.Errorf("field `optValString` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.optValString, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `optValString` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_optValBytes(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.optValBytes, "required"); err != nil {
-		return fmt.Errorf("field `optValBytes` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.optValBytes, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `optValBytes` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options_optValBool(o *Options) error {
-	if err := _validator461e464ebed9.Var(o.optValBool, "required"); err != nil {
-		return fmt.Errorf("field `optValBool` did not pass the test: %w", err)
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.optValBool, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `optValBool` did not pass the test: %w", err)
 	}
 	return nil
 }

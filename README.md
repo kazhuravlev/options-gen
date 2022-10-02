@@ -190,6 +190,38 @@ type Options struct {
 }
 ```
 
+### Custom validator
+
+You can override `options-gen` validator for specific struct by implementing the `Validator()` method:
+```go
+import "github.com/mycoolmodule/internal/validator"
+
+// ...
+
+func (Options) Validator() *validator.Validate {
+  return validator.Validator
+}
+```
+
+Or you can override `options-gen` validator globally:
+```go
+package validator
+
+import (
+  goplvalidator "github.com/go-playground/validator/v10"
+  optsValidator "github.com/kazhuravlev/options-gen/pkg/validator"
+)
+
+var Validator = goplvalidator.New()
+
+func init() {
+  must(Validator.RegisterValidation(/* ... */))
+  must(Validator.RegisterAlias(/* ... */))
+
+  optsValidator.Set(Validator)
+}
+```
+
 ## Contributing
 
 The development process is pretty simple:

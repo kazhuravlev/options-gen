@@ -13,3 +13,7 @@ type Options struct {
 type Config struct {
 	name string
 }
+
+type Params struct {
+	hash string `option:"mandatory" validate:"hexadecimal"`
+}
