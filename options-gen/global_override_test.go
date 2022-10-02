@@ -16,9 +16,9 @@ func TestOptionsWithOverridenValidator(t *testing.T) {
 		return fl.Field().Int() < 14
 	}))
 
-	old := validator.Validator
-	validator.Validator = v
-	t.Cleanup(func() { validator.Validator = old })
+	old := validator.GetValidatorFor(nil)
+	validator.Set(v)
+	t.Cleanup(func() { validator.Set(old) })
 
 	t.Run("valid options", func(t *testing.T) {
 		opts := testcase.NewOptions(100, 13)

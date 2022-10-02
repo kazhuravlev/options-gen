@@ -218,7 +218,7 @@ func init() {
   must(Validator.RegisterValidation(/* ... */))
   must(Validator.RegisterAlias(/* ... */))
 
-  optsValidator.Validator = Validator
+  optsValidator.Set(Validator)
 }
 ```
 
