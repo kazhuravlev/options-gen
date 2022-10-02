@@ -2,6 +2,8 @@ package generator
 
 import (
 	"go/ast"
+	"unicode"
+	"unicode/utf8"
 )
 
 func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName string) ([]*ast.Field, []*ast.Field) {
@@ -50,4 +52,17 @@ func extractFields(fl *ast.FieldList) []*ast.Field {
 		return nil
 	}
 	return fl.List
+}
+
+func isPublic(fieldName string) bool {
+	char, _ := utf8.DecodeRuneInString(fieldName)
+	if char == utf8.RuneError {
+		return false
+	}
+
+	if unicode.IsLetter(char) && unicode.IsUpper(char) {
+		return true
+	}
+
+	return false
 }

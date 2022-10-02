@@ -27,6 +27,7 @@ func main() {
 			params.outFname,
 			params.structName,
 			"main",
+			true,
 		); err != nil {
 			panic(err)
 		}

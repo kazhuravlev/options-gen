@@ -8,7 +8,6 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
-	"log"
 	"os"
 	"path"
 	"reflect"
@@ -93,65 +92,77 @@ func RenderOptions(packageName, optionsStructName string, fileImports []string, 
 
 // GetOptionSpec read the input filename by filePath, find optionsStructName
 // and scan for options.
-func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, error) {
+func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, []string, error) {
 	fset := token.NewFileSet()
 
 	node, err := parser.ParseDir(fset, path.Dir(filePath), nil, parser.ParseComments)
 	if err != nil {
-		return nil, fmt.Errorf("cannot parse dir: %w", err)
+		return nil, nil, fmt.Errorf("cannot parse dir: %w", err)
 	}
 
 	typeParams, fields := findStructTypeParamsAndFields(node, optionsStructName)
 	options := make([]OptionMeta, len(fields))
 
+	var warnings []string
 	for idx := range fields {
 		field := fields[idx]
 
 		fieldName := field.Names[0].Name
+		if isPublic(fieldName) {
+			warnings = append(warnings,
+				fmt.Sprintf(
+					"Warning: consider to make `%s` is private. This is "+
+						"will not allow to users to avoid constructor "+
+						"method.", fieldName),
+			)
+		}
 
 		title := cases.Title(language.English, cases.NoLower)
+		tagOption, tagWarnings := parseTag(field.Tag, fieldName)
+		warnings = append(warnings, tagWarnings...)
 		options[idx] = OptionMeta{
 			Name:      title.String(fieldName),
 			Field:     fieldName,
 			Type:      types.ExprString(field.Type),
-			TagOption: parseTag(field.Tag, fieldName),
+			TagOption: tagOption,
 		}
 	}
 
 	tpSpec, tp, err := typeParamsStr(typeParams)
 	if err != nil {
-		return nil, fmt.Errorf("unable to extract type params %w", err)
+		return nil, nil, fmt.Errorf("unable to extract type params %w", err)
 	}
 
 	return &OptionSpec{
 		TypeParamsSpec: tpSpec,
 		TypeParams:     tp,
 		Options:        options,
-	}, nil
+	}, warnings, nil
 }
 
-func parseTag(tag *ast.BasicLit, fieldName string) TagOption {
+func parseTag(tag *ast.BasicLit, fieldName string) (TagOption, []string) {
 	tagOpt := TagOption{
 		IsRequired:  false,
 		GoValidator: "",
 	}
 
 	if tag == nil {
-		return tagOpt
+		return tagOpt, nil
 	}
 
 	value := tag.Value
 	tagOpt.GoValidator = reflect.StructTag(strings.Trim(value, "`")).Get("validate")
 
+	var warnings []string
 	optionTag := reflect.StructTag(strings.Trim(value, "`")).Get("option")
 	for _, opt := range strings.Split(optionTag, ",") {
 		switch opt {
 		case "required":
 			// NOTE: remove the tag.
-			log.Printf(
+			warnings = append(warnings, fmt.Sprintf(
 				"Deprecated: use `option:\"mandatory\"` "+
 					"instead for field `%s` to force the passing "+
-					"option in the constructor argument\n", fieldName)
+					"option in the constructor argument\n", fieldName))
 
 			tagOpt.IsRequired = true
 
@@ -160,10 +171,10 @@ func parseTag(tag *ast.BasicLit, fieldName string) TagOption {
 
 		case "not-empty":
 			// NOTE: remove the tag.
-			log.Printf(
+			warnings = append(warnings, fmt.Sprintf(
 				"Deprecated: use "+
 					"github.com/go-playground/validator `validate` tag to check "+
-					"the field `%s` content\n", fieldName)
+					"the field `%s` content\n", fieldName))
 
 			if !strings.Contains(tagOpt.GoValidator, "required") {
 				if tagOpt.GoValidator == "" {
@@ -175,7 +186,7 @@ func parseTag(tag *ast.BasicLit, fieldName string) TagOption {
 		}
 	}
 
-	return tagOpt
+	return tagOpt, warnings
 }
 
 func typeParamsStr(params []*ast.Field) (string, string, error) {

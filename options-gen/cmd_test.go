@@ -42,6 +42,7 @@ func TestRun(t *testing.T) {
 					outFilename,
 					"Options",
 					"testcase",
+					true,
 				)
 				assert.NoError(t, err)
 
@@ -59,6 +60,7 @@ func TestRun(t *testing.T) {
 			filepath.Join(dir, "options_generated.go"),
 			"Options",
 			"testcase",
+			true,
 		)
 		assert.ErrorIs(t, err, syscall.ENOENT)
 	})

@@ -33,8 +33,14 @@ func TestGetImports(t *testing.T) {
 func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	spec, err := generator.GetOptionSpec(gofile, "TestOptions")
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptions")
 	req.NoError(t, err)
+	req.Equal(t, []string{
+		"Deprecated: use `option:\"mandatory\"` instead for field `oldStyleOpt1` to force the passing option in the constructor argument\n",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              //nolint:lll
+		"Deprecated: use github.com/go-playground/validator `validate` tag to check the field `oldStyleOpt1` content\n",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  //nolint:lll
+		"Deprecated: use `option:\"mandatory\"` instead for field `oldStyleOpt2` to force the passing option in the constructor argument\n", "Deprecated: use github.com/go-playground/validator `validate` tag to check the field `oldStyleOpt2` content\n", "Deprecated: use `option:\"mandatory\"` instead for field `oldStyleOpt3` to force the passing option in the constructor argument\n", "Deprecated: use github.com/go-playground/validator `validate` tag to check the field `oldStyleOpt3` content\n", "Warning: consider to make `PublicOption1` is private. This is will not allow to users to avoid constructor method.", //nolint:lll
+		"Warning: consider to make `PublicOption2` is private. This is will not allow to users to avoid constructor method.", //nolint:lll
+	}, warnings)
 	req.Equal(t, &generator.OptionSpec{
 		TypeParamsSpec: "",
 		TypeParams:     "",
@@ -93,6 +99,18 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 				Type:      "string",
 				TagOption: generator.TagOption{IsRequired: true, GoValidator: "min=10,required"},
 			},
+			{
+				Name:      "PublicOption1",
+				Field:     "PublicOption1",
+				Type:      "int",
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: ""},
+			},
+			{
+				Name:      "PublicOption2",
+				Field:     "PublicOption2",
+				Type:      "int",
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: ""},
+			},
 		},
 	}, spec)
 }
@@ -100,8 +118,9 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 func TestGetOptionSpec_Generics(t *testing.T) {
 	t.Parallel()
 
-	spec, err := generator.GetOptionSpec(gofile, "TestOptionsGen")
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsGen")
 	req.NoError(t, err)
+	req.Empty(t, warnings)
 	req.Equal(t, &generator.OptionSpec{
 		TypeParamsSpec: "[T1 int | string, T2, T3 any]",
 		TypeParams:     "[T1, T2, T3]",
@@ -147,6 +166,9 @@ type TestOptions struct {
 	oldStyleOpt1 string `option:"required,not-empty"`                     //nolint:unused
 	oldStyleOpt2 string `option:"required,not-empty" validate:"required"` //nolint:unused
 	oldStyleOpt3 string `option:"required,not-empty" validate:"min=10"`   //nolint:unused
+
+	PublicOption1 int `option:"mandatory"`
+	PublicOption2 int
 }
 
 type TestOptionsGen[T1 int | string, T2, T3 any] struct {

@@ -16,6 +16,7 @@ func main() {
 		outFilename       string
 		optionsStructName string
 		outPackageName    string
+		muteWarnings      bool
 	)
 
 	envGoFile := os.Getenv("GOFILE")
@@ -27,6 +28,7 @@ func main() {
 	flag.StringVar(&outPackageName, "pkg", envGoPackage, "output package name")
 	flag.StringVar(&outFilename, "out-filename", defaultOutFilename, "output filename")
 	flag.StringVar(&optionsStructName, "from-struct", "", "struct that contains options")
+	flag.BoolVar(&muteWarnings, "mute-warnings", false, "mute all warnings")
 	flag.Parse()
 
 	if inFilename == "" || outFilename == "" || outPackageName == "" || optionsStructName == "" {
@@ -37,7 +39,14 @@ func main() {
 		return
 	}
 
-	if err := optionsgen.Run(inFilename, outFilename, optionsStructName, outPackageName); err != nil {
+	err := optionsgen.Run(
+		inFilename,
+		outFilename,
+		optionsStructName,
+		outPackageName,
+		!muteWarnings,
+	)
+	if err != nil {
 		//nolint:forbidigo
 		fmt.Println("cannot run options gen", err.Error())
 
