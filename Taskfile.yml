@@ -85,6 +85,7 @@ tasks:
     dir: examples/library
     cmds:
       - go run main.go
+      - go test .
 
   examples:update:cli:
     dir: examples/cli
