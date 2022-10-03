@@ -2,7 +2,7 @@
 package {{ .packageName }}
 
 import (
-    fmt461e464ebed9 "fmt"
+	fmt461e464ebed9 "fmt"
 	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
 {{ if .hasValidation }}validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"{{ end }}
 	{{- range $import := .imports }}
