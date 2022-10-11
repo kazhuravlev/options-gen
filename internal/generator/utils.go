@@ -1,7 +1,10 @@
 package generator
 
 import (
+	"fmt"
 	"go/ast"
+	"strconv"
+	"time"
 	"unicode"
 	"unicode/utf8"
 )
@@ -56,13 +59,28 @@ func extractFields(fl *ast.FieldList) []*ast.Field {
 
 func isPublic(fieldName string) bool {
 	char, _ := utf8.DecodeRuneInString(fieldName)
-	if char == utf8.RuneError {
-		return false
-	}
+	return char != utf8.RuneError && unicode.IsUpper(char)
+}
 
-	if unicode.IsLetter(char) && unicode.IsUpper(char) {
-		return true
-	}
+func checkDefaultValue(fieldType string, tag string) (err error) {
+	switch fieldType {
+	case "int", "int8", "int16", "int32", "int64":
+		_, err = strconv.ParseInt(tag, 10, 64)
 
-	return false
+	case "uint", "uint8", "uint16", "uint32", "uint64":
+		_, err = strconv.ParseUint(tag, 10, 64)
+
+	case "float32", "float64":
+		_, err = strconv.ParseFloat(tag, 64)
+
+	case "time.Duration":
+		_, err = time.ParseDuration(tag)
+
+	case "string":
+		// As is.
+
+	default:
+		return fmt.Errorf("unsupported type `%s`", fieldType)
+	}
+	return
 }

@@ -2,7 +2,7 @@
 package {{ .packageName }}
 
 import (
-    fmt461e464ebed9 "fmt"
+	fmt461e464ebed9 "fmt"
 	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
 {{ if .hasValidation }}validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"{{ end }}
 	{{- range $import := .imports }}
@@ -21,9 +21,16 @@ func New{{ .optionsStructType }}(
 	options ...Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }},
 ) {{ .optionsStructInstanceType }} {
 	o := {{ .optionsStructInstanceType }}{}
-	{{ range .options }}{{ if .TagOption.IsRequired -}}
-		o.{{ .Field }} = {{ .Field }}
-	{{ end }}{{ end }}
+	{{ range .options }}
+	    {{- if .TagOption.IsRequired -}}
+	        o.{{ .Field }} = {{ .Field }}
+        {{ end -}}
+	    {{ if .TagOption.Default -}}
+            {{ if eq .Type "time.Duration" }}o.{{ .Field }}, _ = time.ParseDuration("{{ .TagOption.Default }}")
+            {{- else if eq .Type "string" }}o.{{ .Field }} = "{{ .TagOption.Default }}"
+            {{- else }}o.{{ .Field }} = {{ .TagOption.Default }}{{ end }}
+	    {{ end -}}
+	{{ end }}
 
 	for _, opt := range options {
 		opt(&o)
