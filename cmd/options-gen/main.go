@@ -26,12 +26,24 @@ func main() {
 
 	defaultOutFilename := strings.Replace(filepath.Base(envGoFile), ".go", "_generated.go", 1)
 
-	flag.StringVar(&inFilename, "filename", envGoFile, "input filename")
-	flag.StringVar(&outPackageName, "pkg", envGoPackage, "output package name")
-	flag.StringVar(&outFilename, "out-filename", defaultOutFilename, "output filename")
-	flag.StringVar(&optionsStructName, "from-struct", "", "struct that contains options")
-	flag.StringVar(&defaultsFrom, "defaults-from", "tag", "where to get defaults for options. none, tag=TagName, func=FuncName, var=VarName")
-	flag.BoolVar(&muteWarnings, "mute-warnings", false, "mute all warnings")
+	flag.StringVar(&inFilename,
+		"filename", envGoFile,
+		"input filename")
+	flag.StringVar(&outPackageName,
+		"pkg", envGoPackage,
+		"output package name")
+	flag.StringVar(&outFilename,
+		"out-filename", defaultOutFilename,
+		"output filename")
+	flag.StringVar(&optionsStructName,
+		"from-struct", "",
+		"struct that contains options")
+	flag.StringVar(&defaultsFrom,
+		"defaults-from", "tag=default",
+		"where to get defaults for options. none, tag=TagName, func=FuncName, var=VarName")
+	flag.BoolVar(&muteWarnings,
+		"mute-warnings", false,
+		"mute all warnings")
 	flag.Parse()
 
 	if isEmpty(inFilename, outFilename, outPackageName, optionsStructName, defaultsFrom) {
@@ -108,9 +120,9 @@ func get1(parts []string) string {
 func isEmpty(values ...string) bool {
 	for i := range values {
 		if values[i] == "" {
-			return false
+			return true
 		}
 	}
 
-	return true
+	return false
 }
