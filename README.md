@@ -190,10 +190,13 @@ type Options struct {
 }
 ```
 
-#### Default value for field
+#### Default values
+
+##### Using tag
 
 For numbers, strings and `time.Duration` you can set the default value:
 ```go
+//go:generate options-gen -from-struct=Options
 type Options struct {
   pingPeriod  time.Duration `default:"3s" validate:"min=100ms,max=30s"`
   name        string        `default:"unknown" validate:"required"`
