@@ -12,12 +12,12 @@ import (
 func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName string) ([]*ast.Field, []*ast.Field) {
 	decls := getDecls(packages)
 	for _, decl := range decls {
-		x, ok := decl.(*ast.GenDecl)
+		genDecl, ok := decl.(*ast.GenDecl)
 		if !ok {
 			continue
 		}
 
-		for _, spec := range x.Specs {
+		for _, spec := range genDecl.Specs {
 			typeSpec, ok := spec.(*ast.TypeSpec) //nolint:varnamelen
 			if !ok {
 				continue
@@ -35,6 +35,7 @@ func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName st
 			return extractFields(typeSpec.TypeParams), extractFields(structType.Fields)
 		}
 	}
+
 	return nil, nil
 }
 
