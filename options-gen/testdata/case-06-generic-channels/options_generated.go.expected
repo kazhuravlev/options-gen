@@ -16,6 +16,9 @@ func NewOptions[T any](
 	options ...OptOptionsSetter[T],
 ) Options[T] {
 	o := Options[T]{}
+
+	// Setting defaults from field tag (if present)
+
 	o.ch1 = ch1
 	o.ch2 = ch2
 

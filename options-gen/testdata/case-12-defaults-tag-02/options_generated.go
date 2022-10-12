@@ -15,6 +15,8 @@ func NewOptions(
 	options ...OptOptionsSetter,
 ) Options {
 	o := Options{}
+
+	// Setting defaults from field tag (if present)
 	o.pingPeriod, _ = time.ParseDuration("3s")
 	o.name = "unknown"
 	o.maxAttempts = 10

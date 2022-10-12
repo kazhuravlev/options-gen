@@ -1,0 +1,6 @@
+{
+  "defaults": {
+    "from": "func",
+    "param": "getDefaults"
+  }
+}

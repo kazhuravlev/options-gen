@@ -8,6 +8,8 @@ func NewOptions(
 ) Options {
 	o := Options{}
 
+	// Setting defaults from field tag (if present)
+
 	for _, opt := range options {
 		opt(&o)
 	}

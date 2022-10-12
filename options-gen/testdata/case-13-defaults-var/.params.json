@@ -1,0 +1,6 @@
+{
+  "defaults": {
+    "from": "var",
+    "param": "defaultOptions"
+  }
+}

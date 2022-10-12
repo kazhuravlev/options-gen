@@ -16,6 +16,9 @@ func NewOptions(
 	options ...OptOptionsSetter,
 ) Options {
 	o := Options{}
+
+	// Setting defaults from field tag (if present)
+
 	o.fnTypeParam = fnTypeParam
 	o.fnParam = fnParam
 	o.handlerFunc = handlerFunc

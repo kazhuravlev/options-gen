@@ -16,6 +16,9 @@ func NewOptions(
 	options ...OptOptionsSetter,
 ) Options {
 	o := Options{}
+
+	// Setting defaults from field tag (if present)
+
 	o.any = any
 	o.stringer = stringer
 	o.rWCloser = rWCloser

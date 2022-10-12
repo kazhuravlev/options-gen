@@ -1,0 +1,6 @@
+{
+  "defaults": {
+    "from": "tag",
+    "param": "my-default-tag"
+  }
+}
