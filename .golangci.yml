@@ -7,6 +7,10 @@ issues:
 linters-settings:
   lll:
     line-length: 120
+  varnamelen:
+    ignore-names:
+      - err
+      - i
 
 linters:
   disable-all: true
@@ -71,3 +75,8 @@ linters:
     - usestdlibvars
     - varcheck
     - whitespace
+    - varnamelen
+    - staticcheck
+    - nlreturn
+    - gomnd
+    - exhaustivestruct
