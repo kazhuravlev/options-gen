@@ -32,10 +32,19 @@ func Run(inFilename, outFilename, structName, packageName string, defaults Defau
 	case DefaultsFromNone:
 	case DefaultsFromTag:
 		tagName = defaults.Param
+		if tagName == "" {
+			tagName = "default"
+		}
 	case DefaultsFromVar:
 		varName = defaults.Param
+		if varName == "" {
+			varName = fmt.Sprintf("default%s", structName)
+		}
 	case DefaultsFromFunc:
 		funcName = defaults.Param
+		if funcName == "" {
+			funcName = fmt.Sprintf("getDefault%s", structName)
+		}
 	}
 
 	optionSpec, warnings, err := generator.GetOptionSpec(inFilename, structName, tagName)

@@ -65,7 +65,7 @@ func TestRun(t *testing.T) {
 			filepath.Join(dir, "options_generated.go"),
 			"Options",
 			"testcase",
-			optionsgen.Defaults{From: optionsgen.DefaultsFromTag, Param: "default"},
+			optionsgen.Defaults{From: optionsgen.DefaultsFromTag, Param: ""},
 			true,
 		)
 		assert.ErrorIs(t, err, syscall.ENOENT)
@@ -80,7 +80,7 @@ func readParams(filename string) Params {
 	params := Params{
 		Defaults: optionsgen.Defaults{
 			From:  optionsgen.DefaultsFromTag,
-			Param: "default",
+			Param: "",
 		},
 	}
 
