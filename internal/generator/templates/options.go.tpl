@@ -21,15 +21,36 @@ func New{{ .optionsStructType }}(
 	options ...Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }},
 ) {{ .optionsStructInstanceType }} {
 	o := {{ .optionsStructInstanceType }}{}
+	{{ if .defaultsVarName }}
+		// Setting defaults from variable
+		{{ range .options -}}
+			o.{{ .Field }} = {{ $.defaultsVarName }}.{{ .Field }}
+		{{ end }}
+	{{ end }}
+
+	{{ if .defaultsFuncName }}
+		// Setting defaults from func
+		defaultOpts := {{ $.defaultsFuncName }}()
+		{{ range .options -}}
+			o.{{ .Field }} = defaultOpts.{{ .Field }}
+		{{ end }}
+	{{ end }}
+
+	{{ if .defaultsTagName }}
+		// Setting defaults from field tag (if present)
+        {{ range .options -}}
+            {{ if .TagOption.Default -}}
+                {{ if eq .Type "time.Duration" }}o.{{ .Field }}, _ = time.ParseDuration("{{ .TagOption.Default }}")
+                {{- else if eq .Type "string" }}o.{{ .Field }} = "{{ .TagOption.Default }}"
+                {{- else }}o.{{ .Field }} = {{ .TagOption.Default }}{{ end }}
+            {{ end -}}
+        {{ end }}
+	{{ end }}
+
 	{{ range .options }}
 	    {{- if .TagOption.IsRequired -}}
 	        o.{{ .Field }} = {{ .Field }}
         {{ end -}}
-	    {{ if .TagOption.Default -}}
-            {{ if eq .Type "time.Duration" }}o.{{ .Field }}, _ = time.ParseDuration("{{ .TagOption.Default }}")
-            {{- else if eq .Type "string" }}o.{{ .Field }} = "{{ .TagOption.Default }}"
-            {{- else }}o.{{ .Field }} = {{ .TagOption.Default }}{{ end }}
-	    {{ end -}}
 	{{ end }}
 
 	for _, opt := range options {

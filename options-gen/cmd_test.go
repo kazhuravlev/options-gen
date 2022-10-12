@@ -1,6 +1,7 @@
 package optionsgen_test
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"syscall"
@@ -37,11 +38,15 @@ func TestRun(t *testing.T) {
 			t.Run(dir, func(t *testing.T) {
 				outFilename := filepath.Join(dir, "options_generated.go")
 				expFilename := filepath.Join(dir, "options_generated.go.expected")
+				paramsFilename := filepath.Join(dir, ".params.json")
+				params := readParams(paramsFilename)
+
 				err := optionsgen.Run(
 					filepath.Join(dir, "options.go"),
 					outFilename,
 					"Options",
 					"testcase",
+					params.Defaults,
 					true,
 				)
 				assert.NoError(t, err)
@@ -60,10 +65,35 @@ func TestRun(t *testing.T) {
 			filepath.Join(dir, "options_generated.go"),
 			"Options",
 			"testcase",
+			optionsgen.Defaults{From: optionsgen.DefaultsFromTag, Param: "default"},
 			true,
 		)
 		assert.ErrorIs(t, err, syscall.ENOENT)
 	})
+}
+
+type Params struct {
+	Defaults optionsgen.Defaults `json:"defaults"`
+}
+
+func readParams(filename string) Params {
+	params := Params{
+		Defaults: optionsgen.Defaults{
+			From:  optionsgen.DefaultsFromTag,
+			Param: "default",
+		},
+	}
+
+	bb, err := os.ReadFile(filename)
+	if err != nil {
+		return params
+	}
+
+	if err := json.Unmarshal(bb, &params); err != nil {
+		return params
+	}
+
+	return params
 }
 
 func helpEqualFiles(t *testing.T, filename1, filename2 string) {

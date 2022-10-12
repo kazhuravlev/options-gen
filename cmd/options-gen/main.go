@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -41,19 +42,67 @@ func main() {
 		return
 	}
 
-	err := optionsgen.Run(
+	defaults, err := parseDefaults(defaultsFrom)
+	if err != nil {
+		//nolint:forbidigo
+		fmt.Println("bad defaults spec", err.Error())
+
+		return
+	}
+
+	errRun := optionsgen.Run(
 		inFilename,
 		outFilename,
 		optionsStructName,
 		outPackageName,
+		*defaults,
 		!muteWarnings,
 	)
-	if err != nil {
+	if errRun != nil {
 		//nolint:forbidigo
-		fmt.Println("cannot run options gen", err.Error())
+		fmt.Println("cannot run options gen", errRun.Error())
 
 		return
 	}
+}
+
+func parseDefaults(in string) (*optionsgen.Defaults, error) {
+	parts := strings.Split(in, "=")
+
+	from := optionsgen.DefaultsFrom(parts[0])
+
+	switch from {
+	case optionsgen.DefaultsFromNone:
+		return &optionsgen.Defaults{
+			From:  from,
+			Param: "",
+		}, nil
+	case optionsgen.DefaultsFromTag:
+		return &optionsgen.Defaults{
+			From:  from,
+			Param: get1(parts),
+		}, nil
+	case optionsgen.DefaultsFromVar:
+		return &optionsgen.Defaults{
+			From:  from,
+			Param: get1(parts),
+		}, nil
+	case optionsgen.DefaultsFromFunc:
+		return &optionsgen.Defaults{
+			From:  from,
+			Param: get1(parts),
+		}, nil
+	}
+
+	return nil, errors.New("bad syntax")
+}
+
+func get1(parts []string) string {
+	if len(parts) == 2 {
+		return parts[1]
+	}
+
+	return ""
 }
 
 func isEmpty(values ...string) bool {
