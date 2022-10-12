@@ -51,7 +51,12 @@ type TagOption struct {
 }
 
 // RenderOptions will render file and out it's content.
-func RenderOptions(packageName, optionsStructName string, fileImports []string, spec *OptionSpec, tagName, varName, funcName string) ([]byte, error) {
+func RenderOptions(
+	packageName, optionsStructName string,
+	fileImports []string,
+	spec *OptionSpec,
+	tagName, varName, funcName string,
+) ([]byte, error) {
 	tmpl := template.Must(template.ParseFS(templates, "templates/options.go.tpl"))
 
 	optionsStructType := optionsStructName

@@ -29,6 +29,7 @@ func Run(inFilename, outFilename, structName, packageName string, defaults Defau
 
 	var tagName, varName, funcName string
 	switch defaults.From {
+	case DefaultsFromNone:
 	case DefaultsFromTag:
 		tagName = defaults.Param
 	case DefaultsFromVar:
