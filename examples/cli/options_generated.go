@@ -17,6 +17,10 @@ func NewOptions(
 	options ...OptOptionsSetter,
 ) Options {
 	o := Options{}
+
+	// Setting defaults from field tag (if present)
+	o.addr = "127.0.0.1:8000"
+
 	o.httpClient = httpClient
 	o.token = token
 
@@ -24,6 +28,12 @@ func NewOptions(
 		opt(&o)
 	}
 	return o
+}
+
+func WithAddr(opt string) OptOptionsSetter {
+	return func(o *Options) {
+		o.addr = opt
+	}
 }
 
 func (o *Options) Validate() error {

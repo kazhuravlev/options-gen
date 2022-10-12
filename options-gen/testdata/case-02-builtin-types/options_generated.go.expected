@@ -29,6 +29,9 @@ func NewOptions(
 	options ...OptOptionsSetter,
 ) Options {
 	o := Options{}
+
+	// Setting defaults from field tag (if present)
+
 	o.valInt = valInt
 	o.valInt8 = valInt8
 	o.valInt16 = valInt16

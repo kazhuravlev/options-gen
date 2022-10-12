@@ -12,12 +12,12 @@ import (
 func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName string) ([]*ast.Field, []*ast.Field) {
 	decls := getDecls(packages)
 	for _, decl := range decls {
-		x, ok := decl.(*ast.GenDecl)
+		genDecl, ok := decl.(*ast.GenDecl)
 		if !ok {
 			continue
 		}
 
-		for _, spec := range x.Specs {
+		for _, spec := range genDecl.Specs {
 			typeSpec, ok := spec.(*ast.TypeSpec) //nolint:varnamelen
 			if !ok {
 				continue
@@ -35,6 +35,7 @@ func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName st
 			return extractFields(typeSpec.TypeParams), extractFields(structType.Fields)
 		}
 	}
+
 	return nil, nil
 }
 
@@ -62,7 +63,9 @@ func isPublic(fieldName string) bool {
 	return char != utf8.RuneError && unicode.IsUpper(char)
 }
 
-func checkDefaultValue(fieldType string, tag string) (err error) {
+func checkDefaultValue(fieldType string, tag string) error {
+	var err error
+
 	switch fieldType {
 	case "int", "int8", "int16", "int32", "int64":
 		_, err = strconv.ParseInt(tag, 10, 64)
@@ -82,5 +85,10 @@ func checkDefaultValue(fieldType string, tag string) (err error) {
 	default:
 		return fmt.Errorf("unsupported type `%s`", fieldType)
 	}
-	return
+
+	if err != nil {
+		return fmt.Errorf("bad default value %w %s", err, tag)
+	}
+
+	return nil
 }

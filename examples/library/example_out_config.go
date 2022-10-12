@@ -8,6 +8,8 @@ func NewConfig(
 ) Config {
 	o := Config{}
 
+	// Setting defaults from field tag (if present)
+
 	for _, opt := range options {
 		opt(&o)
 	}

@@ -17,6 +17,9 @@ func NewOptions(
 	options ...OptOptionsSetter,
 ) Options {
 	o := Options{}
+
+	// Setting defaults from field tag (if present)
+
 	o.service1 = service1
 	o.s3Endpoint = s3Endpoint
 

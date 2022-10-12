@@ -51,7 +51,12 @@ type TagOption struct {
 }
 
 // RenderOptions will render file and out it's content.
-func RenderOptions(packageName, optionsStructName string, fileImports []string, spec *OptionSpec) ([]byte, error) {
+func RenderOptions(
+	packageName, optionsStructName string,
+	fileImports []string,
+	spec *OptionSpec,
+	tagName, varName, funcName string,
+) ([]byte, error) {
 	tmpl := template.Must(template.ParseFS(templates, "templates/options.go.tpl"))
 
 	optionsStructType := optionsStructName
@@ -74,6 +79,9 @@ func RenderOptions(packageName, optionsStructName string, fileImports []string, 
 		"optionsStructName":         optionsStructName,
 		"optionsStructType":         optionsStructType,
 		"optionsStructInstanceType": optionsStructInstanceType,
+		"defaultsTagName":           tagName,
+		"defaultsVarName":           varName,
+		"defaultsFuncName":          funcName,
 	}
 	buf := new(bytes.Buffer)
 
@@ -93,7 +101,7 @@ func RenderOptions(packageName, optionsStructName string, fileImports []string, 
 
 // GetOptionSpec read the input filename by filePath, find optionsStructName
 // and scan for options.
-func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, []string, error) {
+func GetOptionSpec(filePath, optionsStructName, tagName string) (*OptionSpec, []string, error) {
 	fset := token.NewFileSet()
 
 	node, err := parser.ParseDir(fset, path.Dir(filePath), nil, parser.ParseComments)
@@ -118,7 +126,7 @@ func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, []string, e
 			)
 		}
 
-		tagOption, tagWarnings := parseTag(field.Tag, fieldName)
+		tagOption, tagWarnings := parseTag(field.Tag, fieldName, tagName)
 		warnings = append(warnings, tagWarnings...)
 		optMeta := OptionMeta{
 			Name:      cases.Title(language.English, cases.NoLower).String(fieldName),
@@ -134,7 +142,7 @@ func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, []string, e
 			}
 
 			if err := checkDefaultValue(optMeta.Type, optMeta.TagOption.Default); err != nil {
-				return nil, nil, fmt.Errorf("field `%s`: invalid `default` tag value: %w", optMeta.Field, err)
+				return nil, nil, fmt.Errorf("field `%s`: invalid `%s` tag value: %w", tagName, optMeta.Field, err)
 			}
 		}
 
@@ -153,7 +161,7 @@ func GetOptionSpec(filePath, optionsStructName string) (*OptionSpec, []string, e
 	}, warnings, nil
 }
 
-func parseTag(tag *ast.BasicLit, fieldName string) (TagOption, []string) {
+func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, []string) {
 	var tagOpt TagOption
 	if tag == nil {
 		return tagOpt, nil
@@ -161,7 +169,7 @@ func parseTag(tag *ast.BasicLit, fieldName string) (TagOption, []string) {
 
 	value := tag.Value
 	tagOpt.GoValidator = reflect.StructTag(strings.Trim(value, "`")).Get("validate")
-	tagOpt.Default = reflect.StructTag(strings.Trim(value, "`")).Get("default")
+	tagOpt.Default = reflect.StructTag(strings.Trim(value, "`")).Get(tagName)
 
 	var warnings []string
 	optionTag := reflect.StructTag(strings.Trim(value, "`")).Get("option")

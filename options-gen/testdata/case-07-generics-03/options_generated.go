@@ -8,6 +8,8 @@ func NewOptions[A comparable, B, C any, D int | string, E []A, F, G []any](
 ) Options[A, B, C, D, E, F, G] {
 	o := Options[A, B, C, D, E, F, G]{}
 
+	// Setting defaults from field tag (if present)
+
 	for _, opt := range options {
 		opt(&o)
 	}

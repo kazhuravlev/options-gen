@@ -18,7 +18,8 @@ func NewOptions(
 	options ...OptOptionsSetter,
 ) Options {
 	o := Options{}
-	o.rWCloser = rWCloser
+
+	// Setting defaults from field tag (if present)
 	o.valInt = 1
 	o.valInt8 = 8
 	o.valInt16 = 16
@@ -33,6 +34,8 @@ func NewOptions(
 	o.valFloat64 = 64.64
 	o.valDuration, _ = time.ParseDuration("3s")
 	o.valString = "golang"
+
+	o.rWCloser = rWCloser
 
 	for _, opt := range options {
 		opt(&o)

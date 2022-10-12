@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	testcase "github.com/kazhuravlev/options-gen/options-gen/testdata/case-12-default-values-02"
+	testcase "github.com/kazhuravlev/options-gen/options-gen/testdata/case-12-defaults-tag-02"
 	"github.com/stretchr/testify/assert"
 )
 

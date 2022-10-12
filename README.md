@@ -190,10 +190,28 @@ type Options struct {
 }
 ```
 
-#### Default value for field
+#### Default values
 
-For numbers, strings and `time.Duration` you can set the default value:
+`options-gen` provide several ways to define defaults for options. You can
+choose which mechanism you need by providing a flag `-defaults-from`. By
+default, this flag is set to `tag=default`.
+
+- `tag[=TagName]`. This mechanism will try to find a tag `TagName` in field
+  tags. By default `TagName` is equal to `default`
+- `var[=VariableName]`. This mechanism will copy variable `VariableName` fields
+  to your `Options` instance. By default `VariableName` is equal
+  to `default<StructName>`. This variable should contain `Options` struct.
+- `func[=FunctionName]`. The same as `var`, but for the function name.
+  Function `FunctionName` will be called once per `NewOptions` constructor. This
+  function should return an `Options` struct.
+- `none` to disable defaults.
+
+##### Using tag
+
+For numbers, strings, and `time.Duration` you can set the default value:
 ```go
+// simple example
+//go:generate options-gen -from-struct=Options
 type Options struct {
   pingPeriod  time.Duration `default:"3s" validate:"min=100ms,max=30s"`
   name        string        `default:"unknown" validate:"required"`
@@ -202,12 +220,102 @@ type Options struct {
 }
 ```
 
-It will be relevant if the field was not filled either explicitly or through functional option. <br>
-Default value must be valid for field type and must satisfy validation rules.
+```go
+// custom default tag
+//go:generate options-gen -from-struct=Options --default-from=tag=mydefaulttag
+type Options struct {
+  pingPeriod  time.Duration `mydefaulttag:"3s" validate:"min=100ms,max=30s"`
+  name        string        `mydefaulttag:"unknown" validate:"required"`
+  maxAttempts int           `mydefaulttag:"10" validate:"min=1,max=10"`
+  eps         float32       `mydefaulttag:"0.0001" validate:"gt=0"`
+}
+```
+
+It would be relevant if the field were not filled either explicitly or through
+functional option.
+
+The default value must be valid for the field type and must satisfy validation
+rules.
+
+##### Using variable
+
+Tags allow you to define defaults for simple types like `string`, `number`
+, `time.Duration`. When you want to define a variable with prefilled values -
+you can do this like that:
+
+```go
+// simple example
+//go:generate options-gen -from-struct=Options -defaults-from=var
+type Options struct {
+	httpClient *http.Client
+}
+
+var defaultOptions = Options{
+	httpClient: &http.Client{},
+}
+```
+
+```go
+// custom variable name
+//go:generate options-gen -from-struct=Options -defaults-from=var=myDefaults
+type Options struct {
+	httpClient *http.Client
+}
+
+var myDefaults = Options{
+	httpClient: &http.Client{},
+}
+```
+
+##### Using function
+
+The same as variable. See an examples:
+
+```go
+// simple example
+//go:generate options-gen -from-struct=Options -defaults-from=func
+type Options struct {
+	httpClient *http.Client
+}
+
+func getDefaultOptions() Options {
+	return Options{
+        httpClient: &http.Client{},
+    }
+}
+```
+
+```go
+// custom function name
+//go:generate options-gen -from-struct=Options -defaults-from=func=myDefaults
+type Options struct {
+    httpClient *http.Client
+}
+
+func myDefaults() Options {
+  return Options{
+    httpClient: &http.Client{},
+  }
+}
+```
+
+##### Disable defaults
+
+If you want to be sure that defaults will not be parsed - you can specify
+the `none` for `-defaults-from` flag.
+
+```go
+// defaults will now be parsed at all
+//go:generate options-gen -from-struct=Options -defaults-from=none
+type Options struct {
+	name string `default:"joe"`
+}
+```
 
 ### Custom validator
 
-You can override `options-gen` validator for specific struct by implementing the `Validator()` method:
+You can override `options-gen` validator for specific struct by implementing
+the `Validator()` method:
 ```go
 import "github.com/mycoolmodule/internal/validator"
 

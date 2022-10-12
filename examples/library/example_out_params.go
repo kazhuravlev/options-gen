@@ -15,6 +15,9 @@ func NewParams(
 	options ...OptParamsSetter,
 ) Params {
 	o := Params{}
+
+	// Setting defaults from field tag (if present)
+
 	o.hash = hash
 
 	for _, opt := range options {

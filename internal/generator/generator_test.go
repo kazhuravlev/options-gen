@@ -35,7 +35,7 @@ func TestGetImports(t *testing.T) {
 func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptions")
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptions", "default")
 	req.NoError(t, err)
 	req.Equal(t, []string{
 		"Deprecated: use `option:\"mandatory\"` instead for field `oldStyleOpt1` to force the passing option in the constructor argument\n",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              //nolint:lll
@@ -126,7 +126,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 func TestGetOptionSpec_Generics(t *testing.T) {
 	t.Parallel()
 
-	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsGen")
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsGen", "default")
 	req.NoError(t, err)
 	req.Empty(t, warnings)
 	req.Equal(t, &generator.OptionSpec{
