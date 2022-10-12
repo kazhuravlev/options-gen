@@ -23,5 +23,6 @@ func GetValidatorFor(opts any) *goplvalidator.Validate {
 	if v, ok := opts.(validatorProvider); ok {
 		return v.Validator()
 	}
+
 	return validator
 }

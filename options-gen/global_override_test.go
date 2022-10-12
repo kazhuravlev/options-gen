@@ -11,13 +11,13 @@ import (
 )
 
 func TestOptionsWithOverridenValidator(t *testing.T) {
-	v := goplvalidator.New()
-	require.NoError(t, v.RegisterValidation("child", func(fl goplvalidator.FieldLevel) bool {
+	validatorInst := goplvalidator.New()
+	require.NoError(t, validatorInst.RegisterValidation("child", func(fl goplvalidator.FieldLevel) bool {
 		return fl.Field().Int() < 14
 	}))
 
 	old := validator.GetValidatorFor(nil)
-	validator.Set(v)
+	validator.Set(validatorInst)
 	t.Cleanup(func() { validator.Set(old) })
 
 	t.Run("valid options", func(t *testing.T) {

@@ -34,6 +34,7 @@ func (s OptionSpec) HasValidation() bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -93,6 +94,7 @@ func RenderOptions(
 	formatted, err := imports.Process("", buf.Bytes(), nil)
 	if err != nil {
 		_, _ = os.Stdout.Write(buf.Bytes()) // For issues debug.
+
 		return nil, fmt.Errorf("cannot optimize imports: %w", err)
 	}
 
@@ -149,14 +151,14 @@ func GetOptionSpec(filePath, optionsStructName, tagName string) (*OptionSpec, []
 		options[idx] = optMeta
 	}
 
-	tpSpec, tp, err := typeParamsStr(typeParams)
+	tpSpec, tpString, err := typeParamsStr(typeParams)
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to extract type params %w", err)
 	}
 
 	return &OptionSpec{
 		TypeParamsSpec: tpSpec,
-		TypeParams:     tp,
+		TypeParams:     tpString,
 		Options:        options,
 	}, warnings, nil
 }
@@ -214,24 +216,25 @@ func typeParamsStr(params []*ast.Field) (string, string, error) {
 
 	paramNames := make([]string, 0, len(params))
 	paramNamesWithTypes := make([]string, len(params))
-	for i, p := range params {
-		if len(p.Names) == 0 {
-			return "", "", fmt.Errorf("unnamed param %s", p.Type)
+	for i, param := range params {
+		if len(param.Names) == 0 {
+			return "", "", fmt.Errorf("unnamed param %s", param.Type)
 		}
 
-		names := make([]string, len(p.Names))
-		for i := range p.Names {
-			names[i] = p.Names[i].Name
+		names := make([]string, len(param.Names))
+		for i := range param.Names {
+			names[i] = param.Names[i].Name
 		}
 
 		paramNames = append(paramNames, names...)
 
-		typeName := types.ExprString(p.Type)
+		typeName := types.ExprString(param.Type)
 		paramNamesWithTypes[i] = fmt.Sprintf("%s %s", strings.Join(names, ", "), typeName)
 	}
 
 	paramNamesStr := fmt.Sprintf("[%s]", strings.Join(paramNames, ", "))
 	paramExprStr := fmt.Sprintf("[%s]", strings.Join(paramNamesWithTypes, ", "))
+
 	return paramExprStr, paramNamesStr, nil
 }
 

@@ -55,11 +55,13 @@ func extractFields(fl *ast.FieldList) []*ast.Field {
 	if fl == nil {
 		return nil
 	}
+
 	return fl.List
 }
 
 func isPublic(fieldName string) bool {
 	char, _ := utf8.DecodeRuneInString(fieldName)
+
 	return char != utf8.RuneError && unicode.IsUpper(char)
 }
 
@@ -68,13 +70,13 @@ func checkDefaultValue(fieldType string, tag string) error {
 
 	switch fieldType {
 	case "int", "int8", "int16", "int32", "int64":
-		_, err = strconv.ParseInt(tag, 10, 64)
+		_, err = strconv.ParseInt(tag, 10, 64) //nolint:gomnd // obvious
 
 	case "uint", "uint8", "uint16", "uint32", "uint64":
-		_, err = strconv.ParseUint(tag, 10, 64)
+		_, err = strconv.ParseUint(tag, 10, 64) //nolint:gomnd // obvious
 
 	case "float32", "float64":
-		_, err = strconv.ParseFloat(tag, 64)
+		_, err = strconv.ParseFloat(tag, 64) //nolint:gomnd // obvious
 
 	case "time.Duration":
 		_, err = time.ParseDuration(tag)

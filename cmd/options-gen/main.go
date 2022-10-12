@@ -110,7 +110,7 @@ func parseDefaults(in string) (*optionsgen.Defaults, error) {
 }
 
 func get1(parts []string) string {
-	if len(parts) == 2 {
+	if len(parts) == 2 { //nolint:gomnd // expect exactly two part
 		return parts[1]
 	}
 
