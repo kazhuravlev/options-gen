@@ -16,6 +16,7 @@ func main() {
 		outFilename       string
 		optionsStructName string
 		outPackageName    string
+		defaultsFrom      string
 		muteWarnings      bool
 	)
 
@@ -28,13 +29,14 @@ func main() {
 	flag.StringVar(&outPackageName, "pkg", envGoPackage, "output package name")
 	flag.StringVar(&outFilename, "out-filename", defaultOutFilename, "output filename")
 	flag.StringVar(&optionsStructName, "from-struct", "", "struct that contains options")
+	flag.StringVar(&defaultsFrom, "defaults-from", "tag", "where to get defaults for options. none, tag=TagName, func=FuncName, var=VarName")
 	flag.BoolVar(&muteWarnings, "mute-warnings", false, "mute all warnings")
 	flag.Parse()
 
-	if inFilename == "" || outFilename == "" || outPackageName == "" || optionsStructName == "" {
+	if isEmpty(inFilename, outFilename, outPackageName, optionsStructName, defaultsFrom) {
 		flag.Usage()
 		//nolint:forbidigo
-		fmt.Println("all options are required")
+		fmt.Println("missed required options")
 
 		return
 	}
@@ -52,4 +54,14 @@ func main() {
 
 		return
 	}
+}
+
+func isEmpty(values ...string) bool {
+	for i := range values {
+		if values[i] == "" {
+			return false
+		}
+	}
+
+	return true
 }
