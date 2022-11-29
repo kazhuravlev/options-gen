@@ -13,7 +13,7 @@ yours.
 ## Installation
 
 ```bash
-go install github.com/kazhuravlev/options-gen/cmd/options-gen
+go install github.com/kazhuravlev/options-gen/cmd/options-gen@latest
 ```
 
 ## Usage
