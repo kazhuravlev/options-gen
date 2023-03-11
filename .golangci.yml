@@ -19,7 +19,7 @@ linters:
     - asciicheck
     - bidichk
     - bodyclose
-    - deadcode
+    - unused
     - depguard
     - durationcheck
     - errcheck
@@ -73,10 +73,9 @@ linters:
     - unparam
     - unused
     - usestdlibvars
-    - varcheck
     - whitespace
     - varnamelen
     - staticcheck
     - nlreturn
     - gomnd
-    - exhaustivestruct
+    - exhaustruct
