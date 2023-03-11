@@ -11,7 +11,7 @@ vars:
 
   TOOL_BIN_DIR: ./bin/tools
 
-  TOOL_LINT_SRC: github.com/golangci/golangci-lint/cmd/golangci-lint@v1.48.0
+  TOOL_LINT_SRC: github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.2
   TOOL_LINT: ./{{ .TOOL_BIN_DIR }}/golangci-lint
 
 tasks:
