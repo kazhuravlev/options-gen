@@ -6,6 +6,9 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/kazhuravlev/options-gen)](https://goreportcard.com/report/github.com/kazhuravlev/options-gen)
 [![CodeCov](https://codecov.io/gh/kazhuravlev/options-gen/branch/master/graph/badge.svg?token=tNKcOjlxLo)](https://codecov.io/gh/kazhuravlev/options-gen)
 
+Code-generator that allows you to create a functional options like 
+[Dave Cheney's post](https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis).
+
 Generate the options for your service/client/etc. All that you need is to define a
 struct with fields, that can be applied as Option then embed this struct into
 yours.
