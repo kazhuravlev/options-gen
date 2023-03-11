@@ -52,6 +52,7 @@ tasks:
         sh: "echo `pwd`/{{ .TOOL_BIN_DIR }}"
     cmds:
       - echo "- Run install tools"
+      - rm -rf {{ .TOO_BIN_DIR }}
       - mkdir -p {{ .TOOL_BIN_DIR }}
       - export GOBIN="{{.GOBIN}}" && go install {{ .TOOL_LINT_SRC }}
 
