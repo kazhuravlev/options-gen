@@ -70,13 +70,13 @@ func checkDefaultValue(fieldType string, tag string) error {
 
 	switch fieldType {
 	case "int", "int8", "int16", "int32", "int64":
-		_, err = strconv.ParseInt(tag, 10, 64) //nolint:gomnd // obvious
+		_, err = strconv.ParseInt(tag, 10, 64)
 
 	case "uint", "uint8", "uint16", "uint32", "uint64":
-		_, err = strconv.ParseUint(tag, 10, 64) //nolint:gomnd // obvious
+		_, err = strconv.ParseUint(tag, 10, 64)
 
 	case "float32", "float64":
-		_, err = strconv.ParseFloat(tag, 64) //nolint:gomnd // obvious
+		_, err = strconv.ParseFloat(tag, 64)
 
 	case "time.Duration":
 		_, err = time.ParseDuration(tag)

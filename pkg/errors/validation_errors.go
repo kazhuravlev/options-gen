@@ -11,7 +11,7 @@ type validationError struct {
 	err       error
 }
 
-func NewValidationError(fieldName string, err error) *validationError {
+func NewValidationError(fieldName string, err error) *validationError { //nolint:revive
 	if err == nil {
 		return nil
 	}
@@ -49,7 +49,7 @@ func (e ValidationErrors) Error() string {
 	return buf.String()
 }
 
-func (e ValidationErrors) Errors() []validationError {
+func (e ValidationErrors) Errors() []validationError { //nolint:revive
 	errs := make([]validationError, len(e))
 	copy(errs, e)
 
