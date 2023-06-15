@@ -143,9 +143,11 @@ func GetOptionSpec(filePath, optionsStructName, tagName string) (*OptionSpec, []
 					fmt.Errorf("field `%s`: mandatory option cannot have a default value", optMeta.Field)
 			}
 
-			if err := checkDefaultValue(optMeta.Type, optMeta.TagOption.Default); err != nil {
+			v, err := checkDefaultValue(optMeta.Type, optMeta.TagOption.Default)
+			if err != nil {
 				return nil, nil, fmt.Errorf("field `%s`: invalid `%s` tag value: %w", tagName, optMeta.Field, err)
 			}
+			optMeta.TagOption.Default = fmt.Sprintf("%v", v)
 		}
 
 		options[idx] = optMeta
