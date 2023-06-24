@@ -49,72 +49,84 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 		Options: []generator.OptionMeta{
 			{
 				Name:      "Stringer",
+				Docstring: "// stringer bla-bla",
 				Field:     "stringer",
 				Type:      "fmt.Stringer",
 				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
 			},
 			{
 				Name:      "Str",
+				Docstring: "// comment-without-field-name-mention",
 				Field:     "str",
 				Type:      "string",
 				TagOption: generator.TagOption{IsRequired: false, GoValidator: "required", Default: ""},
 			},
 			{
 				Name:      "SomeMap",
+				Docstring: "",
 				Field:     "someMap",
 				Type:      "map[string]string",
 				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
 			},
 			{
 				Name:      "NoValidation",
+				Docstring: "// multi\n// line\n// \n// comment",
 				Field:     "noValidation",
 				Type:      "string",
 				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
 			},
 			{
 				Name:      "StarOpt",
+				Docstring: "",
 				Field:     "starOpt",
 				Type:      "*int",
 				TagOption: generator.TagOption{IsRequired: true, GoValidator: "", Default: ""},
 			},
 			{
 				Name:      "SliceOpt",
+				Docstring: "",
 				Field:     "sliceOpt",
 				Type:      "[]int",
 				TagOption: generator.TagOption{IsRequired: true, GoValidator: "", Default: ""},
 			},
 			{
 				Name:      "OldStyleOpt1",
+				Docstring: "",
 				Field:     "oldStyleOpt1",
 				Type:      "string",
 				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
 			},
 			{
 				Name:      "OldStyleOpt2",
+				Docstring: "",
 				Field:     "oldStyleOpt2",
 				Type:      "string",
 				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
 			},
 			{
 				Name:      "OldStyleOpt3",
+				Docstring: "",
 				Field:     "oldStyleOpt3",
 				Type:      "string",
 				TagOption: generator.TagOption{IsRequired: true, GoValidator: "min=10,required", Default: ""},
 			},
 			{
 				Name:      "PublicOption1",
+				Docstring: "",
 				Field:     "PublicOption1",
 				Type:      "int",
 				TagOption: generator.TagOption{IsRequired: true, GoValidator: "", Default: ""},
 			},
 			{
 				Name:      "PublicOption2",
+				Docstring: "",
 				Field:     "PublicOption2",
 				Type:      "int",
 				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
 			},
 			{
 				Name:      "WithDefaultValue",
+				Docstring: "",
 				Field:     "withDefaultValue",
 				Type:      "time.Duration",
 				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: "1m"},
@@ -135,24 +147,28 @@ func TestGetOptionSpec_Generics(t *testing.T) {
 		Options: []generator.OptionMeta{
 			{
 				Name:      "Opt1",
+				Docstring: "",
 				Field:     "opt1",
 				Type:      "T1",
 				TagOption: generator.TagOption{IsRequired: true, GoValidator: "", Default: ""},
 			},
 			{
 				Name:      "Opt2",
+				Docstring: "",
 				Field:     "opt2",
 				Type:      "T2",
 				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
 			},
 			{
 				Name:      "Opt3",
+				Docstring: "",
 				Field:     "opt3",
 				Type:      "int",
 				TagOption: generator.TagOption{IsRequired: false, GoValidator: "min=10", Default: ""},
 			},
 			{
 				Name:      "Opt4",
+				Docstring: "",
 				Field:     "opt4",
 				Type:      "T3",
 				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
@@ -164,12 +180,19 @@ func TestGetOptionSpec_Generics(t *testing.T) {
 // NOTE: this structs is used by testcases in current file
 
 type TestOptions struct {
-	stringer     fmt.Stringer      `option:"mandatory" validate:"required"` //nolint:unused
-	str          string            `validate:"required"`                    //nolint:unused
-	someMap      map[string]string `option:"mandatory" validate:"required"` //nolint:unused
-	noValidation string            //nolint:unused
-	starOpt      *int              `option:"mandatory"` //nolint:unused
-	sliceOpt     []int             `option:"mandatory"` //nolint:unused
+	// stringer bla-bla
+	stringer fmt.Stringer `option:"mandatory" validate:"required"` //nolint:unused
+	// comment-without-field-name-mention
+	str string `validate:"required"` //nolint:unused
+
+	someMap map[string]string `option:"mandatory" validate:"required"` //nolint:unused
+	// multi
+	// line
+	//
+	// comment
+	noValidation string //nolint:unused
+	starOpt      *int   `option:"mandatory"` //nolint:unused
+	sliceOpt     []int  `option:"mandatory"` //nolint:unused
 
 	oldStyleOpt1 string `option:"required,not-empty"`                     //nolint:unused
 	oldStyleOpt2 string `option:"required,not-empty" validate:"required"` //nolint:unused

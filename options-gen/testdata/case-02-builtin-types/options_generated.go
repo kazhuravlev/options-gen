@@ -54,12 +54,14 @@ func NewOptions(
 	return o
 }
 
+// optValInt docstring-1
 func WithOptValInt(opt int) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValInt = opt
 	}
 }
 
+// docstring-2
 func WithOptValInt8(opt int8) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValInt8 = opt
@@ -72,12 +74,18 @@ func WithOptValInt16(opt int16) OptOptionsSetter {
 	}
 }
 
+// Just
+// a
+// comment
 func WithOptValInt32(opt int32) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValInt32 = opt
 	}
 }
 
+// Just
+// a
+// comment
 func WithOptValInt64(opt int64) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValInt64 = opt
