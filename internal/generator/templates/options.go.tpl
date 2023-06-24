@@ -30,7 +30,7 @@ func New{{ .optionsStructType }}(
 
 	{{ if .defaultsFuncName }}
 		// Setting defaults from func
-		defaultOpts := {{ $.defaultsFuncName }}()
+		defaultOpts := {{ $.defaultsFuncName }}{{ $.optionsTypeParams }}()
 		{{ range .options -}}
 			o.{{ .Field }} = defaultOpts.{{ .Field }}
 		{{ end }}
