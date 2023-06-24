@@ -43,7 +43,7 @@ jobs:
           go build -v -o /dev/null ./cmd/options-gen
 
       - name: Test
-        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic -count=1 ./...
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
