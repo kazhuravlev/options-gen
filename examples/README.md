@@ -1,5 +1,5 @@
 # Examples
 
-[Using as cli tool](./cli)
-
-[Using as library](./library)
+- [Using with go generate comment](./go-generate)
+- [Using with go generate comment with generics](./go-generate-generics)
+- [Using as library](./library)

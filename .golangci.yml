@@ -7,6 +7,19 @@ issues:
 linters-settings:
   lll:
     line-length: 120
+  depguard:
+    rules:
+      main:
+        # List of file globs that will match this list of settings to compare against.
+        # Default: $all
+        files:
+          - "$all"
+        # List of allowed packages.
+        allow: [ ]
+        # Packages that are not allowed where the value is a suggestion.
+        deny:
+          - pkg: "github.com/pkg/errors"
+            desc: Use a standard library
   varnamelen:
     ignore-names:
       - err

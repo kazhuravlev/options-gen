@@ -11,7 +11,7 @@ vars:
 
   TOOL_BIN_DIR: ./bin/tools
 
-  TOOL_LINT_SRC: github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.2
+  TOOL_LINT_SRC: github.com/golangci/golangci-lint/cmd/golangci-lint@v1.53.3
   TOOL_LINT: ./{{ .TOOL_BIN_DIR }}/golangci-lint
 
 tasks:
@@ -79,7 +79,8 @@ tasks:
     desc: Update examples directory
     cmds:
       - echo "- Update examples"
-      - task: examples:update:cli
+      - task: examples:update:go-generate
+      - task: examples:update:go-generate-generics
       - task: examples:update:library
 
   examples:update:library:
@@ -88,8 +89,14 @@ tasks:
       - go run main.go
       - go test .
 
-  examples:update:cli:
-    dir: examples/cli
+  examples:update:go-generate:
+    dir: examples/go-generate
+    cmds:
+      - task: "install"
+      - go generate ./...
+
+  examples:update:go-generate-generics:
+    dir: examples/go-generate-generics
     cmds:
       - task: "install"
       - go generate ./...
