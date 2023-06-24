@@ -1,40 +1,13 @@
 package generator
 
 import (
-	"bytes"
 	"fmt"
 	"go/ast"
 	"strconv"
-	"strings"
 	"time"
 	"unicode"
 	"unicode/utf8"
 )
-
-func formatComment(comment string) string {
-	if comment == "" {
-		return ""
-	}
-
-	buf := bytes.NewBuffer(nil)
-
-	lines := strings.Split(comment, "\n")
-	for i := range lines {
-		// Last line contains an empty string.
-		if lines[i] == "" && i == len(lines)-1 {
-			continue
-		}
-
-		if i != 0 {
-			buf.WriteString("\n")
-		}
-
-		buf.WriteString("// ")
-		buf.WriteString(lines[i])
-	}
-
-	return buf.String()
-}
 
 func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName string) ([]*ast.Field, []*ast.Field) {
 	decls := getDecls(packages)
