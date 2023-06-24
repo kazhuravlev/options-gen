@@ -8,22 +8,22 @@ import (
 	"strings"
 )
 
-func prefix(s1, s2 string) string {
-	if s1 == "" || s2 == "" {
+func prefix(str1, str2 string) string {
+	if str1 == "" || str2 == "" {
 		return ""
 	}
 
 	buf := bytes.NewBuffer(nil)
-	if len(s1) > len(s2) {
-		s1, s2 = s2, s1
+	if len(str1) > len(str2) {
+		str1, str2 = str2, str1
 	}
 
-	for i := range s1 {
-		if s1[i] != s2[i] {
+	for i := range str1 {
+		if str1[i] != str2[i] {
 			break
 		}
 
-		buf.WriteByte(s1[i])
+		buf.WriteByte(str1[i])
 	}
 
 	return buf.String()
