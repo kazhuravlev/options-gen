@@ -79,7 +79,8 @@ tasks:
     desc: Update examples directory
     cmds:
       - echo "- Update examples"
-      - task: examples:update:cli
+      - task: examples:update:go-generate
+      - task: examples:update:go-generate-generics
       - task: examples:update:library
 
   examples:update:library:
@@ -88,8 +89,14 @@ tasks:
       - go run main.go
       - go test .
 
-  examples:update:cli:
-    dir: examples/cli
+  examples:update:go-generate:
+    dir: examples/go-generate
+    cmds:
+      - task: "install"
+      - go generate ./...
+
+  examples:update:go-generate-generics:
+    dir: examples/go-generate-generics
     cmds:
       - task: "install"
       - go generate ./...
