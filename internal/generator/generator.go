@@ -40,6 +40,7 @@ func (s OptionSpec) HasValidation() bool {
 
 type OptionMeta struct {
 	Name      string
+	Docstring string // contains a comment with `//`. Can be empty or contain a multi-line string.
 	Field     string
 	Type      string
 	TagOption TagOption
@@ -132,6 +133,7 @@ func GetOptionSpec(filePath, optionsStructName, tagName string) (*OptionSpec, []
 		warnings = append(warnings, tagWarnings...)
 		optMeta := OptionMeta{
 			Name:      cases.Title(language.English, cases.NoLower).String(fieldName),
+			Docstring: formatComment(field.Doc.Text()),
 			Field:     fieldName,
 			Type:      types.ExprString(field.Type),
 			TagOption: tagOption,
