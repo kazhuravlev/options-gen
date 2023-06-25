@@ -30,6 +30,9 @@ func NewOptions(
 	return o
 }
 
+// Address that will be used for each request to the remote server.
+//
+// By default, it will be set to 127.0.0.1:8000
 func WithAddr(opt string) OptOptionsSetter {
 	return func(o *Options) {
 		o.addr = opt

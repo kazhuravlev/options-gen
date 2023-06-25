@@ -19,7 +19,6 @@ jobs:
     strategy:
       matrix:
         go_version:
-          - "1.18"
           - "1.19"
           - "1.20"
         os: [ ubuntu-latest, macOS-latest ]
@@ -43,7 +42,7 @@ jobs:
           go build -v -o /dev/null ./cmd/options-gen
 
       - name: Test
-        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic -count=1 ./...
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
