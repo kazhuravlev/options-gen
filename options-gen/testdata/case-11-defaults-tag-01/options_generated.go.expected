@@ -34,6 +34,7 @@ func NewOptions(
 	o.valFloat64 = 64.64
 	o.valDuration, _ = time.ParseDuration("3s")
 	o.valString = "golang"
+	o.valBool = true
 
 	o.rWCloser = rWCloser
 
@@ -130,6 +131,12 @@ func WithValDuration(opt time.Duration) OptOptionsSetter {
 func WithValString(opt string) OptOptionsSetter {
 	return func(o *Options) {
 		o.valString = opt
+	}
+}
+
+func WithValBool(opt bool) OptOptionsSetter {
+	return func(o *Options) {
+		o.valBool = opt
 	}
 }
 

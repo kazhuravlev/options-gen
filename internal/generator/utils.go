@@ -94,7 +94,6 @@ func isPublic(fieldName string) bool {
 
 func checkDefaultValue(fieldType string, tag string) error {
 	var err error
-
 	switch fieldType {
 	case "int", "int8", "int16", "int32", "int64":
 		_, err = strconv.ParseInt(tag, 10, 64)
@@ -107,6 +106,11 @@ func checkDefaultValue(fieldType string, tag string) error {
 
 	case "time.Duration":
 		_, err = time.ParseDuration(tag)
+
+	case "bool":
+		if !(tag == "true" || tag == "false") {
+			return fmt.Errorf("bool type only supports true/false")
+		}
 
 	case "string":
 		// As is.
