@@ -62,6 +62,13 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 				TagOption: generator.TagOption{IsRequired: false, GoValidator: "required", Default: ""},
 			},
 			{
+				Name:      "SomeMap",
+				Docstring: "",
+				Field:     "someMap",
+				Type:      "map[string]string",
+				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
+			},
+			{
 				Name:      "BoolTrue",
 				Field:     "boolTrue",
 				Type:      "bool",
@@ -72,13 +79,6 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 				Field:     "boolFalse",
 				Type:      "bool",
 				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: "false"},
-			},
-			{
-				Name:      "SomeMap",
-				Docstring: "",
-				Field:     "someMap",
-				Type:      "map[string]string",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
 			},
 			{
 				Name:      "NoValidation",
@@ -197,9 +197,9 @@ type TestOptions struct {
 	// comment-without-field-name-mention
 	str string `validate:"required"` //nolint:unused
 
-	someMap map[string]string `option:"mandatory" validate:"required"` //nolint:unused
-  boolTrue     bool              `default:"true"`                         //nolint:unused
-	boolFalse    bool              `default:"false"`                        //nolint:unused
+	someMap   map[string]string `option:"mandatory" validate:"required"` //nolint:unused
+	boolTrue  bool              `default:"true"`                         //nolint:unused
+	boolFalse bool              `default:"false"`                        //nolint:unused
 	// multi
 	// line
 	//
