@@ -27,6 +27,16 @@ func Test_checkDefaultValue_Negative(t *testing.T) {
 		{t: "float64", val: "bbb"},
 
 		{t: "bool", val: "a"},
+		{t: "bool", val: "1"},
+		{t: "bool", val: "t"},
+		{t: "bool", val: "T"},
+		{t: "bool", val: "TRUE"},
+		{t: "bool", val: "True"},
+		{t: "bool", val: "0"},
+		{t: "bool", val: "f"},
+		{t: "bool", val: "F"},
+		{t: "bool", val: "FALSE"},
+		{t: "bool", val: "False"},
 
 		{t: "time.Duration", val: "1year"},
 
@@ -72,18 +82,8 @@ func Test_checkDefaultValue(t *testing.T) {
 		{t: "float64", val: "3.14", expected: "3.14"},
 		{t: "float64", val: "-3.14", expected: "-3.14"},
 
-		{t: "bool", val: "1", expected: "true"},
-		{t: "bool", val: "t", expected: "true"},
-		{t: "bool", val: "T", expected: "true"},
 		{t: "bool", val: "true", expected: "true"},
-		{t: "bool", val: "TRUE", expected: "true"},
-		{t: "bool", val: "True", expected: "true"},
-		{t: "bool", val: "0", expected: "false"},
-		{t: "bool", val: "f", expected: "false"},
-		{t: "bool", val: "F", expected: "false"},
 		{t: "bool", val: "false", expected: "false"},
-		{t: "bool", val: "FALSE", expected: "false"},
-		{t: "bool", val: "False", expected: "false"},
 
 		{t: "time.Duration", val: "1h", expected: "1h"},
 	}
