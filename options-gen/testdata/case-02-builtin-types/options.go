@@ -21,10 +21,21 @@ type Options struct {
 
 	valBool bool `option:"mandatory"`
 
-	optValInt   int   `validate:"required"`
-	optValInt8  int8  `validate:"required"`
+	// optValInt docstring-1
+	optValInt int `validate:"required"`
+	// docstring-2
+	optValInt8 int8 `validate:"required"`
+	//
 	optValInt16 int16 `validate:"required"`
+	/*
+		Just
+		a
+		comment
+	*/
 	optValInt32 int32 `validate:"required"`
+	// Just
+	// a
+	// comment
 	optValInt64 int64 `validate:"required"`
 
 	optValUInt   uint   `validate:"required"`

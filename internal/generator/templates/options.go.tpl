@@ -30,7 +30,7 @@ func New{{ .optionsStructType }}(
 
 	{{ if .defaultsFuncName }}
 		// Setting defaults from func
-		defaultOpts := {{ $.defaultsFuncName }}()
+		defaultOpts := {{ $.defaultsFuncName }}{{ $.optionsTypeParams }}()
 		{{ range .options -}}
 			o.{{ .Field }} = defaultOpts.{{ .Field }}
 		{{ end }}
@@ -61,6 +61,9 @@ func New{{ .optionsStructType }}(
 
 {{ range .options }}
 	{{ if not .TagOption.IsRequired }}
+		{{- if ne .Docstring "" -}}
+			{{ .Docstring }}
+		{{- end }}
 		func With{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{ .Type }}) Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }} {
 			return func(o *{{ $.optionsStructInstanceType }}) {
 				o.{{ .Field }} = opt
