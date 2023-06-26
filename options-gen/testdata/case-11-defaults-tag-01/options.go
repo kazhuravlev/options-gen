@@ -28,5 +28,5 @@ type Options struct {
 	valDuration time.Duration `default:"3s" validate:"min=100ms,max=30s"`
 
 	valString string `default:"golang" validate:"required"`
-	valBool   bool   `default:"1"`
+	valBool   bool   `default:"true"`
 }

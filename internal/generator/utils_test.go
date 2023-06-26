@@ -1,7 +1,6 @@
 package generator //nolint:testpackage
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -39,7 +38,7 @@ func Test_checkDefaultValue_Negative(t *testing.T) {
 
 	for _, tt := range cases {
 		t.Run(tt.t, func(t *testing.T) {
-			_, err := checkDefaultValue(tt.t, tt.val)
+			err := checkDefaultValue(tt.t, tt.val)
 			assert.Error(t, err)
 		})
 	}
@@ -87,18 +86,12 @@ func Test_checkDefaultValue(t *testing.T) {
 		{t: "bool", val: "False", expected: "false"},
 
 		{t: "time.Duration", val: "1h", expected: "1h"},
-
-		// {t: "fmt.Stringer", val: "nil"},
-		// {t: "Number", val: "nil"},
-		// {t: "localIterface", val: "nil"},
-		// {t: "*T", val: "nil"},
 	}
 
 	for _, tt := range cases {
 		t.Run(tt.t, func(t *testing.T) {
-			v, err := checkDefaultValue(tt.t, tt.val)
+			err := checkDefaultValue(tt.t, tt.val)
 			assert.Nil(t, err)
-			assert.Equal(t, tt.expected, fmt.Sprintf("%v", v))
 		})
 	}
 }

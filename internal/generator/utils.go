@@ -65,37 +65,34 @@ func isPublic(fieldName string) bool {
 	return char != utf8.RuneError && unicode.IsUpper(char)
 }
 
-func checkDefaultValue(fieldType string, tag string) (any, error) {
+func checkDefaultValue(fieldType string, tag string) error {
 	var err error
-	var actualValue any
 	switch fieldType {
 	case "int", "int8", "int16", "int32", "int64":
-		actualValue, err = strconv.ParseInt(tag, 10, 64)
+		_, err = strconv.ParseInt(tag, 10, 64)
 
 	case "uint", "uint8", "uint16", "uint32", "uint64":
-		actualValue, err = strconv.ParseUint(tag, 10, 64)
+		_, err = strconv.ParseUint(tag, 10, 64)
 
 	case "float32", "float64":
-		actualValue, err = strconv.ParseFloat(tag, 64)
+		_, err = strconv.ParseFloat(tag, 64)
 
 	case "time.Duration":
 		_, err = time.ParseDuration(tag)
-		actualValue = tag
 
 	case "bool":
-		actualValue, err = strconv.ParseBool(tag)
+		_, err = strconv.ParseBool(tag)
 
 	case "string":
 		// As is.
-		actualValue = tag
 
 	default:
-		return nil, fmt.Errorf("unsupported type `%s`", fieldType)
+		return fmt.Errorf("unsupported type `%s`", fieldType)
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("bad default value %w %s", err, tag)
+		return fmt.Errorf("bad default value %w %s", err, tag)
 	}
 
-	return actualValue, nil
+	return nil
 }

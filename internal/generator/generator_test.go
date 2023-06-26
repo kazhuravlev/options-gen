@@ -179,7 +179,7 @@ type TestOptions struct {
 	stringer     fmt.Stringer      `option:"mandatory" validate:"required"` //nolint:unused
 	str          string            `validate:"required"`                    //nolint:unused
 	boolTrue     bool              `default:"true"`                         //nolint:unused
-	boolFalse    bool              `default:"f"`                            //nolint:unused
+	boolFalse    bool              `default:"false"`                        //nolint:unused
 	someMap      map[string]string `option:"mandatory" validate:"required"` //nolint:unused
 	noValidation string            //nolint:unused
 	starOpt      *int              `option:"mandatory"` //nolint:unused
