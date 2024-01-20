@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/kazhuravlev/options-gen/internal/generator"
 )
@@ -26,6 +27,8 @@ type Defaults struct {
 func Run(inFilename, outFilename, structName, packageName, outPrefix string, defaults Defaults, showWarnings bool) error {
 	// парсим исходный файл так, что бы получить не только структуру, но и токены, связанные с defaults.
 	// то есть defaults это модификатор парсинга, который заставит парсер вытащить доп инфу
+
+	outPrefix = strings.TrimSpace(outPrefix)
 
 	var tagName, varName, funcName string
 	switch defaults.From {
