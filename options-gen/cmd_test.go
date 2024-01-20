@@ -75,12 +75,13 @@ func TestRun(t *testing.T) {
 }
 
 type Params struct {
-	OutPrefix string              `json:"out_prefix"`
+	OutPrefix string              `json:"out_prefix"` //nolint:tagliatelle
 	Defaults  optionsgen.Defaults `json:"defaults"`
 }
 
 func readParams(filename string) Params {
 	params := Params{
+		OutPrefix: "",
 		Defaults: optionsgen.Defaults{
 			From:  optionsgen.DefaultsFromTag,
 			Param: "",
