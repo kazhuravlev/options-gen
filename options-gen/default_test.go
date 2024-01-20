@@ -18,31 +18,31 @@ func TestDefaultValues(t *testing.T) {
 			wantError: false,
 		},
 		{
-			opts:      testcase.NewOptions(testcase.WithPingPeriod(0)),
+			opts:      testcase.NewOptions(testcase.WithSomePingPeriod(0)),
 			wantError: true,
 		},
 		{
-			opts:      testcase.NewOptions(testcase.WithPingPeriod(time.Hour)),
+			opts:      testcase.NewOptions(testcase.WithSomePingPeriod(time.Hour)),
 			wantError: true,
 		},
 		{
-			opts:      testcase.NewOptions(testcase.WithName("")),
+			opts:      testcase.NewOptions(testcase.WithSomeName("")),
 			wantError: true,
 		},
 		{
-			opts:      testcase.NewOptions(testcase.WithMaxAttempts(0)),
+			opts:      testcase.NewOptions(testcase.WithSomeMaxAttempts(0)),
 			wantError: true,
 		},
 		{
-			opts:      testcase.NewOptions(testcase.WithMaxAttempts(-1)),
+			opts:      testcase.NewOptions(testcase.WithSomeMaxAttempts(-1)),
 			wantError: true,
 		},
 		{
-			opts:      testcase.NewOptions(testcase.WithMaxAttempts(11)),
+			opts:      testcase.NewOptions(testcase.WithSomeMaxAttempts(11)),
 			wantError: true,
 		},
 		{
-			opts:      testcase.NewOptions(testcase.WithEps(0.)),
+			opts:      testcase.NewOptions(testcase.WithSomeEps(0.)),
 			wantError: true,
 		},
 	}

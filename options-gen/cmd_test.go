@@ -46,6 +46,7 @@ func TestRun(t *testing.T) {
 					outFilename,
 					"Options",
 					"testcase",
+					"Some",
 					params.Defaults,
 					true,
 				)
@@ -65,6 +66,7 @@ func TestRun(t *testing.T) {
 			filepath.Join(dir, "options_generated.go"),
 			"Options",
 			"testcase",
+			"XXX",
 			optionsgen.Defaults{From: optionsgen.DefaultsFromTag, Param: ""},
 			true,
 		)
