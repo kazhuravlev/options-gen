@@ -70,12 +70,14 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 			},
 			{
 				Name:      "BoolTrue",
+				Docstring: "",
 				Field:     "boolTrue",
 				Type:      "bool",
 				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: "true"},
 			},
 			{
 				Name:      "BoolFalse",
+				Docstring: "",
 				Field:     "boolFalse",
 				Type:      "bool",
 				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: "false"},

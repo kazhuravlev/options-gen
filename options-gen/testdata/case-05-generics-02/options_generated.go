@@ -33,19 +33,19 @@ func NewOptions[KeyT int | string, TT any](
 	return o
 }
 
-func WithOptHandler[KeyT int | string, TT any](opt http.Handler) OptOptionsSetter[KeyT, TT] {
+func WithSomeOptHandler[KeyT int | string, TT any](opt http.Handler) OptOptionsSetter[KeyT, TT] {
 	return func(o *Options[KeyT, TT]) {
 		o.optHandler = opt
 	}
 }
 
-func WithOptKey[KeyT int | string, TT any](opt KeyT) OptOptionsSetter[KeyT, TT] {
+func WithSomeOptKey[KeyT int | string, TT any](opt KeyT) OptOptionsSetter[KeyT, TT] {
 	return func(o *Options[KeyT, TT]) {
 		o.optKey = opt
 	}
 }
 
-func WithAnyOpt[KeyT int | string, TT any](opt TT) OptOptionsSetter[KeyT, TT] {
+func WithSomeAnyOpt[KeyT int | string, TT any](opt TT) OptOptionsSetter[KeyT, TT] {
 	return func(o *Options[KeyT, TT]) {
 		o.anyOpt = opt
 	}

@@ -16,7 +16,7 @@ func TestGenericsOptions(t *testing.T) {
 			"string key",
 			nil,
 			"",
-			testcase.WithAnyOpt[string, interface{ Timeout() bool }](net.Error(nil)),
+			testcase.WithSomeAnyOpt[string, interface{ Timeout() bool }](net.Error(nil)),
 		)
 		assert.Error(t, opts.Validate())
 	})
@@ -27,8 +27,8 @@ func TestGenericsOptions(t *testing.T) {
 			42,
 			new(handlerMock),
 			24,
-			testcase.WithAnyOpt[int, float32](24.24),
-			testcase.WithOptHandler[int, float32](new(handlerMock)),
+			testcase.WithSomeAnyOpt[int, float32](24.24),
+			testcase.WithSomeOptHandler[int, float32](new(handlerMock)),
 		)
 		assert.NoError(t, opts.Validate())
 	})

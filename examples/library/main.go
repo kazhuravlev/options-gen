@@ -27,6 +27,7 @@ func main() {
 			params.outFname,
 			params.structName,
 			"main",
+			"Some",
 			optionsgen.Defaults{From: optionsgen.DefaultsFromTag, Param: ""},
 			true,
 		); err != nil {

@@ -29,7 +29,7 @@ func NewOptions(
 	return o
 }
 
-func WithPort(opt int) OptOptionsSetter {
+func WithSomePort(opt int) OptOptionsSetter {
 	return func(o *Options) {
 		o.port = opt
 	}

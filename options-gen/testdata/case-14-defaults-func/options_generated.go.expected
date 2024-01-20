@@ -30,25 +30,25 @@ func NewOptions(
 	return o
 }
 
-func WithName(opt string) OptOptionsSetter {
+func WithSomeName(opt string) OptOptionsSetter {
 	return func(o *Options) {
 		o.name = opt
 	}
 }
 
-func WithTimeout(opt time.Duration) OptOptionsSetter {
+func WithSomeTimeout(opt time.Duration) OptOptionsSetter {
 	return func(o *Options) {
 		o.timeout = opt
 	}
 }
 
-func WithMaxAttempts(opt int) OptOptionsSetter {
+func WithSomeMaxAttempts(opt int) OptOptionsSetter {
 	return func(o *Options) {
 		o.maxAttempts = opt
 	}
 }
 
-func WithHttpClient(opt *http.Client) OptOptionsSetter {
+func WithSomeHttpClient(opt *http.Client) OptOptionsSetter {
 	return func(o *Options) {
 		o.httpClient = opt
 	}

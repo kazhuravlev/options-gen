@@ -64,7 +64,7 @@ func New{{ .optionsStructType }}(
 		{{- if ne .Docstring "" -}}
 			{{ .Docstring }}
 		{{- end }}
-		func With{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{ .Type }}) Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }} {
+		func With{{$.optionsPrefix}}{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{ .Type }}) Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }} {
 			return func(o *{{ $.optionsStructInstanceType }}) {
 				o.{{ .Field }} = opt
 			}

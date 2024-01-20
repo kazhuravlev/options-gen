@@ -28,7 +28,7 @@ func NewOptions[T string](
 	return o
 }
 
-func WithOptKey[T string](opt T) OptOptionsSetter[T] {
+func WithSomeOptKey[T string](opt T) OptOptionsSetter[T] {
 	return func(o *Options[T]) {
 		o.optKey = opt
 	}

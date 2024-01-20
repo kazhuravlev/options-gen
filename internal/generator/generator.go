@@ -57,7 +57,7 @@ func RenderOptions(
 	packageName, optionsStructName string,
 	fileImports []string,
 	spec *OptionSpec,
-	tagName, varName, funcName string,
+	tagName, varName, funcName, prefix string,
 ) ([]byte, error) {
 	tmpl := template.Must(template.ParseFS(templates, "templates/options.go.tpl"))
 
@@ -78,6 +78,7 @@ func RenderOptions(
 		"optionsTypeParamsSpec": spec.TypeParamsSpec,
 		"optionsTypeParams":     spec.TypeParams,
 
+		"optionsPrefix":             prefix,
 		"optionsStructName":         optionsStructName,
 		"optionsStructType":         optionsStructType,
 		"optionsStructInstanceType": optionsStructInstanceType,

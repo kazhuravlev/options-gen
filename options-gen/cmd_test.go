@@ -46,6 +46,7 @@ func TestRun(t *testing.T) {
 					outFilename,
 					"Options",
 					"testcase",
+					params.OutPrefix,
 					params.Defaults,
 					true,
 				)
@@ -65,6 +66,7 @@ func TestRun(t *testing.T) {
 			filepath.Join(dir, "options_generated.go"),
 			"Options",
 			"testcase",
+			"XXX",
 			optionsgen.Defaults{From: optionsgen.DefaultsFromTag, Param: ""},
 			true,
 		)
@@ -73,11 +75,13 @@ func TestRun(t *testing.T) {
 }
 
 type Params struct {
-	Defaults optionsgen.Defaults `json:"defaults"`
+	OutPrefix string              `json:"out_prefix"` //nolint:tagliatelle
+	Defaults  optionsgen.Defaults `json:"defaults"`
 }
 
 func readParams(filename string) Params {
 	params := Params{
+		OutPrefix: "",
 		Defaults: optionsgen.Defaults{
 			From:  optionsgen.DefaultsFromTag,
 			Param: "",
