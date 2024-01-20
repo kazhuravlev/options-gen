@@ -16,7 +16,7 @@ func NewConfig(
 	return o
 }
 
-func WithName(opt string) OptConfigSetter {
+func WithSomeName(opt string) OptConfigSetter {
 	return func(o *Config) {
 		o.name = opt
 	}
