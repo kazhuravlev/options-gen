@@ -46,7 +46,7 @@ func TestRun(t *testing.T) {
 					outFilename,
 					"Options",
 					"testcase",
-					"Some",
+					params.OutPrefix,
 					params.Defaults,
 					true,
 				)
@@ -75,7 +75,8 @@ func TestRun(t *testing.T) {
 }
 
 type Params struct {
-	Defaults optionsgen.Defaults `json:"defaults"`
+	OutPrefix string              `json:"out_prefix"`
+	Defaults  optionsgen.Defaults `json:"defaults"`
 }
 
 func readParams(filename string) Params {
