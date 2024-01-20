@@ -81,6 +81,7 @@ tasks:
       - echo "- Update examples"
       - task: examples:update:go-generate
       - task: examples:update:go-generate-generics
+      - task: examples:update:go-generate-2options-1pkg
       - task: examples:update:library
 
   examples:update:library:
@@ -97,6 +98,12 @@ tasks:
 
   examples:update:go-generate-generics:
     dir: examples/go-generate-generics
+    cmds:
+      - task: "install"
+      - go generate ./...
+
+  examples:update:go-generate-2options-1pkg:
+    dir: examples/go-generate-2options-1pkg
     cmds:
       - task: "install"
       - go generate ./...

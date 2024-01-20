@@ -10,7 +10,7 @@ import (
 	{{- end }}
 )
 
-type Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParamsSpec }} func(o *{{ .optionsStructInstanceType }})
+type Opt{{$.optionsPrefix}}{{ $.optionsStructName }}Setter{{ $.optionsTypeParamsSpec }} func(o *{{ .optionsStructInstanceType }})
 
 func New{{ .optionsStructType }}(
 	{{ range .options -}}
@@ -18,7 +18,7 @@ func New{{ .optionsStructType }}(
 			{{ .Field }} {{ .Type }},
 		{{ end }}
 	{{- end -}}
-	options ...Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }},
+	options ...Opt{{$.optionsPrefix}}{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }},
 ) {{ .optionsStructInstanceType }} {
 	o := {{ .optionsStructInstanceType }}{}
 	{{ if .defaultsVarName }}
@@ -64,7 +64,7 @@ func New{{ .optionsStructType }}(
 		{{- if ne .Docstring "" -}}
 			{{ .Docstring }}
 		{{- end }}
-		func With{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{ .Type }}) Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }} {
+		func With{{$.optionsPrefix}}{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{ .Type }}) Opt{{$.optionsPrefix}}{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }} {
 			return func(o *{{ $.optionsStructInstanceType }}) {
 				o.{{ .Field }} = opt
 			}
@@ -79,7 +79,7 @@ func (o *{{ .optionsStructInstanceType }}) Validate() error {
 		errs := new(errors461e464ebed9.ValidationErrors)
 		{{- range .options }}
 			{{- if .TagOption.GoValidator }}
-				errs.Add(errors461e464ebed9.NewValidationError("{{ .Field }}", _validate_{{ $.optionsStructName }}_{{ .Field }}{{ $.optionsTypeParams }}(o)))
+				errs.Add(errors461e464ebed9.NewValidationError("{{ .Field }}", _validate_{{$.optionsPrefix}}{{ $.optionsStructName }}_{{ .Field }}{{ $.optionsTypeParams }}(o)))
 			{{- end }}
 		{{- end }}
 		return errs.AsError()
@@ -88,7 +88,7 @@ func (o *{{ .optionsStructInstanceType }}) Validate() error {
 
 {{ range .options }}
 	{{- if .TagOption.GoValidator }}
-		func _validate_{{ $.optionsStructName }}_{{ .Field }}{{ $.optionsTypeParamsSpec }}(o *{{ $.optionsStructInstanceType }}) error {
+		func _validate_{{$.optionsPrefix}}{{ $.optionsStructName }}_{{ .Field }}{{ $.optionsTypeParamsSpec }}(o *{{ $.optionsStructInstanceType }}) error {
 			if err := validator461e464ebed9.GetValidatorFor(o).Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
 				return fmt461e464ebed9.Errorf("field `{{ .Field }}` did not pass the test: %w", err)
 			}

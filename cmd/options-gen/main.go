@@ -17,6 +17,7 @@ func main() {
 		outFilename       string
 		optionsStructName string
 		outPackageName    string
+		outPrefix         string
 		defaultsFrom      string
 		muteWarnings      bool
 	)
@@ -44,6 +45,10 @@ func main() {
 	flag.BoolVar(&muteWarnings,
 		"mute-warnings", false,
 		"mute all warnings")
+	flag.StringVar(&outPrefix,
+		"out-prefix", "",
+		"prefix for generated structs and functions. It is like namespace that can be used in case "+
+			"when you have a several options structs in one package")
 	flag.Parse()
 
 	if isEmpty(inFilename, outFilename, outPackageName, optionsStructName, defaultsFrom) {
@@ -67,6 +72,7 @@ func main() {
 		outFilename,
 		optionsStructName,
 		outPackageName,
+		outPrefix,
 		*defaults,
 		!muteWarnings,
 	)

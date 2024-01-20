@@ -23,7 +23,7 @@ type Defaults struct {
 	Param string `json:"param"`
 }
 
-func Run(inFilename, outFilename, structName, packageName string, defaults Defaults, showWarnings bool) error {
+func Run(inFilename, outFilename, structName, packageName, outPrefix string, defaults Defaults, showWarnings bool) error {
 	// парсим исходный файл так, что бы получить не только структуру, но и токены, связанные с defaults.
 	// то есть defaults это модификатор парсинга, который заставит парсер вытащить доп инфу
 
@@ -57,7 +57,7 @@ func Run(inFilename, outFilename, structName, packageName string, defaults Defau
 		return fmt.Errorf("cannot get imports: %w", err)
 	}
 
-	res, err := generator.RenderOptions(packageName, structName, imports, optionSpec, tagName, varName, funcName)
+	res, err := generator.RenderOptions(packageName, structName, imports, optionSpec, tagName, varName, funcName, outPrefix)
 	if err != nil {
 		return fmt.Errorf("cannot renderOptions template: %w", err)
 	}
