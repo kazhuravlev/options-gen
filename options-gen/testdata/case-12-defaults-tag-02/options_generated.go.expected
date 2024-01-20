@@ -28,25 +28,25 @@ func NewOptions(
 	return o
 }
 
-func WithPingPeriod(opt time.Duration) OptOptionsSetter {
+func WithSomePingPeriod(opt time.Duration) OptOptionsSetter {
 	return func(o *Options) {
 		o.pingPeriod = opt
 	}
 }
 
-func WithName(opt string) OptOptionsSetter {
+func WithSomeName(opt string) OptOptionsSetter {
 	return func(o *Options) {
 		o.name = opt
 	}
 }
 
-func WithMaxAttempts(opt int) OptOptionsSetter {
+func WithSomeMaxAttempts(opt int) OptOptionsSetter {
 	return func(o *Options) {
 		o.maxAttempts = opt
 	}
 }
 
-func WithEps(opt float32) OptOptionsSetter {
+func WithSomeEps(opt float32) OptOptionsSetter {
 	return func(o *Options) {
 		o.eps = opt
 	}

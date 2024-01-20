@@ -1,4 +1,5 @@
 {
+  "out_prefix": "XXX",
   "defaults": {
     "from": "var",
     "param": "defaultOptions"

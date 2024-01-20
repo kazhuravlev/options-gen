@@ -1,4 +1,5 @@
 {
+  "out_prefix": "Some",
   "defaults": {
     "from": "tag",
     "param": "my-default-tag"
