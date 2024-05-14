@@ -48,6 +48,7 @@ type OptionMeta struct {
 
 type TagOption struct {
 	IsRequired  bool
+	IsOptional  bool
 	GoValidator string
 	Default     string
 }
@@ -131,6 +132,17 @@ func GetOptionSpec(filePath, optionsStructName, tagName string) (*OptionSpec, []
 		}
 
 		tagOption, tagWarnings := parseTag(field.Tag, fieldName, tagName)
+
+		if tagOption.IsOptional {
+			typeSpec, ok := field.Type.(*ast.StarExpr)
+			if !ok {
+				return nil, nil,
+					fmt.Errorf("field `%s`: marked as optional, but not a pointer", fieldName)
+			}
+
+			field.Type = typeSpec.X
+		}
+
 		warnings = append(warnings, tagWarnings...)
 		optMeta := OptionMeta{
 			Name:      cases.Title(language.English, cases.NoLower).String(fieldName),
@@ -182,6 +194,9 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 		switch opt {
 		case "mandatory":
 			tagOpt.IsRequired = true
+
+		case "optional":
+			tagOpt.IsOptional = true
 
 		case "required":
 			// NOTE: remove the tag.

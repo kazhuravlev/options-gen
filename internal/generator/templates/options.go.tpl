@@ -66,7 +66,7 @@ func New{{ .optionsStructType }}(
 		{{- end }}
 		func With{{$.optionsPrefix}}{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{ .Type }}) Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }} {
 			return func(o *{{ $.optionsStructInstanceType }}) {
-				o.{{ .Field }} = opt
+				o.{{ .Field }} = {{ if .TagOption.IsOptional }}&{{- end }}opt
 			}
 		}
 	{{ end }}

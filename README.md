@@ -181,6 +181,24 @@ func NewOptions(otherOptions ...option)...
 
 So, this allows setting only those options fields that user is want to set.
 
+If we want to be able to detect which fields are set, we can also set the
+`option:"optional"` feature, and get something like this:
+
+```go
+type Options struct {
+    field1 *string `option:"optional"`
+}
+
+func WithField1(value string) OptOptionsSetter {
+    return func (o *Options) {
+        o.field1 = &value
+    }
+}
+```
+
+This allows you to distinguish between unset (i.e. nil), and set values, without
+requiring the user to pass in a pointer to the value they're trying to set.
+
 #### Validate field data
 
 After we define the fields, we want to restrict the values of these fields. To
