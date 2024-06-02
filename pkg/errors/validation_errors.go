@@ -38,7 +38,7 @@ func (e ValidationErrors) Error() string {
 	}
 
 	buf := bytes.NewBufferString("ValidationErrors: ")
-	buf.Grow(len(e) * 16) //nolint:gomnd // just because
+	buf.Grow(len(e) * 16) //nolint:mnd // just because
 	for i := range e {
 		buf.WriteString(e[i].Error())
 		if i != len(e)-1 {

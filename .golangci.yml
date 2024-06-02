@@ -38,7 +38,6 @@ linters:
     - errcheck
     - errchkjson
     - errname
-    - execinquery
     - exhaustive
     - exhaustruct
     - exportloopref
@@ -90,5 +89,5 @@ linters:
     - varnamelen
     - staticcheck
     - nlreturn
-    - gomnd
+    - mnd
     - exhaustruct
