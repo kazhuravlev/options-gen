@@ -316,6 +316,24 @@ type Options struct {
 }
 ```
 
+#### Which fields are set?
+
+`options-gen` can produce additional code that allows you to check which fields were set. To do this, simply add
+the `-with-isset` flag to `options-gen`.
+
+For example, this code with the specified option...
+
+```go
+package app
+
+//go:generate options-gen -from-struct=Options -with-isset
+type Options struct {
+	name string
+}
+```
+
+...will produce function `func (o *Options) IsSet(field optField) bool{...}`. 
+
 ### Custom validator
 
 You can override `options-gen` validator for specific struct by implementing
