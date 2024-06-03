@@ -30,6 +30,7 @@ func main() {
 			"Some",
 			optionsgen.Defaults{From: optionsgen.DefaultsFromTag, Param: ""},
 			true,
+			false,
 		); err != nil {
 			panic(err)
 		}

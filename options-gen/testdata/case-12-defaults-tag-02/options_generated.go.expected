@@ -9,6 +9,17 @@ import (
 	validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"
 )
 
+type optField int8
+
+const (
+	FieldpingPeriod  optField = 0
+	Fieldname        optField = 1
+	FieldmaxAttempts optField = 2
+	Fieldeps         optField = 3
+)
+
+var optIsSet = [4]bool{}
+
 type OptOptionsSetter func(o *Options)
 
 func NewOptions(
@@ -16,11 +27,18 @@ func NewOptions(
 ) Options {
 	o := Options{}
 
+	var empty [4]bool
+	optIsSet = empty
+
 	// Setting defaults from field tag (if present)
 	o.pingPeriod, _ = time.ParseDuration("3s")
+	optIsSet[FieldpingPeriod] = true
 	o.name = "unknown"
+	optIsSet[Fieldname] = true
 	o.maxAttempts = 10
+	optIsSet[FieldmaxAttempts] = true
 	o.eps = 0.0001
+	optIsSet[Fieldeps] = true
 
 	for _, opt := range options {
 		opt(&o)
@@ -31,24 +49,28 @@ func NewOptions(
 func WithSomePingPeriod(opt time.Duration) OptOptionsSetter {
 	return func(o *Options) {
 		o.pingPeriod = opt
+		optIsSet[FieldpingPeriod] = true
 	}
 }
 
 func WithSomeName(opt string) OptOptionsSetter {
 	return func(o *Options) {
 		o.name = opt
+		optIsSet[Fieldname] = true
 	}
 }
 
 func WithSomeMaxAttempts(opt int) OptOptionsSetter {
 	return func(o *Options) {
 		o.maxAttempts = opt
+		optIsSet[FieldmaxAttempts] = true
 	}
 }
 
 func WithSomeEps(opt float32) OptOptionsSetter {
 	return func(o *Options) {
 		o.eps = opt
+		optIsSet[Fieldeps] = true
 	}
 }
 
@@ -59,6 +81,10 @@ func (o *Options) Validate() error {
 	errs.Add(errors461e464ebed9.NewValidationError("maxAttempts", _validate_Options_maxAttempts(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("eps", _validate_Options_eps(o)))
 	return errs.AsError()
+}
+
+func (o *Options) IsSet(field optField) bool {
+	return optIsSet[field]
 }
 
 func _validate_Options_pingPeriod(o *Options) error {

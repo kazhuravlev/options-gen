@@ -9,6 +9,20 @@ import (
 	validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"
 )
 
+type optField int8
+
+const (
+	FieldrequiredHandler optField = 0
+	FieldrequiredKey     optField = 1
+	Fieldhandler         optField = 2
+	Fieldkey             optField = 3
+	FieldoptHandler      optField = 4
+	FieldoptKey          optField = 5
+	FieldanyOpt          optField = 6
+)
+
+var optIsSet = [7]bool{}
+
 type OptOptionsSetter[KeyT int | string, TT any] func(o *Options[KeyT, TT])
 
 func NewOptions[KeyT int | string, TT any](
@@ -20,12 +34,19 @@ func NewOptions[KeyT int | string, TT any](
 ) Options[KeyT, TT] {
 	o := Options[KeyT, TT]{}
 
+	var empty [7]bool
+	optIsSet = empty
+
 	// Setting defaults from field tag (if present)
 
 	o.requiredHandler = requiredHandler
+	optIsSet[FieldrequiredHandler] = true
 	o.requiredKey = requiredKey
+	optIsSet[FieldrequiredKey] = true
 	o.handler = handler
+	optIsSet[Fieldhandler] = true
 	o.key = key
+	optIsSet[Fieldkey] = true
 
 	for _, opt := range options {
 		opt(&o)
@@ -36,18 +57,21 @@ func NewOptions[KeyT int | string, TT any](
 func WithSomeOptHandler[KeyT int | string, TT any](opt http.Handler) OptOptionsSetter[KeyT, TT] {
 	return func(o *Options[KeyT, TT]) {
 		o.optHandler = opt
+		optIsSet[FieldoptHandler] = true
 	}
 }
 
 func WithSomeOptKey[KeyT int | string, TT any](opt KeyT) OptOptionsSetter[KeyT, TT] {
 	return func(o *Options[KeyT, TT]) {
 		o.optKey = opt
+		optIsSet[FieldoptKey] = true
 	}
 }
 
 func WithSomeAnyOpt[KeyT int | string, TT any](opt TT) OptOptionsSetter[KeyT, TT] {
 	return func(o *Options[KeyT, TT]) {
 		o.anyOpt = opt
+		optIsSet[FieldanyOpt] = true
 	}
 }
 
@@ -56,6 +80,10 @@ func (o *Options[KeyT, TT]) Validate() error {
 	errs.Add(errors461e464ebed9.NewValidationError("requiredHandler", _validate_Options_requiredHandler[KeyT, TT](o)))
 	errs.Add(errors461e464ebed9.NewValidationError("requiredKey", _validate_Options_requiredKey[KeyT, TT](o)))
 	return errs.AsError()
+}
+
+func (o *Options[KeyT, TT]) IsSet(field optField) bool {
+	return optIsSet[field]
 }
 
 func _validate_Options_requiredHandler[KeyT int | string, TT any](o *Options[KeyT, TT]) error {

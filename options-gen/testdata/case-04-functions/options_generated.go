@@ -5,6 +5,23 @@ import (
 	"net/http"
 )
 
+type optField int8
+
+const (
+	FieldfnTypeParam    optField = 0
+	FieldfnParam        optField = 1
+	FieldhandlerFunc    optField = 2
+	Fieldmiddleware     optField = 3
+	Fieldlocal          optField = 4
+	FieldoptFnTypeParam optField = 5
+	FieldoptFnParam     optField = 6
+	FieldoptHandlerFunc optField = 7
+	FieldoptMiddleware  optField = 8
+	FieldoptLocal       optField = 9
+)
+
+var optIsSet = [10]bool{}
+
 type OptOptionsSetter func(o *Options)
 
 func NewOptions(
@@ -17,13 +34,21 @@ func NewOptions(
 ) Options {
 	o := Options{}
 
+	var empty [10]bool
+	optIsSet = empty
+
 	// Setting defaults from field tag (if present)
 
 	o.fnTypeParam = fnTypeParam
+	optIsSet[FieldfnTypeParam] = true
 	o.fnParam = fnParam
+	optIsSet[FieldfnParam] = true
 	o.handlerFunc = handlerFunc
+	optIsSet[FieldhandlerFunc] = true
 	o.middleware = middleware
+	optIsSet[Fieldmiddleware] = true
 	o.local = local
+	optIsSet[Fieldlocal] = true
 
 	for _, opt := range options {
 		opt(&o)
@@ -34,33 +59,42 @@ func NewOptions(
 func WithOptFnTypeParam(opt FnType) OptOptionsSetter {
 	return func(o *Options) {
 		o.optFnTypeParam = opt
+		optIsSet[FieldoptFnTypeParam] = true
 	}
 }
 
 func WithOptFnParam(opt func(server *http.Server) error) OptOptionsSetter {
 	return func(o *Options) {
 		o.optFnParam = opt
+		optIsSet[FieldoptFnParam] = true
 	}
 }
 
 func WithOptHandlerFunc(opt http.HandlerFunc) OptOptionsSetter {
 	return func(o *Options) {
 		o.optHandlerFunc = opt
+		optIsSet[FieldoptHandlerFunc] = true
 	}
 }
 
 func WithOptMiddleware(opt func(next http.HandlerFunc) http.HandlerFunc) OptOptionsSetter {
 	return func(o *Options) {
 		o.optMiddleware = opt
+		optIsSet[FieldoptMiddleware] = true
 	}
 }
 
 func WithOptLocal(opt localFnType) OptOptionsSetter {
 	return func(o *Options) {
 		o.optLocal = opt
+		optIsSet[FieldoptLocal] = true
 	}
 }
 
 func (o *Options) Validate() error {
 	return nil
+}
+
+func (o *Options) IsSet(field optField) bool {
+	return optIsSet[field]
 }
