@@ -22,6 +22,7 @@ func NewOptions(
 	o.addr = "127.0.0.1:8000"
 
 	o.httpClient = httpClient
+
 	o.token = token
 
 	for _, opt := range options {
@@ -36,6 +37,7 @@ func NewOptions(
 func WithAddr(opt string) OptOptionsSetter {
 	return func(o *Options) {
 		o.addr = opt
+
 	}
 }
 

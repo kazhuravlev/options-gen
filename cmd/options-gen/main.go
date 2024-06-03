@@ -20,6 +20,7 @@ func main() {
 		outPrefix         string
 		defaultsFrom      string
 		muteWarnings      bool
+		withIsset         bool
 	)
 
 	envGoFile := os.Getenv("GOFILE")
@@ -49,6 +50,9 @@ func main() {
 		"out-prefix", "",
 		"prefix for generated structs and functions. It is like namespace that can be used in case "+
 			"when you have a several options structs in one package")
+	flag.BoolVar(&withIsset,
+		"with-isset", false,
+		"generate a function that helps check which fields have been set")
 	flag.Parse()
 
 	if isEmpty(inFilename, outFilename, outPackageName, optionsStructName, defaultsFrom) {
@@ -75,6 +79,7 @@ func main() {
 		outPrefix,
 		*defaults,
 		!muteWarnings,
+		withIsset,
 	)
 	if errRun != nil {
 		//nolint:forbidigo

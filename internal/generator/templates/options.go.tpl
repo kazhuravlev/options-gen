@@ -10,6 +10,17 @@ import (
 	{{- end }}
 )
 
+{{ if .withIsset }}
+type opt{{$.optionsPrefix}}Field int8
+const(
+	{{ range $i, $field := .options }}
+		Field{{$.optionsPrefix}}{{ $field.Field }} opt{{$.optionsPrefix}}Field = {{ $i }}
+	{{- end -}}
+)
+
+var opt{{$.optionsPrefix}}IsSet = [{{ .optionsLen }}]bool{}
+{{ end }}
+
 type Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParamsSpec }} func(o *{{ .optionsStructInstanceType }})
 
 func New{{ .optionsStructType }}(
@@ -21,11 +32,19 @@ func New{{ .optionsStructType }}(
 	options ...Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }},
 ) {{ .optionsStructInstanceType }} {
 	o := {{ .optionsStructInstanceType }}{}
+	{{ if .withIsset }}
+		var empty [{{ .optionsLen }}]bool
+		opt{{$.optionsPrefix}}IsSet = empty
+	{{ end }}
+
 	{{ if .defaultsVarName }}
 		// Setting defaults from variable
 		{{ range .options -}}
 			o.{{ .Field }} = {{ $.defaultsVarName }}.{{ .Field }}
-		{{ end }}
+      {{ if $.withIsset -}}
+				opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
+      {{- end }}
+    {{ end }}
 	{{ end }}
 
 	{{ if .defaultsFuncName }}
@@ -33,7 +52,10 @@ func New{{ .optionsStructType }}(
 		defaultOpts := {{ $.defaultsFuncName }}{{ $.optionsTypeParams }}()
 		{{ range .options -}}
 			o.{{ .Field }} = defaultOpts.{{ .Field }}
-		{{ end }}
+      {{ if $.withIsset -}}
+				opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
+      {{- end }}
+    {{ end }}
 	{{ end }}
 
 	{{ if .defaultsTagName }}
@@ -43,6 +65,9 @@ func New{{ .optionsStructType }}(
                 {{ if eq .Type "time.Duration" }}o.{{ .Field }}, _ = time.ParseDuration("{{ .TagOption.Default }}")
                 {{- else if eq .Type "string" }}o.{{ .Field }} = "{{ .TagOption.Default }}"
                 {{- else }}o.{{ .Field }} = {{ .TagOption.Default }}{{ end }}
+                {{ if $.withIsset -}}
+	                opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
+                {{- end }}
             {{ end -}}
         {{ end }}
 	{{ end }}
@@ -50,7 +75,10 @@ func New{{ .optionsStructType }}(
 	{{ range .options }}
 	    {{- if .TagOption.IsRequired -}}
 	        o.{{ .Field }} = {{ .Field }}
-        {{ end -}}
+          {{ if $.withIsset -}}
+		        opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
+          {{- end }}
+      {{ end -}}
 	{{ end }}
 
 	for _, opt := range options {
@@ -67,6 +95,9 @@ func New{{ .optionsStructType }}(
 		func With{{$.optionsPrefix}}{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{ .Type }}) Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }} {
 			return func(o *{{ $.optionsStructInstanceType }}) {
 				o.{{ .Field }} = opt
+        {{ if $.withIsset -}}
+					opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
+				{{- end }}
 			}
 		}
 	{{ end }}
@@ -85,6 +116,12 @@ func (o *{{ .optionsStructInstanceType }}) Validate() error {
 		return errs.AsError()
 	{{- end }}
 }
+
+{{ if .withIsset }}
+	func (o *{{ .optionsStructInstanceType }}) IsSet(field opt{{$.optionsPrefix}}Field) bool {
+	return opt{{$.optionsPrefix}}IsSet[field]
+	}
+{{ end }}
 
 {{ range .options }}
 	{{- if .TagOption.GoValidator }}

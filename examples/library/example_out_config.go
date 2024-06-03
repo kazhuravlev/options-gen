@@ -19,6 +19,7 @@ func NewConfig(
 func WithSomeName(opt string) OptConfigSetter {
 	return func(o *Config) {
 		o.name = opt
+
 	}
 }
 

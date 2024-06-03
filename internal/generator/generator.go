@@ -22,6 +22,8 @@ import (
 //go:embed templates/options.go.tpl
 var templates embed.FS
 
+var tmpl = template.Must(template.ParseFS(templates, "templates/options.go.tpl"))
+
 type OptionSpec struct {
 	TypeParamsSpec string // [KeyT int | string, TT any]
 	TypeParams     string // [KeyT, TT]
@@ -58,9 +60,8 @@ func RenderOptions(
 	fileImports []string,
 	spec *OptionSpec,
 	tagName, varName, funcName, prefix string,
+	withIsset bool,
 ) ([]byte, error) {
-	tmpl := template.Must(template.ParseFS(templates, "templates/options.go.tpl"))
-
 	optionsStructType := optionsStructName
 	optionsStructInstanceType := optionsStructName
 
@@ -73,6 +74,7 @@ func RenderOptions(
 		"packageName":   packageName,
 		"imports":       fileImports,
 		"options":       spec.Options,
+		"optionsLen":    len(spec.Options),
 		"hasValidation": spec.HasValidation(),
 
 		"optionsTypeParamsSpec": spec.TypeParamsSpec,
@@ -85,6 +87,8 @@ func RenderOptions(
 		"defaultsTagName":           tagName,
 		"defaultsVarName":           varName,
 		"defaultsFuncName":          funcName,
+
+		"withIsset": withIsset,
 	}
 	buf := new(bytes.Buffer)
 

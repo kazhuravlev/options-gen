@@ -49,6 +49,7 @@ func TestRun(t *testing.T) {
 					params.OutPrefix,
 					params.Defaults,
 					true,
+					true,
 				)
 				assert.NoError(t, err)
 
@@ -69,6 +70,7 @@ func TestRun(t *testing.T) {
 			"XXX",
 			optionsgen.Defaults{From: optionsgen.DefaultsFromTag, Param: ""},
 			true,
+			false,
 		)
 		assert.ErrorIs(t, err, syscall.ENOENT)
 	})

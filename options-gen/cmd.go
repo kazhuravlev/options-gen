@@ -28,10 +28,8 @@ func Run(
 	inFilename, outFilename, structName, packageName, outPrefix string,
 	defaults Defaults,
 	showWarnings bool,
+	withIsset bool,
 ) error {
-	// парсим исходный файл так, что бы получить не только структуру, но и токены, связанные с defaults.
-	// то есть defaults это модификатор парсинга, который заставит парсер вытащить доп инфу
-
 	outPrefix = strings.TrimSpace(outPrefix)
 
 	var tagName, varName, funcName string
@@ -69,6 +67,7 @@ func Run(
 		optionSpec,
 		tagName, varName, funcName,
 		outPrefix,
+		withIsset,
 	)
 	if err != nil {
 		return fmt.Errorf("cannot renderOptions template: %w", err)
