@@ -17,8 +17,11 @@ func NewOptions2(
 
 	// Setting defaults from variable
 	o.field1 = defaultOptions2.field1
+
 	o.field2 = defaultOptions2.field2
+
 	o.field3 = defaultOptions2.field3
+
 	o.field4 = defaultOptions2.field4
 
 	for _, opt := range options {
@@ -31,6 +34,7 @@ func NewOptions2(
 func WithNNNField1(opt int) OptOptions2Setter {
 	return func(o *Options2) {
 		o.field1 = opt
+
 	}
 }
 
@@ -38,6 +42,7 @@ func WithNNNField1(opt int) OptOptions2Setter {
 func WithNNNField2(opt int) OptOptions2Setter {
 	return func(o *Options2) {
 		o.field2 = opt
+
 	}
 }
 
@@ -45,6 +50,7 @@ func WithNNNField2(opt int) OptOptions2Setter {
 func WithNNNField3(opt int) OptOptions2Setter {
 	return func(o *Options2) {
 		o.field3 = opt
+
 	}
 }
 
@@ -52,6 +58,7 @@ func WithNNNField3(opt int) OptOptions2Setter {
 func WithNNNField4(opt int) OptOptions2Setter {
 	return func(o *Options2) {
 		o.field4 = opt
+
 	}
 }
 

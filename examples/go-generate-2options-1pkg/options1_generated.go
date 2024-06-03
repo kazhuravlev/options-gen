@@ -17,8 +17,11 @@ func NewOptions1(
 
 	// Setting defaults from variable
 	o.field0 = defaultOptions1.field0
+
 	o.field1 = defaultOptions1.field1
+
 	o.field2 = defaultOptions1.field2
+
 	o.field3 = defaultOptions1.field3
 
 	for _, opt := range options {
@@ -31,6 +34,7 @@ func NewOptions1(
 func WithKKKField0(opt int) OptOptions1Setter {
 	return func(o *Options1) {
 		o.field0 = opt
+
 	}
 }
 
@@ -38,6 +42,7 @@ func WithKKKField0(opt int) OptOptions1Setter {
 func WithKKKField1(opt int) OptOptions1Setter {
 	return func(o *Options1) {
 		o.field1 = opt
+
 	}
 }
 
@@ -45,6 +50,7 @@ func WithKKKField1(opt int) OptOptions1Setter {
 func WithKKKField2(opt int) OptOptions1Setter {
 	return func(o *Options1) {
 		o.field2 = opt
+
 	}
 }
 
@@ -52,6 +58,7 @@ func WithKKKField2(opt int) OptOptions1Setter {
 func WithKKKField3(opt int) OptOptions1Setter {
 	return func(o *Options1) {
 		o.field3 = opt
+
 	}
 }
 

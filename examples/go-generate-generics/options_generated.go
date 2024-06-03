@@ -21,6 +21,7 @@ func NewOptions[K comparable, V any](
 func WithDefaultVal[K comparable, V any](opt V) OptOptionsSetter[K, V] {
 	return func(o *Options[K, V]) {
 		o.defaultVal = opt
+
 	}
 }
 
