@@ -10,16 +10,16 @@ import (
 	validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"
 )
 
-type optField int8
+type optXXXField int8
 
 const (
-	Fieldname        optField = 0
-	Fieldtimeout     optField = 1
-	FieldmaxAttempts optField = 2
-	FieldhttpClient  optField = 3
+	FieldXXXname        optXXXField = 0
+	FieldXXXtimeout     optXXXField = 1
+	FieldXXXmaxAttempts optXXXField = 2
+	FieldXXXhttpClient  optXXXField = 3
 )
 
-var optIsSet = [4]bool{}
+var optXXXIsSet = [4]bool{}
 
 type OptOptionsSetter func(o *Options)
 
@@ -29,17 +29,17 @@ func NewOptions(
 	o := Options{}
 
 	var empty [4]bool
-	optIsSet = empty
+	optXXXIsSet = empty
 
 	// Setting defaults from variable
 	o.name = defaultOptions.name
-	optIsSet[Fieldname] = true
+	optXXXIsSet[FieldXXXname] = true
 	o.timeout = defaultOptions.timeout
-	optIsSet[Fieldtimeout] = true
+	optXXXIsSet[FieldXXXtimeout] = true
 	o.maxAttempts = defaultOptions.maxAttempts
-	optIsSet[FieldmaxAttempts] = true
+	optXXXIsSet[FieldXXXmaxAttempts] = true
 	o.httpClient = defaultOptions.httpClient
-	optIsSet[FieldhttpClient] = true
+	optXXXIsSet[FieldXXXhttpClient] = true
 
 	for _, opt := range options {
 		opt(&o)
@@ -50,28 +50,28 @@ func NewOptions(
 func WithXXXName(opt string) OptOptionsSetter {
 	return func(o *Options) {
 		o.name = opt
-		optIsSet[Fieldname] = true
+		optXXXIsSet[FieldXXXname] = true
 	}
 }
 
 func WithXXXTimeout(opt time.Duration) OptOptionsSetter {
 	return func(o *Options) {
 		o.timeout = opt
-		optIsSet[Fieldtimeout] = true
+		optXXXIsSet[FieldXXXtimeout] = true
 	}
 }
 
 func WithXXXMaxAttempts(opt int) OptOptionsSetter {
 	return func(o *Options) {
 		o.maxAttempts = opt
-		optIsSet[FieldmaxAttempts] = true
+		optXXXIsSet[FieldXXXmaxAttempts] = true
 	}
 }
 
 func WithXXXHttpClient(opt *http.Client) OptOptionsSetter {
 	return func(o *Options) {
 		o.httpClient = opt
-		optIsSet[FieldhttpClient] = true
+		optXXXIsSet[FieldXXXhttpClient] = true
 	}
 }
 
@@ -84,8 +84,8 @@ func (o *Options) Validate() error {
 	return errs.AsError()
 }
 
-func (o *Options) IsSet(field optField) bool {
-	return optIsSet[field]
+func (o *Options) IsSet(field optXXXField) bool {
+	return optXXXIsSet[field]
 }
 
 func _validate_Options_name(o *Options) error {

@@ -8,6 +8,17 @@ import (
 	validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"
 )
 
+type optKKKField int8
+
+const (
+	FieldKKKfield0 optKKKField = 0
+	FieldKKKfield1 optKKKField = 1
+	FieldKKKfield2 optKKKField = 2
+	FieldKKKfield3 optKKKField = 3
+)
+
+var optKKKIsSet = [4]bool{}
+
 type OptOptions1Setter func(o *Options1)
 
 func NewOptions1(
@@ -15,14 +26,18 @@ func NewOptions1(
 ) Options1 {
 	o := Options1{}
 
+	var empty [4]bool
+	optKKKIsSet = empty
+
 	// Setting defaults from variable
 	o.field0 = defaultOptions1.field0
-
+	optKKKIsSet[FieldKKKfield0] = true
 	o.field1 = defaultOptions1.field1
-
+	optKKKIsSet[FieldKKKfield1] = true
 	o.field2 = defaultOptions1.field2
-
+	optKKKIsSet[FieldKKKfield2] = true
 	o.field3 = defaultOptions1.field3
+	optKKKIsSet[FieldKKKfield3] = true
 
 	for _, opt := range options {
 		opt(&o)
@@ -34,7 +49,7 @@ func NewOptions1(
 func WithKKKField0(opt int) OptOptions1Setter {
 	return func(o *Options1) {
 		o.field0 = opt
-
+		optKKKIsSet[FieldKKKfield0] = true
 	}
 }
 
@@ -42,7 +57,7 @@ func WithKKKField0(opt int) OptOptions1Setter {
 func WithKKKField1(opt int) OptOptions1Setter {
 	return func(o *Options1) {
 		o.field1 = opt
-
+		optKKKIsSet[FieldKKKfield1] = true
 	}
 }
 
@@ -50,7 +65,7 @@ func WithKKKField1(opt int) OptOptions1Setter {
 func WithKKKField2(opt int) OptOptions1Setter {
 	return func(o *Options1) {
 		o.field2 = opt
-
+		optKKKIsSet[FieldKKKfield2] = true
 	}
 }
 
@@ -58,7 +73,7 @@ func WithKKKField2(opt int) OptOptions1Setter {
 func WithKKKField3(opt int) OptOptions1Setter {
 	return func(o *Options1) {
 		o.field3 = opt
-
+		optKKKIsSet[FieldKKKfield3] = true
 	}
 }
 
@@ -69,6 +84,10 @@ func (o *Options1) Validate() error {
 	errs.Add(errors461e464ebed9.NewValidationError("field2", _validate_Options1_field2(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("field3", _validate_Options1_field3(o)))
 	return errs.AsError()
+}
+
+func (o *Options1) IsSet(field optKKKField) bool {
+	return optKKKIsSet[field]
 }
 
 func _validate_Options1_field0(o *Options1) error {

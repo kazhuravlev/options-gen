@@ -11,14 +11,14 @@ import (
 )
 
 {{ if .withIsset }}
-type optField int8
+type opt{{$.optionsPrefix}}Field int8
 const(
 	{{ range $i, $field := .options }}
-		Field{{ $field.Field }} optField = {{ $i }}
+		Field{{$.optionsPrefix}}{{ $field.Field }} opt{{$.optionsPrefix}}Field = {{ $i }}
 	{{- end -}}
 )
 
-var optIsSet = [{{ .optionsLen }}]bool{}
+var opt{{$.optionsPrefix}}IsSet = [{{ .optionsLen }}]bool{}
 {{ end }}
 
 type Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParamsSpec }} func(o *{{ .optionsStructInstanceType }})
@@ -34,7 +34,7 @@ func New{{ .optionsStructType }}(
 	o := {{ .optionsStructInstanceType }}{}
 	{{ if .withIsset }}
 		var empty [{{ .optionsLen }}]bool
-		optIsSet = empty
+		opt{{$.optionsPrefix}}IsSet = empty
 	{{ end }}
 
 	{{ if .defaultsVarName }}
@@ -42,7 +42,7 @@ func New{{ .optionsStructType }}(
 		{{ range .options -}}
 			o.{{ .Field }} = {{ $.defaultsVarName }}.{{ .Field }}
       {{ if $.withIsset -}}
-				optIsSet[Field{{ .Field }}] = true
+				opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
       {{- end }}
     {{ end }}
 	{{ end }}
@@ -53,7 +53,7 @@ func New{{ .optionsStructType }}(
 		{{ range .options -}}
 			o.{{ .Field }} = defaultOpts.{{ .Field }}
       {{ if $.withIsset -}}
-				optIsSet[Field{{ .Field }}] = true
+				opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
       {{- end }}
     {{ end }}
 	{{ end }}
@@ -66,7 +66,7 @@ func New{{ .optionsStructType }}(
                 {{- else if eq .Type "string" }}o.{{ .Field }} = "{{ .TagOption.Default }}"
                 {{- else }}o.{{ .Field }} = {{ .TagOption.Default }}{{ end }}
                 {{ if $.withIsset -}}
-	                optIsSet[Field{{ .Field }}] = true
+	                opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
                 {{- end }}
             {{ end -}}
         {{ end }}
@@ -76,7 +76,7 @@ func New{{ .optionsStructType }}(
 	    {{- if .TagOption.IsRequired -}}
 	        o.{{ .Field }} = {{ .Field }}
           {{ if $.withIsset -}}
-		        optIsSet[Field{{ .Field }}] = true
+		        opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
           {{- end }}
       {{ end -}}
 	{{ end }}
@@ -96,7 +96,7 @@ func New{{ .optionsStructType }}(
 			return func(o *{{ $.optionsStructInstanceType }}) {
 				o.{{ .Field }} = opt
         {{ if $.withIsset -}}
-					optIsSet[Field{{ .Field }}] = true
+					opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
 				{{- end }}
 			}
 		}
@@ -118,8 +118,8 @@ func (o *{{ .optionsStructInstanceType }}) Validate() error {
 }
 
 {{ if .withIsset }}
-	func (o *{{ .optionsStructInstanceType }}) IsSet(field optField) bool {
-	return optIsSet[field]
+	func (o *{{ .optionsStructInstanceType }}) IsSet(field opt{{$.optionsPrefix}}Field) bool {
+	return opt{{$.optionsPrefix}}IsSet[field]
 	}
 {{ end }}
 
