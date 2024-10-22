@@ -1,18 +1,9 @@
-# https://taskfile.dev
-
 version: '3'
 
 silent: true
 
 vars:
   GO_MODULE: github.com/kazhuravlev/options-gen
-  GO_FILES:
-    sh: find . -type f -name '*.go' -not -path "./.gocache/*" -not -path "./.go/*" -not -path "_generated.go" | tr "\n" " "
-
-  TOOL_BIN_DIR: ./bin/tools
-
-  TOOL_LINT_SRC: github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.0
-  TOOL_LINT: ./{{ .TOOL_BIN_DIR }}/golangci-lint
 
 tasks:
   default:
@@ -45,24 +36,16 @@ tasks:
   tools:install:
     desc: Install required tools (into local project dir)
     run: once
-    # `env` is not working due to
-    # https://github.com/go-task/task/issues/693
-    vars:
-      GOBIN:
-        sh: "echo `pwd`/{{ .TOOL_BIN_DIR }}"
     cmds:
       - echo "- Run install tools"
-      - rm -rf {{ .TOO_BIN_DIR }}
-      - mkdir -p {{ .TOOL_BIN_DIR }}
-      - export GOBIN="{{.GOBIN}}" && go install {{ .TOOL_LINT_SRC }}
+      - go run github.com/kazhuravlev/toolset/cmd/toolset@latest sync
 
   lint:
     desc: Run linter
-    deps:
-      - "tools:install"
     cmds:
       - echo "- Lint"
-      - "{{ .TOOL_LINT }} run --fix ./..."
+      - task: 'tools:install'
+      - toolset run golangci-lint run --fix ./...
 
   install:
     run: once

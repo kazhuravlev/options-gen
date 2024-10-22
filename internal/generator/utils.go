@@ -36,6 +36,7 @@ func formatComment(comment string) string {
 	return buf.String()
 }
 
+//nolint:staticcheck
 func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName string) ([]*ast.Field, []*ast.Field) {
 	decls := getDecls(packages)
 	for _, decl := range decls {
@@ -66,6 +67,7 @@ func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName st
 	return nil, nil
 }
 
+//nolint:staticcheck
 func getDecls(packages map[string]*ast.Package) []ast.Decl {
 	var res []ast.Decl
 
