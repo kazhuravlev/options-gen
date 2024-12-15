@@ -2,9 +2,6 @@ version: '3'
 
 silent: true
 
-vars:
-  GO_MODULE: github.com/kazhuravlev/options-gen
-
 tasks:
   default:
     cmds:

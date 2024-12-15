@@ -2,7 +2,7 @@
 	"tools": [
 		{
 			"runtime": "go",
-			"module": "github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0",
+			"module": "github.com/golangci/golangci-lint/cmd/golangci-lint@v1.62.2",
 			"alias": null,
 			"tags": null
 		}
