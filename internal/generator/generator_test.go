@@ -27,6 +27,7 @@ func TestGetImports(t *testing.T) {
 		`"testing"`,
 		`"time"`,
 		`"github.com/kazhuravlev/options-gen/internal/generator"`,
+		`"github.com/kazhuravlev/options-gen/internal/generator/testdata"`,
 		`req "github.com/stretchr/testify/require"`,
 	}
 	sort.Strings(requiredImports)
