@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/kazhuravlev/options-gen/internal/generator"
+	"github.com/kazhuravlev/options-gen/internal/generator/testdata"
+
 	// test named imports.
 	req "github.com/stretchr/testify/require"
 )
@@ -225,4 +227,162 @@ type TestOptionsGen[T1 int | string, T2, T3 any] struct {
 	opt2 T2  `option:"mandatory" validate:"required"` //nolint:unused
 	opt3 int `validate:"min=10"`                      //nolint:unused
 	opt4 T3  //nolint:unused
+}
+
+type TestOptionsInline struct {
+	InlineStruct struct {
+		Field1 string
+	}
+}
+
+type TestOptionsInlinePtr struct {
+	InlineStruct *struct {
+		Field1 string
+	}
+}
+
+type EmbedStruct struct {
+	String string
+}
+
+type TestOptionsEmbed struct {
+	EmbedStruct
+}
+
+type TestOptionsEmbedPtr struct {
+	*EmbedStruct
+}
+
+type TestOptionsEmbedAnotherPkg struct {
+	testdata.StructForEmbed
+}
+
+type TestOptionsEmbedAnotherPkgPtr struct {
+	*testdata.StructForEmbed
+}
+
+func TestGetOptionSpecInline(t *testing.T) { //nolint:funlen
+	t.Parallel()
+
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsInline", "default")
+	req.NoError(t, err)
+	req.Equal(t, []string{
+		"Warning: consider to make `InlineStruct` is private. This is will not allow to users to avoid constructor method.",
+	}, warnings)
+	req.Equal(t, &generator.OptionSpec{
+		TypeParamsSpec: "",
+		TypeParams:     "",
+		Options: []generator.OptionMeta{
+			{
+				Name:  "InlineStruct",
+				Field: "InlineStruct",
+				Type:  "struct{Field1 string}",
+			},
+		},
+	}, spec)
+}
+
+func TestGetOptionSpecInlinePtr(t *testing.T) { //nolint:funlen
+	t.Parallel()
+
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsInlinePtr", "default")
+	req.NoError(t, err)
+	req.Equal(t, []string{
+		"Warning: consider to make `InlineStruct` is private. This is will not allow to users to avoid constructor method.",
+	}, warnings)
+	req.Equal(t, &generator.OptionSpec{
+		TypeParamsSpec: "",
+		TypeParams:     "",
+		Options: []generator.OptionMeta{
+			{
+				Name:  "InlineStruct",
+				Field: "InlineStruct",
+				Type:  "*struct{Field1 string}",
+			},
+		},
+	}, spec)
+}
+
+func TestGetOptionSpecEmbed(t *testing.T) { //nolint:funlen
+	t.Parallel()
+
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsEmbed", "default")
+	req.NoError(t, err)
+	req.Equal(t, []string{
+		"Warning: consider to make `EmbedStruct` is private. This is will not allow to users to avoid constructor method.",
+	}, warnings)
+	req.Equal(t, &generator.OptionSpec{
+		TypeParamsSpec: "",
+		TypeParams:     "",
+		Options: []generator.OptionMeta{
+			{
+				Name:  "EmbedStruct",
+				Field: "EmbedStruct",
+				Type:  "EmbedStruct",
+			},
+		},
+	}, spec)
+}
+
+func TestGetOptionSpecEmbedPtr(t *testing.T) { //nolint:funlen
+	t.Parallel()
+
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsEmbedPtr", "default")
+	req.NoError(t, err)
+	req.Equal(t, []string{
+		"Warning: consider to make `EmbedStruct` is private. This is will not allow to users to avoid constructor method.",
+	}, warnings)
+	req.Equal(t, &generator.OptionSpec{
+		TypeParamsSpec: "",
+		TypeParams:     "",
+		Options: []generator.OptionMeta{
+			{
+				Name:  "EmbedStruct",
+				Field: "EmbedStruct",
+				Type:  "*EmbedStruct",
+			},
+		},
+	}, spec)
+}
+
+func TestGetOptionSpecEmbedAnotherPkg(t *testing.T) { //nolint:funlen
+	t.Parallel()
+
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsEmbedAnotherPkg", "default")
+	req.NoError(t, err)
+	req.Equal(t, []string{
+		"Warning: consider to make `StructForEmbed` is private. This is will not allow to users to avoid constructor method.",
+	}, warnings)
+	req.Equal(t, &generator.OptionSpec{
+		TypeParamsSpec: "",
+		TypeParams:     "",
+		Options: []generator.OptionMeta{
+			{
+				Name:  "StructForEmbed",
+				Field: "StructForEmbed",
+				Type:  "testdata.StructForEmbed",
+			},
+		},
+	}, spec)
+}
+
+func TestGetOptionSpecEmbedAnotherPkgPtr(t *testing.T) { //nolint:funlen
+	t.Parallel()
+
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsEmbedAnotherPkgPtr", "default")
+	req.NoError(t, err)
+	req.Equal(t, []string{
+		"Warning: consider to make `StructForEmbed` is private. This is will not allow to users to avoid constructor method.",
+	}, warnings)
+	req.Equal(t, &generator.OptionSpec{
+		TypeParamsSpec: "",
+		TypeParams:     "",
+		Options: []generator.OptionMeta{
+			{
+				Name:  "StructForEmbed",
+				Field: "StructForEmbed",
+				Type:  "*testdata.StructForEmbed",
+			},
+		},
+	}, spec)
 }

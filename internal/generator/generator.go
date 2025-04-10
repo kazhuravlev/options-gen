@@ -124,7 +124,10 @@ func GetOptionSpec(filePath, optionsStructName, tagName string) (*OptionSpec, []
 	for idx := range fields {
 		field := fields[idx]
 
-		fieldName := field.Names[0].Name
+		fieldName := normalizeName(types.ExprString(field.Type))
+		if len(field.Names) > 0 {
+			fieldName = field.Names[0].Name
+		}
 		if isPublic(fieldName) {
 			warnings = append(warnings,
 				fmt.Sprintf(

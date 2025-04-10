@@ -95,3 +95,22 @@ func Test_checkDefaultValue(t *testing.T) {
 		})
 	}
 }
+
+func Test_normalizeName(t *testing.T) {
+	cases := []struct {
+		t        string
+		val      string
+		expected string
+	}{
+		{t: "int", val: "int", expected: "int"},
+		{t: "*int", val: "*int", expected: "int"},
+		{t: "[]int", val: "int", expected: "int"},
+		{t: "[]*int", val: "int", expected: "int"},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.t, func(t *testing.T) {
+			assert.Equal(t, tt.expected, normalizeName(tt.val))
+		})
+	}
+}
