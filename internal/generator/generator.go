@@ -229,7 +229,8 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 		case "variadic":
 			val, err := strconv.ParseBool(optValue)
 			if err != nil {
-				warnings = append(warnings, fmt.Sprintf("Error: parse variadic for the field %s failed: %s\n", fieldName, err.Error()))
+				warnings = append(warnings, fmt.Sprintf("Error: parse variadic for the field %s failed: %s\n",
+					fieldName, err.Error()))
 			}
 
 			tagOpt.Variadic = val
