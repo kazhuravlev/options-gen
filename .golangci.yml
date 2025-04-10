@@ -75,7 +75,6 @@ linters:
     - staticcheck
     - stylecheck
     - tagliatelle
-    - tenv
     - testpackage
     - thelper
     - tparallel
