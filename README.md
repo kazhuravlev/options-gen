@@ -141,6 +141,10 @@ it will have the following arguments:
 - `out-filename` - specifies an output filename. This filename will be rewritten
   with options-gen specific content. For
   example `./pkg/github-client/options_generated.go`.
+- `generate-constructor` - flag for whether to generate a function to build your structure with options.
+  Default: `true`
+- `public-constructor` - flag indicating whether the generated function for building
+  your structure should be made public. Default: `true`
 
 See an [Examples](#Examples).
 
