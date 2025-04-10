@@ -106,6 +106,10 @@ func Test_normalizeName(t *testing.T) {
 		{t: "*int", val: "*int", expected: "int"},
 		{t: "[]int", val: "int", expected: "int"},
 		{t: "[]*int", val: "int", expected: "int"},
+		{t: "some.Struct", val: "some.Struct", expected: "Struct"},
+		{t: "*some.Struct", val: "*some.Struct", expected: "Struct"},
+		{t: "[]some.Struct", val: "some.Struct", expected: "Struct"},
+		{t: "[]*some.Struct", val: "some.Struct", expected: "Struct"},
 	}
 
 	for _, tt := range cases {
