@@ -7,9 +7,8 @@ import (
 	"time"
 
 	"github.com/kazhuravlev/options-gen/internal/generator"
-	"github.com/kazhuravlev/options-gen/internal/generator/testdata"
-
 	// test named imports.
+	"github.com/kazhuravlev/options-gen/internal/generator/testdata"
 	req "github.com/stretchr/testify/require"
 )
 
@@ -275,9 +274,11 @@ func TestGetOptionSpecInline(t *testing.T) { //nolint:funlen
 		TypeParams:     "",
 		Options: []generator.OptionMeta{
 			{
-				Name:  "InlineStruct",
-				Field: "InlineStruct",
-				Type:  "struct{Field1 string}",
+				Name:      "InlineStruct",
+				Field:     "InlineStruct",
+				Type:      "struct{Field1 string}",
+				Docstring: "",
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
 			},
 		},
 	}, spec)
@@ -296,9 +297,11 @@ func TestGetOptionSpecInlinePtr(t *testing.T) { //nolint:funlen
 		TypeParams:     "",
 		Options: []generator.OptionMeta{
 			{
-				Name:  "InlineStruct",
-				Field: "InlineStruct",
-				Type:  "*struct{Field1 string}",
+				Name:      "InlineStruct",
+				Field:     "InlineStruct",
+				Type:      "*struct{Field1 string}",
+				Docstring: "",
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
 			},
 		},
 	}, spec)
@@ -317,9 +320,11 @@ func TestGetOptionSpecEmbed(t *testing.T) { //nolint:funlen
 		TypeParams:     "",
 		Options: []generator.OptionMeta{
 			{
-				Name:  "EmbedStruct",
-				Field: "EmbedStruct",
-				Type:  "EmbedStruct",
+				Name:      "EmbedStruct",
+				Field:     "EmbedStruct",
+				Type:      "EmbedStruct",
+				Docstring: "",
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
 			},
 		},
 	}, spec)
@@ -338,9 +343,11 @@ func TestGetOptionSpecEmbedPtr(t *testing.T) { //nolint:funlen
 		TypeParams:     "",
 		Options: []generator.OptionMeta{
 			{
-				Name:  "EmbedStruct",
-				Field: "EmbedStruct",
-				Type:  "*EmbedStruct",
+				Name:      "EmbedStruct",
+				Field:     "EmbedStruct",
+				Type:      "*EmbedStruct",
+				Docstring: "",
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
 			},
 		},
 	}, spec)
@@ -359,9 +366,11 @@ func TestGetOptionSpecEmbedAnotherPkg(t *testing.T) { //nolint:funlen
 		TypeParams:     "",
 		Options: []generator.OptionMeta{
 			{
-				Name:  "StructForEmbed",
-				Field: "StructForEmbed",
-				Type:  "testdata.StructForEmbed",
+				Name:      "StructForEmbed",
+				Field:     "StructForEmbed",
+				Type:      "testdata.StructForEmbed",
+				Docstring: "",
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
 			},
 		},
 	}, spec)
@@ -380,9 +389,11 @@ func TestGetOptionSpecEmbedAnotherPkgPtr(t *testing.T) { //nolint:funlen
 		TypeParams:     "",
 		Options: []generator.OptionMeta{
 			{
-				Name:  "StructForEmbed",
-				Field: "StructForEmbed",
-				Type:  "*testdata.StructForEmbed",
+				Name:      "StructForEmbed",
+				Field:     "StructForEmbed",
+				Type:      "*testdata.StructForEmbed",
+				Docstring: "",
+				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
 			},
 		},
 	}, spec)
