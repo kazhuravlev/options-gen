@@ -61,6 +61,7 @@ func RenderOptions(
 	spec *OptionSpec,
 	tagName, varName, funcName, prefix string,
 	withIsset bool,
+	generateConstructor, publicConstructor bool,
 ) ([]byte, error) {
 	optionsStructType := optionsStructName
 	optionsStructInstanceType := optionsStructName
@@ -89,6 +90,9 @@ func RenderOptions(
 		"defaultsFuncName":          funcName,
 
 		"withIsset": withIsset,
+
+		"generateConstructor": generateConstructor,
+		"publicConstructor":   publicConstructor,
 	}
 	buf := new(bytes.Buffer)
 
