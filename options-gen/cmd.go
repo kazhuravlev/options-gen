@@ -29,6 +29,7 @@ func Run(
 	defaults Defaults,
 	showWarnings bool,
 	withIsset bool,
+	generateConstructor, publicConstructor bool,
 ) error {
 	outPrefix = strings.TrimSpace(outPrefix)
 
@@ -68,6 +69,7 @@ func Run(
 		tagName, varName, funcName,
 		outPrefix,
 		withIsset,
+		generateConstructor, publicConstructor,
 	)
 	if err != nil {
 		return fmt.Errorf("cannot renderOptions template: %w", err)

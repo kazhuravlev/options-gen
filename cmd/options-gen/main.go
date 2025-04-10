@@ -13,14 +13,16 @@ import (
 
 func main() {
 	var (
-		inFilename        string
-		outFilename       string
-		optionsStructName string
-		outPackageName    string
-		outPrefix         string
-		defaultsFrom      string
-		muteWarnings      bool
-		withIsset         bool
+		inFilename          string
+		outFilename         string
+		optionsStructName   string
+		outPackageName      string
+		outPrefix           string
+		defaultsFrom        string
+		muteWarnings        bool
+		withIsset           bool
+		generateConstructor bool
+		publicConstructor   bool
 	)
 
 	envGoFile := os.Getenv("GOFILE")
@@ -53,6 +55,12 @@ func main() {
 	flag.BoolVar(&withIsset,
 		"with-isset", false,
 		"generate a function that helps check which fields have been set")
+	flag.BoolVar(&generateConstructor,
+		"generate-constructor", true,
+		"generate a function constructor")
+	flag.BoolVar(&publicConstructor,
+		"public-constructor", true,
+		"make public or private function constructor")
 	flag.Parse()
 
 	if isEmpty(inFilename, outFilename, outPackageName, optionsStructName, defaultsFrom) {
@@ -80,6 +88,8 @@ func main() {
 		*defaults,
 		!muteWarnings,
 		withIsset,
+		generateConstructor,
+		publicConstructor,
 	)
 	if errRun != nil {
 		//nolint:forbidigo
