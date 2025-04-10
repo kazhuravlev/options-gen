@@ -347,7 +347,7 @@ import "github.com/mycoolmodule/internal/validator"
 // ...
 
 func (Options) Validator() *validator.Validate {
-return validator.Validator
+	return validator.Validator
 }
 ```
 
@@ -368,6 +368,16 @@ func init() {
 	must(Validator.RegisterAlias( /* ... */))
 
 	optsValidator.Set(Validator)
+}
+```
+
+### Skip fields
+
+If you don't need to generate a setter for a specific field, you can specify this using the tag `option:"-"`.
+
+```go
+type Options struct {
+	name string `option:"-"`
 }
 ```
 
