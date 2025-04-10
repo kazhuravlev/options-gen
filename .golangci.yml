@@ -40,7 +40,6 @@ linters:
     - errname
     - exhaustive
     - exhaustruct
-    - copyloopvar
     - forbidigo
     - gci
     - goconst
@@ -76,7 +75,6 @@ linters:
     - staticcheck
     - stylecheck
     - tagliatelle
-    - tenv
     - testpackage
     - thelper
     - tparallel
