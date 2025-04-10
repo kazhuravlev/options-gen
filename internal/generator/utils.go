@@ -125,3 +125,7 @@ func checkDefaultValue(fieldType string, tag string) error {
 
 	return nil
 }
+
+func isSlice(typeName string) bool {
+	return strings.HasPrefix(typeName, "[]")
+}

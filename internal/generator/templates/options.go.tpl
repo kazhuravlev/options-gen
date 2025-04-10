@@ -92,12 +92,11 @@ func New{{ .optionsStructType }}(
 		{{- if ne .Docstring "" -}}
 			{{ .Docstring }}
 		{{- end }}
-		func With{{$.optionsPrefix}}{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{ .Type }}) Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }} {
+		func With{{$.optionsPrefix}}{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{if .TagOption.Variadic}}...{{end}}{{ .Type }}) Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }} {
 			return func(o *{{ $.optionsStructInstanceType }}) {
-				o.{{ .Field }} = opt
-        {{ if $.withIsset -}}
-					opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
-				{{- end }}
+				{{if .TagOption.Variadic}}o.{{ .Field }} = append(o.{{ .Field }}, opt...){{else}}o.{{ .Field }} = opt{{end}}
+				{{ if $.withIsset -}}
+				opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true{{- end }}
 			}
 		}
 	{{ end }}

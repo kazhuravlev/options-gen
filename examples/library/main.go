@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/kazhuravlev/options-gen/options-gen"
+	optionsgen "github.com/kazhuravlev/options-gen/options-gen"
 )
 
 func main() {
@@ -30,6 +30,7 @@ func main() {
 			"Some",
 			optionsgen.Defaults{From: optionsgen.DefaultsFromTag, Param: ""},
 			true,
+			false,
 			false,
 		); err != nil {
 			panic(err)
