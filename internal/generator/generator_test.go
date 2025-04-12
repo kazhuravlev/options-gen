@@ -383,7 +383,7 @@ type TestOptionsEmbedAnotherPkgPtr struct {
 func TestGetOptionSpecInline(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsInline", "default")
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsInline", "default", false)
 	req.NoError(t, err)
 	req.Equal(t, []string{
 		"Warning: consider to make `InlineStruct` is private. This is will not allow to users to avoid constructor method.",
@@ -397,7 +397,13 @@ func TestGetOptionSpecInline(t *testing.T) { //nolint:funlen
 				Field:     "InlineStruct",
 				Type:      "struct{Field1 string}",
 				Docstring: "",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 		},
 	}, spec)
@@ -406,7 +412,7 @@ func TestGetOptionSpecInline(t *testing.T) { //nolint:funlen
 func TestGetOptionSpecInlinePtr(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsInlinePtr", "default")
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsInlinePtr", "default", false)
 	req.NoError(t, err)
 	req.Equal(t, []string{
 		"Warning: consider to make `InlineStruct` is private. This is will not allow to users to avoid constructor method.",
@@ -420,7 +426,13 @@ func TestGetOptionSpecInlinePtr(t *testing.T) { //nolint:funlen
 				Field:     "InlineStruct",
 				Type:      "*struct{Field1 string}",
 				Docstring: "",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 		},
 	}, spec)
@@ -429,7 +441,7 @@ func TestGetOptionSpecInlinePtr(t *testing.T) { //nolint:funlen
 func TestGetOptionSpecEmbed(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsEmbed", "default")
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsEmbed", "default", false)
 	req.NoError(t, err)
 	req.Equal(t, []string{
 		"Warning: consider to make `EmbedStruct` is private. This is will not allow to users to avoid constructor method.",
@@ -443,7 +455,13 @@ func TestGetOptionSpecEmbed(t *testing.T) { //nolint:funlen
 				Field:     "EmbedStruct",
 				Type:      "EmbedStruct",
 				Docstring: "",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 		},
 	}, spec)
@@ -452,7 +470,7 @@ func TestGetOptionSpecEmbed(t *testing.T) { //nolint:funlen
 func TestGetOptionSpecEmbedPtr(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsEmbedPtr", "default")
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsEmbedPtr", "default", false)
 	req.NoError(t, err)
 	req.Equal(t, []string{
 		"Warning: consider to make `EmbedStruct` is private. This is will not allow to users to avoid constructor method.",
@@ -466,7 +484,13 @@ func TestGetOptionSpecEmbedPtr(t *testing.T) { //nolint:funlen
 				Field:     "EmbedStruct",
 				Type:      "*EmbedStruct",
 				Docstring: "",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 		},
 	}, spec)
@@ -475,7 +499,7 @@ func TestGetOptionSpecEmbedPtr(t *testing.T) { //nolint:funlen
 func TestGetOptionSpecEmbedAnotherPkg(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsEmbedAnotherPkg", "default")
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsEmbedAnotherPkg", "default", false)
 	req.NoError(t, err)
 	req.Equal(t, []string{
 		"Warning: consider to make `StructForEmbed` is private. This is will not allow to users to avoid constructor method.",
@@ -489,7 +513,13 @@ func TestGetOptionSpecEmbedAnotherPkg(t *testing.T) { //nolint:funlen
 				Field:     "StructForEmbed",
 				Type:      "testdata.StructForEmbed",
 				Docstring: "",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 		},
 	}, spec)
@@ -498,7 +528,7 @@ func TestGetOptionSpecEmbedAnotherPkg(t *testing.T) { //nolint:funlen
 func TestGetOptionSpecEmbedAnotherPkgPtr(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsEmbedAnotherPkgPtr", "default")
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsEmbedAnotherPkgPtr", "default", false)
 	req.NoError(t, err)
 	req.Equal(t, []string{
 		"Warning: consider to make `StructForEmbed` is private. This is will not allow to users to avoid constructor method.",
@@ -512,7 +542,13 @@ func TestGetOptionSpecEmbedAnotherPkgPtr(t *testing.T) { //nolint:funlen
 				Field:     "StructForEmbed",
 				Type:      "*testdata.StructForEmbed",
 				Docstring: "",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 		},
 	}, spec)

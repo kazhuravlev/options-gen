@@ -130,10 +130,10 @@ func isSlice(typeName string) bool {
 	return strings.HasPrefix(typeName, "[]")
 }
 
-func normalizeName(fieldName string) string {
-	if idx := strings.LastIndex(fieldName, "."); idx > -1 {
-		fieldName = fieldName[idx+1:]
+func normalizeTypeName(typeName string) string {
+	if idx := strings.LastIndex(typeName, "."); idx > -1 {
+		typeName = typeName[idx+1:]
 	}
 
-	return strings.TrimPrefix(strings.TrimPrefix(fieldName, "[]"), "*")
+	return strings.TrimPrefix(strings.TrimPrefix(typeName, "[]"), "*")
 }
