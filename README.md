@@ -143,6 +143,13 @@ it will have the following arguments:
   example `./pkg/github-client/options_generated.go`.
 - `all-variadic` - generate variadic functions for all fields with slice type.
   Default: `false` - functions that accept a slice are generated.
+- `constructor` - specifies the type and whether to generate a function to build your structure with parameters.
+  Possible values:
+  - `public` - generate public constructor
+  - `private` - generate private constructor
+  - `no` - not generate any constructor
+
+  Default: `public`
 
 See an [Examples](#Examples).
 

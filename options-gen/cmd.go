@@ -24,12 +24,21 @@ type Defaults struct {
 	Param string `json:"param"`
 }
 
+type ConstructorTypeRender generator.ConstructorTypeRender
+
+const (
+	ConstructorPublicRender  ConstructorTypeRender = ConstructorTypeRender(generator.ConstructorPublicRender)
+	ConstructorPrivateRender ConstructorTypeRender = ConstructorTypeRender(generator.ConstructorPrivateRender)
+	ConstructorNoRender      ConstructorTypeRender = ConstructorTypeRender(generator.ConstructorNoRender)
+)
+
 func Run(
 	inFilename, outFilename, structName, packageName, outPrefix string,
 	defaults Defaults,
 	showWarnings bool,
 	withIsset bool,
 	allVariadic bool,
+	constructorTypeRender ConstructorTypeRender,
 ) error {
 	outPrefix = strings.TrimSpace(outPrefix)
 
@@ -69,6 +78,7 @@ func Run(
 		tagName, varName, funcName,
 		outPrefix,
 		withIsset,
+		generator.ConstructorTypeRender(constructorTypeRender),
 	)
 	if err != nil {
 		return fmt.Errorf("cannot renderOptions template: %w", err)
