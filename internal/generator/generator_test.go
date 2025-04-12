@@ -6,7 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/kazhuravlev/options-gen/internal/generator"
+
 	// test named imports.
 	"github.com/kazhuravlev/options-gen/internal/generator/testdata"
 	req "github.com/stretchr/testify/require"
@@ -25,6 +27,7 @@ func TestGetImports(t *testing.T) {
 		`"sort"`,
 		`"testing"`,
 		`"time"`,
+		`"github.com/google/uuid"`,
 		`"github.com/kazhuravlev/options-gen/internal/generator"`,
 		`"github.com/kazhuravlev/options-gen/internal/generator/testdata"`,
 		`req "github.com/stretchr/testify/require"`,
@@ -571,6 +574,120 @@ func TestGetOptionSpecEmbedAnotherPkgPtr(t *testing.T) { //nolint:funlen
 					GoValidator:   "",
 					Default:       "",
 					Variadic:      false,
+					VariadicIsSet: false,
+					Skip:          false,
+				},
+			},
+		},
+	}, spec)
+}
+
+type (
+	Ints       []int
+	IntsPtr    []*int
+	Structs    []testdata.StructForEmbed
+	StructsPtr []*testdata.StructForEmbed
+)
+
+type TestOptionSliceAlias struct {
+	ints       Ints            //nolint:unused
+	intsPtr    IntsPtr         //nolint:unused
+	structs    Structs         //nolint:unused
+	structsPtr StructsPtr      //nolint:unused
+	pkgSlice   testdata.Int32s //nolint:unused
+	uuid       uuid.UUID       //nolint:unused
+}
+
+func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
+	t.Parallel()
+
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionSliceAlias", "default", true)
+	req.NoError(t, err)
+	req.Equal(t, []string(nil), warnings)
+	req.Equal(t, &generator.OptionSpec{
+		TypeParamsSpec: "",
+		TypeParams:     "",
+		Options: []generator.OptionMeta{
+			{
+				Name:      "Ints",
+				Field:     "ints",
+				Type:      "int",
+				Docstring: "",
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      true,
+					VariadicIsSet: false,
+					Skip:          false,
+				},
+			},
+			{
+				Name:      "IntsPtr",
+				Field:     "intsPtr",
+				Type:      "*int",
+				Docstring: "",
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      true,
+					VariadicIsSet: false,
+					Skip:          false,
+				},
+			},
+			{
+				Name:      "Structs",
+				Field:     "structs",
+				Type:      "testdata.StructForEmbed",
+				Docstring: "",
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      true,
+					VariadicIsSet: false,
+					Skip:          false,
+				},
+			},
+			{
+				Name:      "StructsPtr",
+				Field:     "structsPtr",
+				Type:      "*testdata.StructForEmbed",
+				Docstring: "",
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      true,
+					VariadicIsSet: false,
+					Skip:          false,
+				},
+			},
+			{
+				Name:      "PkgSlice",
+				Field:     "pkgSlice",
+				Type:      "int32",
+				Docstring: "",
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      true,
+					VariadicIsSet: false,
+					Skip:          false,
+				},
+			},
+			{
+				Name:      "Uuid",
+				Field:     "uuid",
+				Type:      "byte",
+				Docstring: "",
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      true,
 					VariadicIsSet: false,
 					Skip:          false,
 				},
