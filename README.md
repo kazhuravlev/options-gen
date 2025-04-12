@@ -349,7 +349,7 @@ import "github.com/mycoolmodule/internal/validator"
 // ...
 
 func (Options) Validator() *validator.Validate {
-return validator.Validator
+	return validator.Validator
 }
 ```
 
@@ -379,6 +379,16 @@ You can generate variadic functions for slice type variables. By default, functi
 
 To generate variadic functions, you can use the `-all-variadic=true` option or specify tag `option:"variadic=true"` for specific fields.
 You can also generate a fallback variadic function when `-all-variadic=true` is included using the `option:"variadic=false"` tag.
+
+### Skip fields
+
+If you don't need to generate a setter for a specific field, you can specify this using the tag `option:"-"`.
+
+```go
+type Options struct {
+	name string `option:"-"`
+}
+```
 
 ## Contributing
 
