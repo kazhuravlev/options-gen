@@ -11,6 +11,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"strconv"
 	"strings"
 	"text/template"
 
@@ -23,6 +24,8 @@ import (
 var templates embed.FS
 
 var tmpl = template.Must(template.ParseFS(templates, "templates/options.go.tpl"))
+
+const keyValueSliceSize = 2
 
 type OptionSpec struct {
 	TypeParamsSpec string // [KeyT int | string, TT any]
@@ -49,10 +52,21 @@ type OptionMeta struct {
 }
 
 type TagOption struct {
-	IsRequired  bool
-	GoValidator string
-	Default     string
+	IsRequired    bool
+	GoValidator   string
+	Default       string
+	Variadic      bool
+	VariadicIsSet bool
+	Skip          bool
 }
+
+type ConstructorTypeRender string
+
+const (
+	ConstructorPublicRender  ConstructorTypeRender = "public"
+	ConstructorPrivateRender ConstructorTypeRender = "private"
+	ConstructorNoRender      ConstructorTypeRender = "no"
+)
 
 // RenderOptions will render file and out it's content.
 func RenderOptions(
@@ -61,6 +75,7 @@ func RenderOptions(
 	spec *OptionSpec,
 	tagName, varName, funcName, prefix string,
 	withIsset bool,
+	constructorTypeRender ConstructorTypeRender,
 ) ([]byte, error) {
 	optionsStructType := optionsStructName
 	optionsStructInstanceType := optionsStructName
@@ -89,6 +104,8 @@ func RenderOptions(
 		"defaultsFuncName":          funcName,
 
 		"withIsset": withIsset,
+
+		"constructorTypeRender": constructorTypeRender,
 	}
 	buf := new(bytes.Buffer)
 
@@ -109,7 +126,7 @@ func RenderOptions(
 
 // GetOptionSpec read the input filename by filePath, find optionsStructName
 // and scan for options.
-func GetOptionSpec(filePath, optionsStructName, tagName string) (*OptionSpec, []string, error) {
+func GetOptionSpec(filePath, optionsStructName, tagName string, allVariadic bool) (*OptionSpec, []string, error) {
 	fset := token.NewFileSet()
 
 	node, err := parser.ParseDir(fset, path.Dir(filePath), nil, parser.ParseComments)
@@ -118,13 +135,24 @@ func GetOptionSpec(filePath, optionsStructName, tagName string) (*OptionSpec, []
 	}
 
 	typeParams, fields := findStructTypeParamsAndFields(node, optionsStructName)
-	options := make([]OptionMeta, len(fields))
+	options := make([]OptionMeta, 0, len(fields))
 
 	var warnings []string
 	for idx := range fields {
 		field := fields[idx]
 
-		fieldName := field.Names[0].Name
+		var fieldName string
+		if len(field.Names) > 0 {
+			fieldName = field.Names[0].Name
+		} else {
+			fieldName = normalizeTypeName(types.ExprString(field.Type))
+		}
+
+		tagOption, tagWarnings := parseTag(field.Tag, fieldName, tagName)
+		if tagOption.Skip {
+			continue
+		}
+
 		if isPublic(fieldName) {
 			warnings = append(warnings,
 				fmt.Sprintf(
@@ -134,7 +162,6 @@ func GetOptionSpec(filePath, optionsStructName, tagName string) (*OptionSpec, []
 			)
 		}
 
-		tagOption, tagWarnings := parseTag(field.Tag, fieldName, tagName)
 		warnings = append(warnings, tagWarnings...)
 		optMeta := OptionMeta{
 			Name:      cases.Title(language.English, cases.NoLower).String(fieldName),
@@ -155,7 +182,21 @@ func GetOptionSpec(filePath, optionsStructName, tagName string) (*OptionSpec, []
 			}
 		}
 
-		options[idx] = optMeta
+		if optMeta.TagOption.Variadic || allVariadic {
+			if !isSlice(optMeta.Type) {
+				return nil, nil, fmt.Errorf("field `%s`: this type could not be variadic", tagName)
+			}
+
+			if !optMeta.TagOption.VariadicIsSet {
+				optMeta.TagOption.Variadic = allVariadic
+			}
+
+			if optMeta.TagOption.Variadic {
+				optMeta.Type = optMeta.Type[2:]
+			}
+		}
+
+		options = append(options, optMeta)
 	}
 
 	tpSpec, tpString, err := typeParamsStr(typeParams)
@@ -183,7 +224,15 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 	var warnings []string
 	optionTag := reflect.StructTag(strings.Trim(value, "`")).Get("option")
 	for _, opt := range strings.Split(optionTag, ",") {
-		switch opt {
+		optParts := strings.SplitN(opt, "=", keyValueSliceSize)
+		var optName, optValue string
+		optName = optParts[0]
+
+		if len(optParts) > 1 {
+			optValue = optParts[1]
+		}
+
+		switch optName {
 		case "mandatory":
 			tagOpt.IsRequired = true
 
@@ -210,6 +259,19 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 					tagOpt.GoValidator += ",required"
 				}
 			}
+
+		case "variadic":
+			val, err := strconv.ParseBool(optValue)
+			if err != nil {
+				warnings = append(warnings, fmt.Sprintf("Error: parse variadic for the field %s failed: %s\n",
+					fieldName, err.Error()))
+			}
+
+			tagOpt.Variadic = val
+			tagOpt.VariadicIsSet = true
+
+		case "-":
+			tagOpt.Skip = true
 		}
 	}
 

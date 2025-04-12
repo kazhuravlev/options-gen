@@ -125,3 +125,15 @@ func checkDefaultValue(fieldType string, tag string) error {
 
 	return nil
 }
+
+func isSlice(typeName string) bool {
+	return strings.HasPrefix(typeName, "[]")
+}
+
+func normalizeTypeName(typeName string) string {
+	if idx := strings.LastIndex(typeName, "."); idx > -1 {
+		typeName = typeName[idx+1:]
+	}
+
+	return strings.TrimPrefix(strings.TrimPrefix(typeName, "[]"), "*")
+}

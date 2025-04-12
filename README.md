@@ -141,6 +141,15 @@ it will have the following arguments:
 - `out-filename` - specifies an output filename. This filename will be rewritten
   with options-gen specific content. For
   example `./pkg/github-client/options_generated.go`.
+- `all-variadic` - generate variadic functions for all fields with slice type.
+  Default: `false` - functions that accept a slice are generated.
+- `constructor` - specifies the type and whether to generate a function to build your structure with parameters.
+  Possible values:
+  - `public` - generate public constructor
+  - `private` - generate private constructor
+  - `no` - not generate any constructor
+
+  Default: `public`
 
 See an [Examples](#Examples).
 
@@ -347,7 +356,7 @@ import "github.com/mycoolmodule/internal/validator"
 // ...
 
 func (Options) Validator() *validator.Validate {
-return validator.Validator
+	return validator.Validator
 }
 ```
 
@@ -368,6 +377,23 @@ func init() {
 	must(Validator.RegisterAlias( /* ... */))
 
 	optsValidator.Set(Validator)
+}
+```
+
+### Variadic setters
+
+You can generate variadic functions for slice type variables. By default, functions that accept a slice are generated.
+
+To generate variadic functions, you can use the `-all-variadic=true` option or specify tag `option:"variadic=true"` for specific fields.
+You can also generate a fallback variadic function when `-all-variadic=true` is included using the `option:"variadic=false"` tag.
+
+### Skip fields
+
+If you don't need to generate a setter for a specific field, you can specify this using the tag `option:"-"`.
+
+```go
+type Options struct {
+	name string `option:"-"`
 }
 ```
 

@@ -50,6 +50,8 @@ func TestRun(t *testing.T) {
 					params.Defaults,
 					true,
 					true,
+					false,
+					params.Constructor,
 				)
 				assert.NoError(t, err)
 
@@ -71,14 +73,17 @@ func TestRun(t *testing.T) {
 			optionsgen.Defaults{From: optionsgen.DefaultsFromTag, Param: ""},
 			true,
 			false,
+			false,
+			optionsgen.ConstructorPublicRender,
 		)
 		assert.ErrorIs(t, err, syscall.ENOENT)
 	})
 }
 
 type Params struct {
-	OutPrefix string              `json:"out_prefix"` //nolint:tagliatelle
-	Defaults  optionsgen.Defaults `json:"defaults"`
+	OutPrefix   string                           `json:"out_prefix"` //nolint:tagliatelle
+	Defaults    optionsgen.Defaults              `json:"defaults"`
+	Constructor optionsgen.ConstructorTypeRender `json:"constructor"`
 }
 
 func readParams(filename string) Params {
@@ -88,6 +93,7 @@ func readParams(filename string) Params {
 			From:  optionsgen.DefaultsFromTag,
 			Param: "",
 		},
+		Constructor: optionsgen.ConstructorPublicRender,
 	}
 
 	bb, err := os.ReadFile(filename)
