@@ -4,14 +4,20 @@ on:
   push:
     tags:
       - '*'
+
 jobs:
-  lint:
+  golangci:
+    name: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: golangci/golangci-lint-action@v3
+      - uses: actions/setup-go@v5
         with:
-          version: v1.62.2
+          go-version: stable
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v7
+        with:
+          version: v2.0
 
   build:
     name: Build on golang ${{ matrix.go_version }} and ${{ matrix.os }}
