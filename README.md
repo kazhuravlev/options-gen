@@ -157,6 +157,19 @@ it will have the following arguments:
     - `no` - not generate any constructor
 
   Default: `public`
+- `defaults-from` - specifies how default values are determined for option fields. Possible values:
+    - `tag[=TagName]` - use tag values (default TagName is `default`)
+    - `var[=VariableName]` - use variable of Options type (default VariableName is `default<StructName>`)
+    - `func[=FunctionName]` - use function that returns Options (default FunctionName is `getDefault<StructName>`)
+    - `none` - disable defaults
+
+  Default: `tag=default`
+- `mute-warnings` - suppress warning messages during code generation.
+
+  Default: `false` - warnings are displayed
+- `out-prefix` - add prefix to the generated file. Useful when you have multiple Options structs in the same package.
+
+  Default: empty string
 
 See an [Examples](#Examples).
 
