@@ -8,9 +8,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/kazhuravlev/options-gen/internal/generator"
-
-	// test named imports.
 	"github.com/kazhuravlev/options-gen/internal/generator/testdata"
+	// test named imports.
 	req "github.com/stretchr/testify/require"
 )
 
