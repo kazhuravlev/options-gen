@@ -37,7 +37,7 @@ func TestGetImports(t *testing.T) {
 func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptions", "default")
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptions", "default", false)
 	req.NoError(t, err)
 	req.Equal(t, []string{
 		"Deprecated: use `option:\"mandatory\"` instead for field `oldStyleOpt1` to force the passing option in the constructor argument\n",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              //nolint:lll
@@ -54,98 +54,192 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 				Docstring: "// stringer bla-bla",
 				Field:     "stringer",
 				Type:      "fmt.Stringer",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    true,
+					GoValidator:   "required",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 			{
 				Name:      "Str",
 				Docstring: "// comment-without-field-name-mention",
 				Field:     "str",
 				Type:      "string",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: "required", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "required",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 			{
 				Name:      "SomeMap",
 				Docstring: "",
 				Field:     "someMap",
 				Type:      "map[string]string",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    true,
+					GoValidator:   "required",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 			{
 				Name:      "BoolTrue",
 				Docstring: "",
 				Field:     "boolTrue",
 				Type:      "bool",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: "true"},
+				TagOption: generator.TagOption{
+					IsRequired:  false,
+					GoValidator: "", Default: "true",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 			{
 				Name:      "BoolFalse",
 				Docstring: "",
 				Field:     "boolFalse",
 				Type:      "bool",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: "false"},
+				TagOption: generator.TagOption{
+					IsRequired:  false,
+					GoValidator: "", Default: "false",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 			{
 				Name:      "NoValidation",
 				Docstring: "// multi\n// line\n// \n// comment",
 				Field:     "noValidation",
 				Type:      "string",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 			{
 				Name:      "StarOpt",
 				Docstring: "",
 				Field:     "starOpt",
 				Type:      "*int",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    true,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 			{
 				Name:      "SliceOpt",
 				Docstring: "",
 				Field:     "sliceOpt",
 				Type:      "[]int",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    true,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
+			},
+			{
+				Name:      "SliceOptVariadic",
+				Docstring: "",
+				Field:     "sliceOptVariadic",
+				Type:      "int",
+				TagOption: generator.TagOption{
+					IsRequired:    true,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      true,
+					VariadicIsSet: true,
+				},
 			},
 			{
 				Name:      "OldStyleOpt1",
 				Docstring: "",
 				Field:     "oldStyleOpt1",
 				Type:      "string",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    true,
+					GoValidator:   "required",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 			{
 				Name:      "OldStyleOpt2",
 				Docstring: "",
 				Field:     "oldStyleOpt2",
 				Type:      "string",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    true,
+					GoValidator:   "required",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 			{
 				Name:      "OldStyleOpt3",
 				Docstring: "",
 				Field:     "oldStyleOpt3",
 				Type:      "string",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "min=10,required", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    true,
+					GoValidator:   "min=10,required",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 			{
 				Name:      "PublicOption1",
 				Docstring: "",
 				Field:     "PublicOption1",
 				Type:      "int",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    true,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 			{
 				Name:      "PublicOption2",
 				Docstring: "",
 				Field:     "PublicOption2",
 				Type:      "int",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 			{
 				Name:      "WithDefaultValue",
 				Docstring: "",
 				Field:     "withDefaultValue",
 				Type:      "time.Duration",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: "1m"},
+				TagOption: generator.TagOption{
+					IsRequired:  false,
+					GoValidator: "", Default: "1m",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 		},
 	}, spec)
@@ -154,7 +248,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 func TestGetOptionSpec_Generics(t *testing.T) {
 	t.Parallel()
 
-	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsGen", "default")
+	spec, warnings, err := generator.GetOptionSpec(gofile, "TestOptionsGen", "default", false)
 	req.NoError(t, err)
 	req.Empty(t, warnings)
 	req.Equal(t, &generator.OptionSpec{
@@ -166,28 +260,52 @@ func TestGetOptionSpec_Generics(t *testing.T) {
 				Docstring: "",
 				Field:     "opt1",
 				Type:      "T1",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    true,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 			{
 				Name:      "Opt2",
 				Docstring: "",
 				Field:     "opt2",
 				Type:      "T2",
-				TagOption: generator.TagOption{IsRequired: true, GoValidator: "required", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    true,
+					GoValidator:   "required",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 			{
 				Name:      "Opt3",
 				Docstring: "",
 				Field:     "opt3",
 				Type:      "int",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: "min=10", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "min=10",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 			{
 				Name:      "Opt4",
 				Docstring: "",
 				Field:     "opt4",
 				Type:      "T3",
-				TagOption: generator.TagOption{IsRequired: false, GoValidator: "", Default: ""},
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      false,
+					VariadicIsSet: false,
+				},
 			},
 		},
 	}, spec)
@@ -208,9 +326,10 @@ type TestOptions struct {
 	// line
 	//
 	// comment
-	noValidation string //nolint:unused
-	starOpt      *int   `option:"mandatory"` //nolint:unused
-	sliceOpt     []int  `option:"mandatory"` //nolint:unused
+	noValidation     string //nolint:unused
+	starOpt          *int   `option:"mandatory"`               //nolint:unused
+	sliceOpt         []int  `option:"mandatory"`               //nolint:unused
+	sliceOptVariadic []int  `option:"mandatory,variadic=true"` //nolint:unused
 
 	oldStyleOpt1 string `option:"required,not-empty"`                     //nolint:unused
 	oldStyleOpt2 string `option:"required,not-empty" validate:"required"` //nolint:unused
