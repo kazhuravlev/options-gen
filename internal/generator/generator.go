@@ -57,6 +57,7 @@ type TagOption struct {
 	Default       string
 	Variadic      bool
 	VariadicIsSet bool
+	Skip          bool
 }
 
 // RenderOptions will render file and out it's content.
@@ -123,7 +124,7 @@ func GetOptionSpec(filePath, optionsStructName, tagName string, allVariadic bool
 	}
 
 	typeParams, fields := findStructTypeParamsAndFields(node, optionsStructName)
-	options := make([]OptionMeta, len(fields))
+	options := make([]OptionMeta, 0, len(fields))
 
 	var warnings []string
 	for idx := range fields {
@@ -136,6 +137,11 @@ func GetOptionSpec(filePath, optionsStructName, tagName string, allVariadic bool
 			fieldName = normalizeTypeName(types.ExprString(field.Type))
 		}
 
+		tagOption, tagWarnings := parseTag(field.Tag, fieldName, tagName)
+		if tagOption.Skip {
+			continue
+		}
+
 		if isPublic(fieldName) {
 			warnings = append(warnings,
 				fmt.Sprintf(
@@ -145,7 +151,6 @@ func GetOptionSpec(filePath, optionsStructName, tagName string, allVariadic bool
 			)
 		}
 
-		tagOption, tagWarnings := parseTag(field.Tag, fieldName, tagName)
 		warnings = append(warnings, tagWarnings...)
 		optMeta := OptionMeta{
 			Name:      cases.Title(language.English, cases.NoLower).String(fieldName),
@@ -180,7 +185,7 @@ func GetOptionSpec(filePath, optionsStructName, tagName string, allVariadic bool
 			}
 		}
 
-		options[idx] = optMeta
+		options = append(options, optMeta)
 	}
 
 	tpSpec, tpString, err := typeParamsStr(typeParams)
@@ -253,6 +258,9 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 
 			tagOpt.Variadic = val
 			tagOpt.VariadicIsSet = true
+
+		case "-":
+			tagOpt.Skip = true
 		}
 	}
 

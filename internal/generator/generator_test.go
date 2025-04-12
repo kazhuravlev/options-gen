@@ -60,6 +60,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 			{
@@ -73,6 +74,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 			{
@@ -86,6 +88,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 			{
@@ -98,6 +101,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 					GoValidator: "", Default: "true",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 			{
@@ -110,6 +114,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 					GoValidator: "", Default: "false",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 			{
@@ -123,6 +128,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 			{
@@ -136,6 +142,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 			{
@@ -149,6 +156,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 			{
@@ -162,6 +170,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      true,
 					VariadicIsSet: true,
+					Skip:          false,
 				},
 			},
 			{
@@ -175,6 +184,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 			{
@@ -188,6 +198,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 			{
@@ -201,6 +212,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 			{
@@ -214,6 +226,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 			{
@@ -227,6 +240,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 			{
@@ -239,6 +253,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 					GoValidator: "", Default: "1m",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 		},
@@ -266,6 +281,7 @@ func TestGetOptionSpec_Generics(t *testing.T) {
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 			{
@@ -279,6 +295,7 @@ func TestGetOptionSpec_Generics(t *testing.T) {
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 			{
@@ -292,6 +309,7 @@ func TestGetOptionSpec_Generics(t *testing.T) {
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 			{
@@ -305,6 +323,7 @@ func TestGetOptionSpec_Generics(t *testing.T) {
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 		},
@@ -403,6 +422,7 @@ func TestGetOptionSpecInline(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 		},
@@ -432,6 +452,7 @@ func TestGetOptionSpecInlinePtr(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 		},
@@ -461,6 +482,7 @@ func TestGetOptionSpecEmbed(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 		},
@@ -490,6 +512,7 @@ func TestGetOptionSpecEmbedPtr(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 		},
@@ -519,6 +542,7 @@ func TestGetOptionSpecEmbedAnotherPkg(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 		},
@@ -548,6 +572,7 @@ func TestGetOptionSpecEmbedAnotherPkgPtr(t *testing.T) { //nolint:funlen
 					Default:       "",
 					Variadic:      false,
 					VariadicIsSet: false,
+					Skip:          false,
 				},
 			},
 		},
