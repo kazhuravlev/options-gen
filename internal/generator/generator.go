@@ -60,14 +60,6 @@ type TagOption struct {
 	Skip          bool
 }
 
-type ConstructorTypeRender string
-
-const (
-	ConstructorPublicRender  ConstructorTypeRender = "public"
-	ConstructorPrivateRender ConstructorTypeRender = "private"
-	ConstructorNoRender      ConstructorTypeRender = "no"
-)
-
 // RenderOptions will render file and out it's content.
 func RenderOptions(
 	packageName, optionsStructName string,
@@ -75,7 +67,7 @@ func RenderOptions(
 	spec *OptionSpec,
 	tagName, varName, funcName, prefix string,
 	withIsset bool,
-	constructorTypeRender ConstructorTypeRender,
+	constructorTypeRender string,
 ) ([]byte, error) {
 	optionsStructType := optionsStructName
 	optionsStructInstanceType := optionsStructName

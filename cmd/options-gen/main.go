@@ -60,13 +60,25 @@ func main() {
 		"generate variadic functions")
 	flag.StringVar((*string)(&constructorTypeRender),
 		"constructor", string(optionsgen.ConstructorPublicRender),
-		"generate a function constructor")
+		"generate a function constructor. Possible values: "+strings.Join([]string{
+			string(optionsgen.ConstructorPublicRender),
+			string(optionsgen.ConstructorPrivateRender),
+			string(optionsgen.ConstructorNoRender),
+		}, ", ")+".")
 	flag.Parse()
 
 	if isEmpty(inFilename, outFilename, outPackageName, optionsStructName, defaultsFrom) {
 		flag.Usage()
 		//nolint:forbidigo
 		fmt.Println("missed required options")
+
+		return
+	}
+
+	if !constructorTypeRender.Valid() {
+		flag.Usage()
+		//nolint:forbidigo
+		fmt.Println("invalid value for constructor: " + constructorTypeRender)
 
 		return
 	}
