@@ -31,6 +31,7 @@ func main() {
 			optionsgen.Defaults{From: optionsgen.DefaultsFromTag, Param: ""},
 			true,
 			false,
+			false,
 			true,
 			true,
 		); err != nil {

@@ -21,6 +21,7 @@ func main() {
 		defaultsFrom        string
 		muteWarnings        bool
 		withIsset           bool
+		allVariadic         bool
 		generateConstructor bool
 		publicConstructor   bool
 	)
@@ -55,6 +56,9 @@ func main() {
 	flag.BoolVar(&withIsset,
 		"with-isset", false,
 		"generate a function that helps check which fields have been set")
+	flag.BoolVar(&allVariadic,
+		"all-variadic", false,
+		"generate variadic functions")
 	flag.BoolVar(&generateConstructor,
 		"generate-constructor", true,
 		"generate a function constructor")
@@ -88,6 +92,7 @@ func main() {
 		*defaults,
 		!muteWarnings,
 		withIsset,
+		allVariadic,
 		generateConstructor,
 		publicConstructor,
 	)

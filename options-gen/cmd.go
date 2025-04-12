@@ -29,6 +29,7 @@ func Run(
 	defaults Defaults,
 	showWarnings bool,
 	withIsset bool,
+	allVariadic bool,
 	generateConstructor, publicConstructor bool,
 ) error {
 	outPrefix = strings.TrimSpace(outPrefix)
@@ -53,7 +54,7 @@ func Run(
 		}
 	}
 
-	optionSpec, warnings, err := generator.GetOptionSpec(inFilename, structName, tagName)
+	optionSpec, warnings, err := generator.GetOptionSpec(inFilename, structName, tagName, allVariadic)
 	if err != nil {
 		return fmt.Errorf("cannot get options spec: %w", err)
 	}

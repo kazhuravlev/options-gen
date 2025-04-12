@@ -50,6 +50,7 @@ func TestRun(t *testing.T) {
 					params.Defaults,
 					true,
 					true,
+					false,
 					params.GenerateConstructor,
 					params.PublicConstructor,
 				)
@@ -72,6 +73,7 @@ func TestRun(t *testing.T) {
 			"XXX",
 			optionsgen.Defaults{From: optionsgen.DefaultsFromTag, Param: ""},
 			true,
+			false,
 			false,
 			true,
 			true,
