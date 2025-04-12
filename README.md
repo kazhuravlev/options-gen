@@ -160,6 +160,12 @@ it will have the following arguments:
 
 See an [Examples](#Examples).
 
+### Using out-prefix for multiple Options structs
+
+When you have multiple option structs in the same package, the `out-prefix` flag helps avoid naming conflicts:
+
+You can find an example in [that example](./examples/go-generate-2options-1pkg/) directory.
+
 ### Option tag
 
 You can control two important things. The first is about the options constructor
