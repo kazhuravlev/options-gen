@@ -126,6 +126,11 @@ func GetOptionSpec(filePath, optionsStructName, tagName string, allVariadic bool
 		return nil, nil, fmt.Errorf("cannot parse dir: %w", err)
 	}
 
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return nil, nil, fmt.Errorf("get current dir: %w", err)
+	}
+
 	typeParams, fields := findStructTypeParamsAndFields(node, optionsStructName)
 	options := make([]OptionMeta, 0, len(fields))
 
@@ -175,7 +180,7 @@ func GetOptionSpec(filePath, optionsStructName, tagName string, allVariadic bool
 		}
 
 		if optMeta.TagOption.Variadic || allVariadic {
-			kind, ok := extractSliceKind(fset, node, optMeta.Type, path.Dir(filePath))
+			kind, ok := extractSliceKind(fset, node, optMeta.Type, path.Join(currentDir, path.Dir(filePath)), true)
 			if !ok {
 				return nil, nil, fmt.Errorf("field `%s`: this type could not be variadic", fieldName)
 			}

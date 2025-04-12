@@ -588,12 +588,14 @@ type (
 )
 
 type TestOptionSliceAlias struct {
-	ints       Ints            //nolint:unused
-	intsPtr    IntsPtr         //nolint:unused
-	structs    Structs         //nolint:unused
-	structsPtr StructsPtr      //nolint:unused
-	pkgSlice   testdata.Int32s //nolint:unused
-	uuid       uuid.UUID       //nolint:unused
+	ints       Ints              //nolint:unused
+	intsPtr    IntsPtr           //nolint:unused
+	structs    Structs           //nolint:unused
+	structsPtr StructsPtr        //nolint:unused
+	pkgSlice   testdata.Int32s   //nolint:unused
+	uuid       uuid.UUID         //nolint:unused
+	ref        testdata.RefType  //nolint:unused
+	refUUID    testdata.RefUUIDs //nolint:unused
 }
 
 func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
@@ -680,6 +682,34 @@ func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
 				Name:      "Uuid",
 				Field:     "uuid",
 				Type:      "byte",
+				Docstring: "",
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      true,
+					VariadicIsSet: false,
+					Skip:          false,
+				},
+			},
+			{
+				Name:      "Ref",
+				Field:     "ref",
+				Type:      "int64",
+				Docstring: "",
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      true,
+					VariadicIsSet: false,
+					Skip:          false,
+				},
+			},
+			{
+				Name:      "RefUUID",
+				Field:     "refUUID",
+				Type:      "uuid.UUID",
 				Docstring: "",
 				TagOption: generator.TagOption{
 					IsRequired:    false,

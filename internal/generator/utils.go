@@ -192,15 +192,8 @@ func tryParsePackage(
 	currentPackage string,
 	currentDir string,
 ) (map[string]*ast.Package, bool) {
-	if currentDir == "." {
-		path, err := os.Getwd()
-		if err != nil {
-			return nil, false
-		}
-
-		currentDir = path
-	}
 	currentPackage = "/" + strings.TrimSuffix(currentPackage, "_test") + "/"
+
 	if idx := strings.Index(packagePath, currentPackage); idx > -1 {
 		node, err := parser.ParseDir(
 			fset,
@@ -307,6 +300,7 @@ func extractSliceKind(
 	packages map[string]*ast.Package,
 	typeName string,
 	currentDir string,
+	firstCall bool,
 ) (string, bool) {
 	if strings.HasPrefix(typeName, "[]") {
 		return typeName[2:], true
@@ -323,9 +317,38 @@ func extractSliceKind(
 			return "", false
 		}
 
+		packages = newPkg
 		decls = getDecls(newPkg)
+		currentDir = path.Join(currentDir, nameParts[0])
 	}
 
+	typeSpec := findTypeSpecs(decls, typeName)
+	if typeSpec == nil {
+		return "", false
+	}
+
+	if arr, ok := typeSpec.Type.(*ast.ArrayType); ok {
+		typename := types.ExprString(arr.Elt)
+
+		if !firstCall {
+			itemSpec := findTypeSpecs(decls, typename)
+
+			if itemSpec != nil {
+				typename = nameParts[0] + "." + typename
+			}
+		}
+
+		return typename, true
+	}
+
+	if sel, ok := typeSpec.Type.(*ast.SelectorExpr); ok {
+		return extractSliceKind(fset, packages, types.ExprString(sel), currentDir, false)
+	}
+
+	return "", false
+}
+
+func findTypeSpecs(decls []ast.Decl, typeName string) *ast.TypeSpec {
 	for _, decl := range decls {
 		genDecl, ok := decl.(*ast.GenDecl)
 		if !ok {
@@ -342,13 +365,11 @@ func extractSliceKind(
 				continue
 			}
 
-			if arr, ok := typeSpec.Type.(*ast.ArrayType); ok {
-				return types.ExprString(arr.Elt), true
-			}
+			return typeSpec
 		}
 	}
 
-	return "", false
+	return nil
 }
 
 func normalizeTypeName(typeName string) string {
