@@ -17,7 +17,8 @@ func New(opts Options) (*Client, error) {
 	return &Client{opts: opts}, nil
 }
 
-func (c *Client) SendRequest(ctx context.Context) error {
-	_, err := c.opts.httpClient.Get("http://localhost:8000/hello?token=" + c.opts.token)
+func (c *Client) SendRequest(_ context.Context) error {
+	_, err := c.opts.httpClient.Get("http://localhost:8000/hello?token=" + c.opts.token) //nolint:bodyclose,noctx
+
 	return err
 }
