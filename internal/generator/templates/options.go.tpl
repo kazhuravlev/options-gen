@@ -23,8 +23,8 @@ var opt{{$.optionsPrefix}}IsSet = [{{ .optionsLen }}]bool{}
 
 type Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParamsSpec }} func(o *{{ .optionsStructInstanceType }})
 
-{{if .generateConstructor }}
-func {{if .publicConstructor }}New{{else}}new{{end}}{{ .optionsStructType }}(
+{{if ne .constructorTypeRender "no" }}
+func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsStructType }}(
 	{{ range .options -}}
 		{{ if .TagOption.IsRequired -}}
 			{{ .Field }} {{ .Type }},

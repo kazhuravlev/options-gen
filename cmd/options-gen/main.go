@@ -13,17 +13,16 @@ import (
 
 func main() {
 	var (
-		inFilename          string
-		outFilename         string
-		optionsStructName   string
-		outPackageName      string
-		outPrefix           string
-		defaultsFrom        string
-		muteWarnings        bool
-		withIsset           bool
-		allVariadic         bool
-		generateConstructor bool
-		publicConstructor   bool
+		inFilename            string
+		outFilename           string
+		optionsStructName     string
+		outPackageName        string
+		outPrefix             string
+		defaultsFrom          string
+		muteWarnings          bool
+		withIsset             bool
+		allVariadic           bool
+		constructorTypeRender optionsgen.ConstructorTypeRender
 	)
 
 	envGoFile := os.Getenv("GOFILE")
@@ -59,12 +58,9 @@ func main() {
 	flag.BoolVar(&allVariadic,
 		"all-variadic", false,
 		"generate variadic functions")
-	flag.BoolVar(&generateConstructor,
-		"generate-constructor", true,
+	flag.StringVar((*string)(&constructorTypeRender),
+		"constructor", string(optionsgen.ConstructorPublicRender),
 		"generate a function constructor")
-	flag.BoolVar(&publicConstructor,
-		"public-constructor", true,
-		"make public or private function constructor")
 	flag.Parse()
 
 	if isEmpty(inFilename, outFilename, outPackageName, optionsStructName, defaultsFrom) {
@@ -93,8 +89,7 @@ func main() {
 		!muteWarnings,
 		withIsset,
 		allVariadic,
-		generateConstructor,
-		publicConstructor,
+		constructorTypeRender,
 	)
 	if errRun != nil {
 		//nolint:forbidigo

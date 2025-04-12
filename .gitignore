@@ -146,3 +146,5 @@ fabric.properties
 !.vscode/extensions.json
 
 bin/
+
+.vscode/

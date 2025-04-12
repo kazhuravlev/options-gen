@@ -32,8 +32,7 @@ func main() {
 			true,
 			false,
 			false,
-			true,
-			true,
+			optionsgen.ConstructorPublicRender,
 		); err != nil {
 			panic(err)
 		}
