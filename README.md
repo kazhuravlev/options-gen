@@ -148,6 +148,7 @@ it will have the following arguments:
   - `public` - generate public constructor
   - `private` - generate private constructor
   - `no` - not generate any constructor
+
   Default: `public`
 
 See an [Examples](#Examples).
