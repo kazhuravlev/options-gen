@@ -1,8 +1,6 @@
 package main
 
-import (
-	"github.com/kazhuravlev/options-gen/examples/library/sub-package"
-)
+import subpackage "github.com/kazhuravlev/options-gen/examples/library/sub-package"
 
 type Options struct {
 	service1   *subpackage.Service1 `option:"mandatory" validate:"required"`

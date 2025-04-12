@@ -108,7 +108,7 @@ func checkDefaultValue(fieldType string, tag string) error {
 		_, err = time.ParseDuration(tag)
 
 	case "bool":
-		if !(tag == "true" || tag == "false") {
+		if tag != "true" && tag != "false" {
 			return fmt.Errorf("bool type only supports true/false")
 		}
 

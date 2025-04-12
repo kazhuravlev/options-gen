@@ -1,3 +1,4 @@
+//nolint:mnd
 package gogenerate
 
 //go:generate options-gen -from-struct=Options1 -out-prefix=KKK -out-filename=options1_generated.go -defaults-from=var=defaultOptions1 -with-isset
