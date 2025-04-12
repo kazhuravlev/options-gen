@@ -130,28 +130,54 @@ All the tool needs is the information about source and target files and packages
 Tool can be invoked by `options-gen` (after [Installation](#Installation)) and
 it will have the following arguments:
 
-- `filename` - is a source filename that contains `Options` struct relative
-  to the current dir. For example `./pkg/github-client/options.go`.
+- `filename` - is a source filename that contains `Options` struct relative to the current dir. For example
+  `./pkg/github-client/options.go`.
+
   Default: `$GOFILE` (file where you placed `//go:generate`).
-- `pkg` - name of output filename package. In most cases we can just use
-  the same package as the `filename` file. For example `githubclient`.
+- `pkg` - name of output filename package. In most cases we can just use the same package as the `filename` file. For
+  example `githubclient`.
+
   Default: `$GOPACKAGE`. Package name same as file where you placed `//go:generate`.
-- `from-struct` - name of structure that contains our options. For
-  example `Options`.
-- `out-filename` - specifies an output filename. This filename will be rewritten
-  with options-gen specific content. For
+- `from-struct` - name of structure that contains our options. For example `Options`.
+- `out-filename` - specifies an output filename. This filename will be rewritten with options-gen specific content. For
   example `./pkg/github-client/options_generated.go`.
+
+  Default: `$GOFILE_generated.go`
 - `all-variadic` - generate variadic functions for all fields with slice type.
+
   Default: `false` - functions that accept a slice are generated.
+- `with-isset` - generate additional method `IsSet(field optField) bool` that allows checking whether a field was
+  explicitly set.
+
+  Default: `false`. Will not produce the `IsSet` functions.
 - `constructor` - specifies the type and whether to generate a function to build your structure with parameters.
   Possible values:
-  - `public` - generate public constructor
-  - `private` - generate private constructor
-  - `no` - not generate any constructor
+    - `public` - generate public constructor
+    - `private` - generate private constructor
+    - `no` - not generate any constructor
 
   Default: `public`
+- `defaults-from` - specifies how default values are determined for option fields. Possible values:
+    - `tag[=TagName]` - use tag values (default TagName is `default`)
+    - `var[=VariableName]` - use variable of Options type (default VariableName is `default<StructName>`)
+    - `func[=FunctionName]` - use function that returns Options (default FunctionName is `getDefault<StructName>`)
+    - `none` - disable defaults
+
+  Default: `tag=default`
+- `mute-warnings` - suppress warning messages during code generation.
+
+  Default: `false` - warnings are displayed
+- `out-prefix` - add prefix to the generated file. Useful when you have multiple Options structs in the same package.
+
+  Default: empty string
 
 See an [Examples](#Examples).
+
+### Using out-prefix for multiple Options structs
+
+When you have multiple option structs in the same package, the `out-prefix` flag helps avoid naming conflicts:
+
+You can find an example in [that example](./examples/go-generate-2options-1pkg/) directory.
 
 ### Option tag
 
@@ -384,8 +410,9 @@ func init() {
 
 You can generate variadic functions for slice type variables. By default, functions that accept a slice are generated.
 
-To generate variadic functions, you can use the `-all-variadic=true` option or specify tag `option:"variadic=true"` for specific fields.
-You can also generate a fallback variadic function when `-all-variadic=true` is included using the `option:"variadic=false"` tag.
+To generate variadic functions, you can use the `-all-variadic=true` option or specify tag `option:"variadic=true"` for
+specific fields. You can also generate a fallback variadic function when `-all-variadic=true` is included using the
+`option:"variadic=false"` tag.
 
 ### Skip fields
 
