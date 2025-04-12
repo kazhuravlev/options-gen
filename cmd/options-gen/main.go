@@ -21,6 +21,7 @@ func main() {
 		defaultsFrom      string
 		muteWarnings      bool
 		withIsset         bool
+		allVariadic       bool
 	)
 
 	envGoFile := os.Getenv("GOFILE")
@@ -53,6 +54,9 @@ func main() {
 	flag.BoolVar(&withIsset,
 		"with-isset", false,
 		"generate a function that helps check which fields have been set")
+	flag.BoolVar(&allVariadic,
+		"all-variadic", false,
+		"generate variadic functions")
 	flag.Parse()
 
 	if isEmpty(inFilename, outFilename, outPackageName, optionsStructName, defaultsFrom) {
@@ -80,6 +84,7 @@ func main() {
 		*defaults,
 		!muteWarnings,
 		withIsset,
+		allVariadic,
 	)
 	if errRun != nil {
 		//nolint:forbidigo
