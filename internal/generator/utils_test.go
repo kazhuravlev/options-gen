@@ -95,3 +95,26 @@ func Test_checkDefaultValue(t *testing.T) {
 		})
 	}
 }
+
+func Test_normalizeTypeName(t *testing.T) {
+	cases := []struct {
+		name     string
+		val      string
+		expected string
+	}{
+		{name: "int", val: "int", expected: "int"},
+		{name: "*int", val: "*int", expected: "int"},
+		{name: "[]int", val: "[]int", expected: "int"},
+		{name: "[]*int", val: "[]*int", expected: "int"},
+		{name: "some.Struct", val: "some.Struct", expected: "Struct"},
+		{name: "*some.Struct", val: "*some.Struct", expected: "Struct"},
+		{name: "[]some.Struct", val: "[]some.Struct", expected: "Struct"},
+		{name: "[]*some.Struct", val: "[]*some.Struct", expected: "Struct"},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, normalizeTypeName(tt.val))
+		})
+	}
+}
