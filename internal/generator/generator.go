@@ -120,7 +120,7 @@ func RenderOptions(
 
 // GetOptionSpec read the input filename by filePath, find optionsStructName
 // and scan for options.
-func GetOptionSpec(filePath, optionsStructName, tagName string, allVariadic bool) (*OptionSpec, []string, []string, error) {
+func GetOptionSpec(filePath, optStructName, tagName string, allVariadic bool) (*OptionSpec, []string, []string, error) {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		return nil, nil, nil, fmt.Errorf("source file not exist: %w", syscall.ENOENT)
 	}
@@ -133,7 +133,7 @@ func GetOptionSpec(filePath, optionsStructName, tagName string, allVariadic bool
 		return nil, nil, nil, fmt.Errorf("cannot parse dir: %w", err)
 	}
 
-	file, typeParams, fields, ok := findStructTypeParamsAndFields(node, optionsStructName)
+	file, typeParams, fields, ok := findStructTypeParamsAndFields(node, optStructName)
 	if !ok {
 		return nil, nil, nil, errors.New("cannot find target struct")
 	}

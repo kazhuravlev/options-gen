@@ -1,3 +1,4 @@
+//nolint:exhaustruct
 package generator //nolint:testpackage
 
 import (
@@ -125,6 +126,8 @@ func Test_normalizeTypeName(t *testing.T) {
 }
 
 func TestExtractSliceElemType(t *testing.T) {
+	const fPerm = 0o644
+
 	tempDir := t.TempDir()
 
 	somepkgDir := tempDir + "/somepkg"
@@ -142,16 +145,16 @@ type User struct {
 type CustomType struct{}
 type CustomSlice []CustomType
 `
-	require.NoError(t, os.WriteFile(somepkgDir+"/somepkg.go", []byte(somepkgContent), 0o644))
+	require.NoError(t, os.WriteFile(somepkgDir+"/somepkg.go", []byte(somepkgContent), fPerm))
 
-	require.NoError(t, os.WriteFile(tempDir+"/go.mod", []byte("module xxx\ngo 1.18"), 0o644))
+	require.NoError(t, os.WriteFile(tempDir+"/go.mod", []byte("module xxx\ngo 1.18"), fPerm))
 
 	mainContent := `package main
 
 import "./somepkg"
 `
 
-	require.NoError(t, os.WriteFile(tempDir+"/main.go", []byte(mainContent), 0o644))
+	require.NoError(t, os.WriteFile(tempDir+"/main.go", []byte(mainContent), fPerm))
 
 	fset := token.NewFileSet()
 
@@ -253,7 +256,7 @@ import "./somepkg"
 	}
 
 	t.Run("not_a_slice", func(t *testing.T) {
-		res, err := extractSliceElemType(tempDir, fset, mainFile, &ast.Ident{Name: "string"})
+		res, err := extractSliceElemType(tempDir, fset, mainFile, &ast.Ident{Name: "string"}) //nolint:exhaustruct
 		require.Error(t, err)
 		require.Equal(t, "", res)
 	})
