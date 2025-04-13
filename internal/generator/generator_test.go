@@ -7,7 +7,6 @@ import (
 
 	"github.com/kazhuravlev/options-gen/internal/generator"
 	"github.com/kazhuravlev/options-gen/internal/generator/testdata"
-	// test named imports.
 	req "github.com/stretchr/testify/require"
 )
 
