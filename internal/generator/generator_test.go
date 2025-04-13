@@ -637,6 +637,7 @@ type TestOptionSliceAlias struct {
 	pkgSlice   testdata.Int32s //nolint:unused
 	ref        testdata.RefType
 	refUUIDs   testdata.RefExtSliceType
+	refUUIDs2  testdata.RefExtSliceType2
 }
 
 func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
@@ -744,6 +745,20 @@ func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
 			{
 				Name:      "RefUUIDs",
 				Field:     "refUUIDs",
+				Type:      "validator.FieldError",
+				Docstring: "",
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      true,
+					VariadicIsSet: false,
+					Skip:          false,
+				},
+			},
+			{
+				Name:      "RefUUIDs2",
+				Field:     "refUUIDs2",
 				Type:      "validator.FieldError",
 				Docstring: "",
 				TagOption: generator.TagOption{

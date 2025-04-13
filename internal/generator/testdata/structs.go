@@ -14,3 +14,4 @@ type Int32s []int32
 type RefType subpkg.Slice
 
 type RefExtSliceType validator.ValidationErrors
+type RefExtSliceType2 []validator.FieldError
