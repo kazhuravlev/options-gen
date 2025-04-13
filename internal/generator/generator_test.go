@@ -725,6 +725,34 @@ func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
 					Skip:          false,
 				},
 			},
+			{
+				Name:      "Ref",
+				Field:     "ref",
+				Type:      "int64",
+				Docstring: "",
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      true,
+					VariadicIsSet: false,
+					Skip:          false,
+				},
+			},
+			{
+				Name:      "RefUUID",
+				Field:     "refUUID",
+				Type:      "uuid.UUID",
+				Docstring: "",
+				TagOption: generator.TagOption{
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "",
+					Variadic:      true,
+					VariadicIsSet: false,
+					Skip:          false,
+				},
+			},
 		},
 	}, spec)
 }
