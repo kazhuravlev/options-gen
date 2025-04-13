@@ -594,7 +594,7 @@ type TestOptionSliceAlias struct {
 	structs    Structs         //nolint:unused
 	structsPtr StructsPtr      //nolint:unused
 	pkgSlice   testdata.Int32s //nolint:unused
-	uuid       uuid.UUID       //nolint:unused
+	uuid       uuid.UUIDs      //nolint:unused
 }
 
 func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
@@ -680,7 +680,7 @@ func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
 			{
 				Name:      "Uuid",
 				Field:     "uuid",
-				Type:      "byte",
+				Type:      "uuid.UUID",
 				Docstring: "",
 				TagOption: generator.TagOption{
 					IsRequired:    false,
