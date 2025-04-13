@@ -2,13 +2,11 @@ package generator
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"go/ast"
-	"go/parser"
 	"go/token"
 	"go/types"
-	"os"
-	"os/exec"
 	"path"
 	"strconv"
 	"strings"
@@ -16,10 +14,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"golang.org/x/mod/modfile"
+	"golang.org/x/tools/go/packages"
 )
-
-const typePartsSize = 2
 
 func formatComment(comment string) string {
 	if comment == "" {
@@ -125,56 +121,6 @@ func checkDefaultValue(fieldType string, tag string) error {
 	}
 
 	return nil
-}
-
-
-func extractSliceKind(
-	fset *token.FileSet,
-	packages map[string]*ast.Package,
-	typeName string,
-	currentDir string,
-) (string, bool) {
-	if strings.HasPrefix(typeName, "[]") {
-		return typeName[2:], true
-	}
-
-	decls := getDecls(packages)
-	nameParts := strings.SplitN(typeName, ".", typePartsSize)
-	typeName = nameParts[0]
-	if len(nameParts) > 1 {
-		typeName = nameParts[1]
-
-		newPkg, ok := extractTypesFromPackage(fset, packages, nameParts[0], currentDir)
-		if !ok {
-			return "", false
-		}
-
-		decls = getDecls(newPkg)
-	}
-
-	for _, decl := range decls {
-		genDecl, ok := decl.(*ast.GenDecl)
-		if !ok {
-			continue
-		}
-
-		for _, spec := range genDecl.Specs {
-			typeSpec, ok := spec.(*ast.TypeSpec)
-			if !ok {
-				continue
-			}
-
-			if typeSpec.Name.Name != typeName {
-				continue
-			}
-
-			if arr, ok := typeSpec.Type.(*ast.ArrayType); ok {
-				return types.ExprString(arr.Elt), true
-			}
-		}
-	}
-
-	return "", false
 }
 
 func normalizeTypeName(typeName string) string {
