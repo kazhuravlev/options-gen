@@ -167,9 +167,11 @@ func extractSliceElemType(
 				if expr, ok := expr.Underlying().(*types.Slice); ok {
 					switch expr := expr.Elem().(type) {
 					case *types.Named:
-						typName := alias + "." + expr.Obj().Name()
+						if importPath == expr.Obj().Pkg().Path() {
+							return alias + "." + expr.Obj().Name(), nil
+						}
 
-						return typName, nil
+						return expr.Obj().Pkg().Name() + "." + expr.Obj().Name(), nil
 					case *types.Basic:
 						return expr.Name(), nil
 					}
