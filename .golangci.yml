@@ -95,3 +95,5 @@ formatters:
       - third_party$
       - builtin$
       - examples$
+output:
+  show-stats: false
