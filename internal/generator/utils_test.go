@@ -1,7 +1,6 @@
 package generator //nolint:testpackage
 
 import (
-	"github.com/stretchr/testify/require"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -9,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_checkDefaultValue_Negative(t *testing.T) {
