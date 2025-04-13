@@ -46,46 +46,37 @@ func formatComment(comment string) string {
 	return buf.String()
 }
 
-func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName string) ([]*ast.Field, []*ast.Field) {
-	decls := getDecls(packages)
-	for _, decl := range decls {
-		genDecl, ok := decl.(*ast.GenDecl)
-		if !ok {
-			continue
-		}
+func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName string) (*ast.Package, *ast.File, []*ast.Field, []*ast.Field, bool) {
+	for _, pkgObj := range packages {
+		for _, fileObj := range pkgObj.Files {
+			for _, decl := range fileObj.Decls {
+				genDecl, ok := decl.(*ast.GenDecl)
+				if !ok {
+					continue
+				}
 
-		for _, spec := range genDecl.Specs {
-			typeSpec, ok := spec.(*ast.TypeSpec) //nolint:varnamelen
-			if !ok {
-				continue
+				for _, spec := range genDecl.Specs {
+					typeSpec, ok := spec.(*ast.TypeSpec) //nolint:varnamelen
+					if !ok {
+						continue
+					}
+
+					if typeSpec.Name.Name != typeName {
+						continue
+					}
+
+					structType, ok := typeSpec.Type.(*ast.StructType)
+					if !ok {
+						continue
+					}
+
+					return pkgObj, fileObj, extractFields(typeSpec.TypeParams), extractFields(structType.Fields), true
+				}
 			}
-
-			if typeSpec.Name.Name != typeName {
-				continue
-			}
-
-			structType, ok := typeSpec.Type.(*ast.StructType)
-			if !ok {
-				continue
-			}
-
-			return extractFields(typeSpec.TypeParams), extractFields(structType.Fields)
-		}
-	}
-
-	return nil, nil
-}
-
-func getDecls(packages map[string]*ast.Package) []ast.Decl {
-	var res []ast.Decl
-
-	for _, pkg := range packages {
-		for _, fileObj := range pkg.Files {
-			res = append(res, fileObj.Decls...)
 		}
 	}
 
-	return res
+	return nil, nil, nil, nil, false
 }
 
 func extractFields(fl *ast.FieldList) []*ast.Field {
