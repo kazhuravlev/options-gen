@@ -630,14 +630,14 @@ type (
 )
 
 type TestOptionSliceAlias struct {
-	ints       Ints            //nolint:unused
-	intsPtr    IntsPtr         //nolint:unused
-	structs    Structs         //nolint:unused
-	structsPtr StructsPtr      //nolint:unused
-	pkgSlice   testdata.Int32s //nolint:unused
-	ref        testdata.RefType
-	refUUIDs   testdata.RefExtSliceType
-	refUUIDs2  testdata.RefExtSliceType2
+	ints       Ints                      //nolint:unused
+	intsPtr    IntsPtr                   //nolint:unused
+	structs    Structs                   //nolint:unused
+	structsPtr StructsPtr                //nolint:unused
+	pkgSlice   testdata.Int32s           //nolint:unused
+	ref        testdata.RefType          //nolint:unused
+	refUUIDs   testdata.RefExtSliceType  //nolint:unused
+	refUUIDs2  testdata.RefExtSliceType2 //nolint:unused
 }
 
 func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen

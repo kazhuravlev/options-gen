@@ -162,7 +162,7 @@ func extractSliceElemType(
 		}
 
 		lookupType := pkg.Types.Scope().Lookup(typeName)
-		if expr, ok := lookupType.(*types.TypeName); ok {
+		if expr, ok := lookupType.(*types.TypeName); ok { //nolint:nestif
 			if expr, ok := expr.Type().(*types.Named); ok {
 				if expr, ok := expr.Underlying().(*types.Slice); ok {
 					switch expr := expr.Elem().(type) {
