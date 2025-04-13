@@ -3,6 +3,7 @@ package generator
 import (
 	"bytes"
 	"embed"
+	"errors"
 	"fmt"
 	"go/ast"
 	"go/parser"
@@ -13,6 +14,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"syscall"
 	"text/template"
 
 	"golang.org/x/text/cases"
@@ -183,9 +185,9 @@ func GetOptionSpec(filePath, optionsStructName, tagName string, allVariadic bool
 		}
 
 		if optMeta.TagOption.Variadic || allVariadic {
-			kind, ok := extractSliceKind(fset, node, optMeta.Type, path.Dir(filePath))
-			if !ok {
-				return nil, nil, fmt.Errorf("field `%s`: this type could not be variadic", fieldName)
+			elementType, err := extractSliceElemType(workDir, fset, pkg, file, field.Type)
+			if err != nil {
+				return nil, nil, nil, fmt.Errorf("field `%s`: this type could not be variadic: %w", fieldName, err)
 			}
 
 			if !optMeta.TagOption.VariadicIsSet {
