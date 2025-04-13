@@ -42,7 +42,7 @@ func formatComment(comment string) string {
 	return buf.String()
 }
 
-func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName string) (*ast.File, []*ast.Field, []*ast.Field, bool) {
+func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName string) (*ast.File, []*ast.Field, []*ast.Field, bool) { //nolint:lll
 	for _, pkgObj := range packages {
 		for _, fileObj := range pkgObj.Files {
 			for _, decl := range fileObj.Decls {
@@ -151,7 +151,6 @@ func extractSliceElemType(
 		pkgName := pkgIdent.Name
 		typeName := expr.Sel.Name
 
-		// FIXME(zhuravlev): use only go/packages anf go/types packages in whole project.
 		importPath, alias := findImportPath(curFile.Imports, pkgName)
 		if importPath == "" {
 			return "", errors.New("import path not found")
@@ -163,14 +162,9 @@ func extractSliceElemType(
 		}
 
 		lookupType := pkg.Types.Scope().Lookup(typeName)
-		switch expr := lookupType.(type) {
-		case *types.TypeName:
-			switch expr := expr.Type().(type) {
-			case *types.Named:
-				switch expr := expr.Underlying().(type) {
-				case *types.Slice:
-					// FIXME(zhuravlev): use more gently way to extract the type name.
-					fmt.Printf("%T: %s\n", expr.Elem(), expr.String())
+		if expr, ok := lookupType.(*types.TypeName); ok {
+			if expr, ok := expr.Type().(*types.Named); ok {
+				if expr, ok := expr.Underlying().(*types.Slice); ok {
 					switch expr := expr.Elem().(type) {
 					case *types.Named:
 						typName := alias + "." + expr.Obj().Name()
@@ -228,7 +222,7 @@ func findImportPath(imports []*ast.ImportSpec, pkgName string) (string, string) 
 
 // loadPkg loads a package by full import path.
 func loadPkg(fset *token.FileSet, pkgName, dirPath string) (*packages.Package, error) {
-	cfg := &packages.Config{
+	cfg := &packages.Config{ //nolint:exhaustruct
 		Mode: packages.NeedName |
 			packages.NeedSyntax |
 			packages.NeedTypes |
