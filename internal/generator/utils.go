@@ -42,7 +42,7 @@ func formatComment(comment string) string {
 	return buf.String()
 }
 
-func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName string) (*ast.Package, *ast.File, []*ast.Field, []*ast.Field, bool) {
+func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName string) (*ast.File, []*ast.Field, []*ast.Field, bool) {
 	for _, pkgObj := range packages {
 		for _, fileObj := range pkgObj.Files {
 			for _, decl := range fileObj.Decls {
@@ -66,13 +66,13 @@ func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName st
 						continue
 					}
 
-					return pkgObj, fileObj, extractFields(typeSpec.TypeParams), extractFields(structType.Fields), true
+					return fileObj, extractFields(typeSpec.TypeParams), extractFields(structType.Fields), true
 				}
 			}
 		}
 	}
 
-	return nil, nil, nil, nil, false
+	return nil, nil, nil, false
 }
 
 func extractFields(fl *ast.FieldList) []*ast.Field {
@@ -132,7 +132,12 @@ func normalizeTypeName(typeName string) string {
 }
 
 // extractSliceElemType will find the element type for given slice.
-func extractSliceElemType(workDir string, fset *token.FileSet, curPkg *ast.Package, curFile *ast.File, expr ast.Expr) (string, error) {
+func extractSliceElemType(
+	workDir string,
+	fset *token.FileSet,
+	curFile *ast.File,
+	expr ast.Expr,
+) (string, error) {
 	switch expr := expr.(type) {
 	default:
 		return "", errors.New("unsupported expression")
@@ -190,7 +195,7 @@ func extractSliceElemType(workDir string, fset *token.FileSet, curPkg *ast.Packa
 		default:
 			return "", errors.New("unsupported ident expression")
 		case *ast.TypeSpec:
-			return extractSliceElemType(workDir, fset, curPkg, curFile, expr.Type)
+			return extractSliceElemType(workDir, fset, curFile, expr.Type)
 		}
 	}
 }

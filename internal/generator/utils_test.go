@@ -158,11 +158,6 @@ import "./somepkg"
 	mainFile, err := parser.ParseFile(fset, tempDir+"/main.go", nil, parser.ParseComments)
 	require.NoError(t, err)
 
-	curPkg := &ast.Package{
-		Name:  "main",
-		Files: map[string]*ast.File{tempDir + "/main.go": mainFile},
-	}
-
 	tests := []struct {
 		name string
 		expr ast.Expr
@@ -251,14 +246,14 @@ import "./somepkg"
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := extractSliceElemType(tempDir, fset, curPkg, mainFile, tt.expr)
+			got, err := extractSliceElemType(tempDir, fset, mainFile, tt.expr)
 			require.NoError(t, err)
 			require.Equal(t, tt.want, got)
 		})
 	}
 
 	t.Run("not_a_slice", func(t *testing.T) {
-		res, err := extractSliceElemType(tempDir, fset, curPkg, mainFile, &ast.Ident{Name: "string"})
+		res, err := extractSliceElemType(tempDir, fset, mainFile, &ast.Ident{Name: "string"})
 		require.Error(t, err)
 		require.Equal(t, "", res)
 	})
