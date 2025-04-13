@@ -130,3 +130,118 @@ func normalizeTypeName(typeName string) string {
 
 	return strings.TrimPrefix(strings.TrimPrefix(typeName, "[]"), "*")
 }
+
+// extractSliceElemType will find the element type for given slice.
+func extractSliceElemType(workDir string, fset *token.FileSet, curPkg *ast.Package, curFile *ast.File, expr ast.Expr) (string, error) {
+	switch expr := expr.(type) {
+	default:
+		return "", errors.New("unsupported expression")
+	case *ast.SelectorExpr:
+		// Extract package name and type name
+		pkgIdent, ok := expr.X.(*ast.Ident)
+		if !ok {
+			return "", errors.New("unsupported selector")
+		}
+
+		pkgName := pkgIdent.Name
+		typeName := expr.Sel.Name
+
+		// FIXME(zhuravlev): use only go/packages anf go/types packages in whole project.
+		importPath, alias := findImportPath(curFile.Imports, pkgName)
+		if importPath == "" {
+			return "", errors.New("import path not found")
+		}
+
+		pkg, err := loadPkg(fset, importPath, workDir)
+		if err != nil {
+			return "", errors.New("unable to load package")
+		}
+
+		lookupType := pkg.Types.Scope().Lookup(typeName)
+		switch expr := lookupType.(type) {
+		case *types.TypeName:
+			switch expr := expr.Type().(type) {
+			case *types.Named:
+				switch expr := expr.Underlying().(type) {
+				case *types.Slice:
+					// FIXME(zhuravlev): use more gently way to extract the type name.
+					fmt.Printf("%T: %s\n", expr.Elem(), expr.String())
+					switch expr := expr.Elem().(type) {
+					case *types.Named:
+						typName := alias + "." + expr.Obj().Name()
+
+						return typName, nil
+					case *types.Basic:
+						return expr.Name(), nil
+					}
+				}
+			}
+		}
+
+		return "", errors.New("lookup type not found")
+	case *ast.ArrayType:
+		return types.ExprString(expr.Elt), nil
+	case *ast.Ident:
+		if expr.Obj == nil {
+			return "", errors.New("id is empty")
+		}
+
+		switch expr := expr.Obj.Decl.(type) {
+		default:
+			return "", errors.New("unsupported ident expression")
+		case *ast.TypeSpec:
+			return extractSliceElemType(workDir, fset, curPkg, curFile, expr.Type)
+		}
+	}
+}
+
+// findImportPath return full package name and alias if presented.
+func findImportPath(imports []*ast.ImportSpec, pkgName string) (string, string) {
+	for _, imp := range imports {
+		importPath, err := strconv.Unquote(imp.Path.Value)
+		if err != nil {
+			continue
+		}
+
+		// If the import has an alias, check that
+		if imp.Name != nil {
+			aliasName, err := strconv.Unquote(imp.Name.Name)
+			if err == nil && aliasName == pkgName {
+				return importPath, aliasName
+			}
+		} else {
+			// Otherwise, check if the base package name matches
+			baseName := path.Base(importPath)
+			if baseName == pkgName {
+				return importPath, baseName
+			}
+		}
+	}
+
+	return "", ""
+}
+
+// loadPkg loads a package by full import path.
+func loadPkg(fset *token.FileSet, pkgName, dirPath string) (*packages.Package, error) {
+	cfg := &packages.Config{
+		Mode: packages.NeedName |
+			packages.NeedSyntax |
+			packages.NeedTypes |
+			packages.NeedImports |
+			packages.NeedDeps |
+			packages.NeedTypesInfo,
+		Dir:  dirPath,
+		Fset: fset,
+	}
+
+	pkgs, err := packages.Load(cfg, pkgName)
+	if err != nil {
+		return nil, fmt.Errorf("loading package: %w", err)
+	}
+
+	if len(pkgs) == 0 {
+		return nil, fmt.Errorf("no packages found")
+	}
+
+	return pkgs[0], nil
+}
