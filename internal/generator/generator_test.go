@@ -15,27 +15,6 @@ import (
 
 const gofile = "generator_test.go"
 
-func TestGetImports(t *testing.T) {
-	t.Parallel()
-
-	imports, err := generator.GetFileImports(gofile)
-	req.NoError(t, err)
-
-	requiredImports := []string{
-		`"fmt"`,
-		`"sort"`,
-		`"testing"`,
-		`"time"`,
-		`"github.com/google/uuid"`,
-		`"github.com/kazhuravlev/options-gen/internal/generator"`,
-		`"github.com/kazhuravlev/options-gen/internal/generator/testdata"`,
-		`req "github.com/stretchr/testify/require"`,
-	}
-	sort.Strings(requiredImports)
-	sort.Strings(imports)
-	req.EqualValues(t, requiredImports, imports)
-}
-
 func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 	t.Parallel()
 

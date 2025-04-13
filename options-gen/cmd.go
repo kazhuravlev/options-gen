@@ -74,14 +74,9 @@ func Run(
 		}
 	}
 
-	optionSpec, warnings, err := generator.GetOptionSpec(inFilename, structName, tagName, allVariadic)
+	optionSpec, warnings, imports, err := generator.GetOptionSpec(inFilename, structName, tagName, allVariadic)
 	if err != nil {
 		return fmt.Errorf("cannot get options spec: %w", err)
-	}
-
-	imports, err := generator.GetFileImports(inFilename)
-	if err != nil {
-		return fmt.Errorf("cannot get imports: %w", err)
 	}
 
 	res, err := generator.RenderOptions(
