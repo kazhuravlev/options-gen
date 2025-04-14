@@ -184,7 +184,7 @@ func GetOptionSpec(filePath, optStructName, tagName string, allVariadic bool) (*
 			}
 		}
 
-		if optMeta.TagOption.Variadic || allVariadic {
+		if optMeta.TagOption.Variadic || allVariadic { //nolint:nestif
 			elementType, err := extractSliceElemType(workDir, fset, file, field.Type)
 			if err != nil {
 				if errors.Is(err, errIsNotSlice) && !optMeta.TagOption.Variadic {
