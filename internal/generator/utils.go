@@ -19,10 +19,19 @@ import (
 
 var errIsNotSlice = errors.New("it is not slice")
 
-var (
-	importPackageMask             = regexp.MustCompile(`(?<pkgName>[\w_\-\.\d]+)(\/v\d+)?$`)
-	importPackageMaskPkgNameIndex = importPackageMask.SubexpIndex("pkgName")
-)
+// Named Capture Group support since Go 1.22.
+// When we remove support for Go versions below 1.22, we will be able to use code like
+//
+// var (
+//
+//	importPackageMask             = regexp.MustCompile(`(?<pkgName>[\w_\-\.\d]+)(\/v\d+)?$`)
+//	importPackageMaskPkgNameIndex = importPackageMask.SubexpIndex("pkgName")
+//
+// )
+
+var importPackageMask = regexp.MustCompile(`([\w_\-\.\d]+)(\/v\d+)?$`)
+
+const importPackageMaskPkgNameIndex = 1
 
 func formatComment(comment string) string {
 	if comment == "" {
