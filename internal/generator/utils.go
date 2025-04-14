@@ -17,7 +17,7 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-var errIDIsEmpty = errors.New("id is empty")
+var errIsNotSlice = errors.New("it is not slice")
 
 var (
 	importPackageMask             = regexp.MustCompile(`\/(?<pkgName>[\w_\-\.\d]+)(\/v\d+)?$`)
@@ -147,7 +147,7 @@ func extractSliceElemType(
 ) (string, error) {
 	switch expr := expr.(type) {
 	default:
-		return "", errors.New("unsupported expression")
+		return "", errIsNotSlice
 	case *ast.SelectorExpr:
 		// Extract package name and type name
 		pkgIdent, ok := expr.X.(*ast.Ident)
@@ -191,7 +191,7 @@ func extractSliceElemType(
 		return types.ExprString(expr.Elt), nil
 	case *ast.Ident:
 		if expr.Obj == nil {
-			return "", errIDIsEmpty
+			return "", errIsNotSlice
 		}
 
 		switch expr := expr.Obj.Decl.(type) {
