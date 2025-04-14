@@ -17,7 +17,8 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
-          version: v2.0
+          version: v2.0.2
+          install-mode: 'goinstall'
 
   build:
     name: Build on golang ${{ matrix.go_version }} and ${{ matrix.os }}
