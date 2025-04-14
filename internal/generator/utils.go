@@ -7,7 +7,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
-	"path"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -18,6 +18,11 @@ import (
 )
 
 var errIDIsEmpty = errors.New("id is empty")
+
+var (
+	importPackageMask             = regexp.MustCompile(`\/(?<pkgName>[\w_\-\.\d]+)(\/v\d+)?$`)
+	importPackageMaskPkgNameIndex = importPackageMask.SubexpIndex("pkgName")
+)
 
 func formatComment(comment string) string {
 	if comment == "" {
@@ -214,9 +219,9 @@ func findImportPath(imports []*ast.ImportSpec, pkgName string) (string, string) 
 			}
 		} else {
 			// Otherwise, check if the base package name matches
-			baseName := path.Base(importPath)
-			if baseName == pkgName {
-				return importPath, baseName
+			match := importPackageMask.FindStringSubmatch(importPath)
+			if len(match) > 0 && match[importPackageMaskPkgNameIndex] == pkgName {
+				return importPath, pkgName
 			}
 		}
 	}
