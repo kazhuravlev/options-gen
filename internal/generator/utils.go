@@ -7,7 +7,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
-	"path"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -16,6 +16,22 @@ import (
 
 	"golang.org/x/tools/go/packages"
 )
+
+var errIsNotSlice = errors.New("it is not slice")
+
+// Named Capture Group support since Go 1.22.
+// When we remove support for Go versions below 1.22, we will be able to use code like
+//
+// var (
+//
+//	importPackageMask             = regexp.MustCompile(`(?<pkgName>[\w_\-\.\d]+)(\/v\d+)?$`)
+//	importPackageMaskPkgNameIndex = importPackageMask.SubexpIndex("pkgName")
+//
+// )
+
+var importPackageMask = regexp.MustCompile(`([\w_\-\.\d]+)(\/v\d+)?$`)
+
+const importPackageMaskPkgNameIndex = 1
 
 func formatComment(comment string) string {
 	if comment == "" {
@@ -140,7 +156,7 @@ func extractSliceElemType(
 ) (string, error) {
 	switch expr := expr.(type) {
 	default:
-		return "", errors.New("unsupported expression")
+		return "", errIsNotSlice
 	case *ast.SelectorExpr:
 		// Extract package name and type name
 		pkgIdent, ok := expr.X.(*ast.Ident)
@@ -176,6 +192,8 @@ func extractSliceElemType(
 						return expr.Name(), nil
 					}
 				}
+
+				return "", errIsNotSlice
 			}
 		}
 
@@ -184,7 +202,7 @@ func extractSliceElemType(
 		return types.ExprString(expr.Elt), nil
 	case *ast.Ident:
 		if expr.Obj == nil {
-			return "", errors.New("id is empty")
+			return "", errIsNotSlice
 		}
 
 		switch expr := expr.Obj.Decl.(type) {
@@ -212,9 +230,9 @@ func findImportPath(imports []*ast.ImportSpec, pkgName string) (string, string) 
 			}
 		} else {
 			// Otherwise, check if the base package name matches
-			baseName := path.Base(importPath)
-			if baseName == pkgName {
-				return importPath, baseName
+			match := importPackageMask.FindStringSubmatch(importPath)
+			if len(match) > 0 && match[importPackageMaskPkgNameIndex] == pkgName {
+				return importPath, pkgName
 			}
 		}
 	}

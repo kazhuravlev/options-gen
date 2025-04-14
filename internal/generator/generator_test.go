@@ -151,7 +151,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 				Field:     "sliceOptVariadic",
 				Type:      "int",
 				TagOption: generator.TagOption{
-					IsRequired:    true,
+					IsRequired:    false,
 					GoValidator:   "",
 					Default:       "",
 					Variadic:      true,
@@ -340,9 +340,9 @@ type TestOptions struct {
 	//
 	// comment
 	noValidation     string //nolint:unused
-	starOpt          *int   `option:"mandatory"`               //nolint:unused
-	sliceOpt         []int  `option:"mandatory"`               //nolint:unused
-	sliceOptVariadic []int  `option:"mandatory,variadic=true"` //nolint:unused
+	starOpt          *int   `option:"mandatory"`     //nolint:unused
+	sliceOpt         []int  `option:"mandatory"`     //nolint:unused
+	sliceOptVariadic []int  `option:"variadic=true"` //nolint:unused
 
 	oldStyleOpt1 string `option:"required,not-empty"`                     //nolint:unused
 	oldStyleOpt2 string `option:"required,not-empty" validate:"required"` //nolint:unused
