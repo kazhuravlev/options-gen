@@ -20,7 +20,7 @@ import (
 var errIsNotSlice = errors.New("it is not slice")
 
 var (
-	importPackageMask             = regexp.MustCompile(`\/(?<pkgName>[\w_\-\.\d]+)(\/v\d+)?$`)
+	importPackageMask             = regexp.MustCompile(`(?<pkgName>[\w_\-\.\d]+)(\/v\d+)?$`)
 	importPackageMaskPkgNameIndex = importPackageMask.SubexpIndex("pkgName")
 )
 
@@ -183,6 +183,8 @@ func extractSliceElemType(
 						return expr.Name(), nil
 					}
 				}
+
+				return "", errIsNotSlice
 			}
 		}
 
