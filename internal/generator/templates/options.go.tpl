@@ -28,7 +28,7 @@ type Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParamsSpec }} func(o *{{ 
 func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsStructType }}(
 	{{ range .options -}}
 		{{ if .TagOption.IsRequired -}}
-			{{ .Field }} {{if .TagOption.Variadic}}[]{{end}}{{ .Type }},
+			{{ .Field }} {{ .Type }},
 		{{ end }}
 	{{- end -}}
 	options ...Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }},
