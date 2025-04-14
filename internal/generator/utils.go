@@ -17,6 +17,8 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
+var errIDIsEmpty = errors.New("id is empty")
+
 func formatComment(comment string) string {
 	if comment == "" {
 		return ""
@@ -184,7 +186,7 @@ func extractSliceElemType(
 		return types.ExprString(expr.Elt), nil
 	case *ast.Ident:
 		if expr.Obj == nil {
-			return "", errors.New("id is empty")
+			return "", errIDIsEmpty
 		}
 
 		switch expr := expr.Obj.Decl.(type) {

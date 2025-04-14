@@ -187,6 +187,12 @@ func GetOptionSpec(filePath, optStructName, tagName string, allVariadic bool) (*
 		if optMeta.TagOption.Variadic || allVariadic {
 			elementType, err := extractSliceElemType(workDir, fset, file, field.Type)
 			if err != nil {
+				if errors.Is(err, errIDIsEmpty) && !optMeta.TagOption.Variadic {
+					options = append(options, optMeta)
+
+					continue
+				}
+
 				return nil, nil, nil, fmt.Errorf("field `%s`: this type could not be variadic: %w", fieldName, err)
 			}
 
