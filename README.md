@@ -170,6 +170,10 @@ it will have the following arguments:
 - `out-prefix` - add prefix to the generated file. Useful when you have multiple Options structs in the same package.
 
   Default: empty string
+- `out-option-type-name` - name for the option type (function alias).
+  If not specified, the "Opt[StructName]Setter" template is used.
+
+  Default: empty string
 
 See an [Examples](#Examples).
 

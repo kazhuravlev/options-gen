@@ -51,6 +51,7 @@ func Run(
 	withIsset bool,
 	allVariadic bool,
 	constructorTypeRender ConstructorTypeRender,
+	outOptionTypeName string,
 ) error {
 	outPrefix = strings.TrimSpace(outPrefix)
 
@@ -86,6 +87,7 @@ func Run(
 		outPrefix,
 		withIsset,
 		string(constructorTypeRender),
+		outOptionTypeName,
 	)
 	if err != nil {
 		return fmt.Errorf("cannot renderOptions template: %w", err)

@@ -52,6 +52,7 @@ func TestRun(t *testing.T) {
 					true,
 					params.AllVariadic,
 					params.Constructor,
+					params.OptionTypeName,
 				)
 				assert.NoError(t, err)
 
@@ -75,16 +76,18 @@ func TestRun(t *testing.T) {
 			false,
 			false,
 			optionsgen.ConstructorPublicRender,
+			"",
 		)
 		assert.ErrorIs(t, err, syscall.ENOENT)
 	})
 }
 
 type Params struct {
-	OutPrefix   string                           `json:"out_prefix"` //nolint:tagliatelle
-	Defaults    optionsgen.Defaults              `json:"defaults"`
-	Constructor optionsgen.ConstructorTypeRender `json:"constructor"`
-	AllVariadic bool                             `json:"all_variadic"` //nolint:tagliatelle
+	OutPrefix      string                           `json:"out_prefix"` //nolint:tagliatelle
+	Defaults       optionsgen.Defaults              `json:"defaults"`
+	Constructor    optionsgen.ConstructorTypeRender `json:"constructor"`
+	AllVariadic    bool                             `json:"all_variadic"`     //nolint:tagliatelle
+	OptionTypeName string                           `json:"option_type_name"` //nolint:tagliatelle
 }
 
 func readParams(filename string) Params {
@@ -94,8 +97,9 @@ func readParams(filename string) Params {
 			From:  optionsgen.DefaultsFromTag,
 			Param: "",
 		},
-		Constructor: optionsgen.ConstructorPublicRender,
-		AllVariadic: false,
+		Constructor:    optionsgen.ConstructorPublicRender,
+		AllVariadic:    false,
+		OptionTypeName: "",
 	}
 
 	bb, err := os.ReadFile(filename)

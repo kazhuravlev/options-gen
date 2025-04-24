@@ -70,6 +70,7 @@ func RenderOptions(
 	tagName, varName, funcName, prefix string,
 	withIsset bool,
 	constructorTypeRender string,
+	optionTypeName string,
 ) ([]byte, error) {
 	optionsStructType := optionsStructName
 	optionsStructInstanceType := optionsStructName
@@ -77,6 +78,10 @@ func RenderOptions(
 	if spec.TypeParamsSpec != "" {
 		optionsStructType += spec.TypeParamsSpec
 		optionsStructInstanceType += spec.TypeParams
+	}
+
+	if optionTypeName == "" {
+		optionTypeName = "Opt" + optionsStructName + "Setter"
 	}
 
 	tplContext := map[string]interface{}{
@@ -93,6 +98,7 @@ func RenderOptions(
 		"optionsStructName":         optionsStructName,
 		"optionsStructType":         optionsStructType,
 		"optionsStructInstanceType": optionsStructInstanceType,
+		"optionsTypeName":           optionTypeName,
 		"defaultsTagName":           tagName,
 		"defaultsVarName":           varName,
 		"defaultsFuncName":          funcName,
