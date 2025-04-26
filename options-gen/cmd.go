@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/kazhuravlev/options-gen/internal/generator"
@@ -79,6 +80,15 @@ func Run(
 	optionSpec, warnings, imports, err := generator.GetOptionSpec(inFilename, structName, tagName, allVariadic)
 	if err != nil {
 		return fmt.Errorf("cannot get options spec: %w", err)
+	}
+
+	if outOptionTypeName == "" {
+		outOptionTypeName = "Opt" + structName + "Setter"
+	} else {
+		onlyLetters := regexp.MustCompile(`^[a-zA-Z]+$`)
+		if !onlyLetters.MatchString(outOptionTypeName) {
+			return fmt.Errorf("outOptionTypeName must be a valid type name, contains only letters a-z or A-Z")
+		}
 	}
 
 	res, err := generator.RenderOptions(
