@@ -23,6 +23,7 @@ func main() {
 		},
 	} {
 		if err := optionsgen.Run(
+			"qa-version",
 			"./example_in.go",
 			params.outFname,
 			params.structName,

@@ -45,6 +45,7 @@ func (c ConstructorTypeRender) Valid() bool {
 }
 
 func Run(
+	version string,
 	inFilename, outFilename, structName, packageName, outPrefix string,
 	defaults Defaults,
 	showWarnings bool,
@@ -81,6 +82,7 @@ func Run(
 	}
 
 	res, err := generator.RenderOptions(
+		version,
 		packageName, structName, imports,
 		optionSpec,
 		tagName, varName, funcName,

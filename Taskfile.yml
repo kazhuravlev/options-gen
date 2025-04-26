@@ -15,7 +15,6 @@ tasks:
       - task: tools:install
       - task: fmt
       - task: lint
-      - task: install
       - task: tests
       - task: examples:update
 
@@ -44,12 +43,6 @@ tasks:
       - task: 'tools:install'
       - toolset run golangci-lint run --fix ./...
 
-  install:
-    run: once
-    cmds:
-      - echo "- Install"
-      - go install ./cmd/options-gen
-
   tests:
     cmds:
       - echo "- Tests"
@@ -59,6 +52,7 @@ tasks:
     desc: Update examples directory
     cmds:
       - echo "- Update examples"
+      - go install -ldflags "-X 'main.Version=qa-version'" ./cmd/options-gen
       - task: examples:update:go-generate
       - task: examples:update:go-generate-generics
       - task: examples:update:go-generate-2options-1pkg
@@ -73,17 +67,14 @@ tasks:
   examples:update:go-generate:
     dir: examples/go-generate
     cmds:
-      - task: "install"
       - go generate ./...
 
   examples:update:go-generate-generics:
     dir: examples/go-generate-generics
     cmds:
-      - task: "install"
       - go generate ./...
 
   examples:update:go-generate-2options-1pkg:
     dir: examples/go-generate-2options-1pkg
     cmds:
-      - task: "install"
       - go generate ./...

@@ -42,6 +42,7 @@ func TestRun(t *testing.T) {
 				params := readParams(paramsFilename)
 
 				err := optionsgen.Run(
+					"qa-version",
 					filepath.Join(dir, "options.go"),
 					outFilename,
 					"Options",
@@ -66,6 +67,7 @@ func TestRun(t *testing.T) {
 
 		dir := t.TempDir()
 		err := optionsgen.Run(
+			"qa-version",
 			filepath.Join(dir, "options.go"),
 			filepath.Join(dir, "options_generated.go"),
 			"Options",
