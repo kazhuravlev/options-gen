@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"regexp"
-	"strings"
 
 	"github.com/kazhuravlev/options-gen/internal/generator"
 )
@@ -45,45 +44,44 @@ func (c ConstructorTypeRender) Valid() bool {
 	return true
 }
 
-func Run(
-	version string,
-	inFilename, outFilename, structName, packageName, outPrefix string,
-	defaults Defaults,
-	showWarnings bool,
-	withIsset bool,
-	allVariadic bool,
-	constructorTypeRender ConstructorTypeRender,
-	outOptionTypeName string,
-) error {
-	outPrefix = strings.TrimSpace(outPrefix)
+func Run(opts Options) error {
+	if err := opts.Validate(); err != nil {
+		return fmt.Errorf("bad configuration: %w", err)
+	}
 
 	var tagName, varName, funcName string
-	switch defaults.From {
+	switch opts.defaults.From {
 	case DefaultsFromNone:
 	case DefaultsFromTag:
-		tagName = defaults.Param
+		tagName = opts.defaults.Param
 		if tagName == "" {
 			tagName = "default"
 		}
 	case DefaultsFromVar:
-		varName = defaults.Param
+		varName = opts.defaults.Param
 		if varName == "" {
-			varName = fmt.Sprintf("default%s", structName)
+			varName = fmt.Sprintf("default%s", opts.structName)
 		}
 	case DefaultsFromFunc:
-		funcName = defaults.Param
+		funcName = opts.defaults.Param
 		if funcName == "" {
-			funcName = fmt.Sprintf("getDefault%s", structName)
+			funcName = fmt.Sprintf("getDefault%s", opts.structName)
 		}
 	}
 
-	optionSpec, warnings, imports, err := generator.GetOptionSpec(inFilename, structName, tagName, allVariadic)
+	optionSpec, warnings, imports, err := generator.GetOptionSpec(
+		opts.inFilename,
+		opts.structName,
+		tagName,
+		opts.allVariadic,
+	)
 	if err != nil {
 		return fmt.Errorf("cannot get options spec: %w", err)
 	}
 
+	outOptionTypeName := opts.outOptionTypeName
 	if outOptionTypeName == "" {
-		outOptionTypeName = "Opt" + structName + "Setter"
+		outOptionTypeName = "Opt" + opts.structName + "Setter"
 	} else {
 		onlyLetters := regexp.MustCompile(`^[a-zA-Z]+$`)
 		if !onlyLetters.MatchString(outOptionTypeName) {
@@ -92,13 +90,13 @@ func Run(
 	}
 
 	res, err := generator.RenderOptions(
-		version,
-		packageName, structName, imports,
+		opts.version,
+		opts.packageName, opts.structName, imports,
 		optionSpec,
 		tagName, varName, funcName,
-		outPrefix,
-		withIsset,
-		string(constructorTypeRender),
+		opts.outPrefix,
+		opts.withIsset,
+		string(opts.constructorTypeRender),
 		outOptionTypeName,
 	)
 	if err != nil {
@@ -106,11 +104,11 @@ func Run(
 	}
 
 	const perm = 0o644
-	if err := os.WriteFile(outFilename, res, perm); err != nil {
+	if err := os.WriteFile(opts.outFilename, res, perm); err != nil {
 		return fmt.Errorf("cannot write result: %w", err)
 	}
 
-	if showWarnings {
+	if opts.showWarnings {
 		for _, warning := range warnings {
 			log.Println(warning)
 		}

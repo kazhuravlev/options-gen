@@ -110,18 +110,20 @@ func main() {
 	}
 
 	errRun := optionsgen.Run(
-		Version,
-		inFilename,
-		outFilename,
-		optionsStructName,
-		outPackageName,
-		outPrefix,
-		*defaults,
-		!muteWarnings,
-		withIsset,
-		allVariadic,
-		constructorTypeRender,
-		outSetterName,
+		optionsgen.NewOptions(
+			optionsgen.WithVersion(Version),
+			optionsgen.WithInFilename(inFilename),
+			optionsgen.WithOutFilename(outFilename),
+			optionsgen.WithStructName(optionsStructName),
+			optionsgen.WithPackageName(outPackageName),
+			optionsgen.WithOutPrefix(outPrefix),
+			optionsgen.WithDefaults(*defaults),
+			optionsgen.WithShowWarnings(!muteWarnings),
+			optionsgen.WithWithIsset(withIsset),
+			optionsgen.WithAllVariadic(allVariadic),
+			optionsgen.WithConstructorTypeRender(constructorTypeRender),
+			optionsgen.WithOutOptionTypeName(outSetterName),
+		),
 	)
 	if errRun != nil {
 		//nolint:forbidigo

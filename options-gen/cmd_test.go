@@ -41,20 +41,20 @@ func TestRun(t *testing.T) {
 				paramsFilename := filepath.Join(dir, ".params.json")
 				params := readParams(paramsFilename)
 
-				err := optionsgen.Run(
-					"qa-version",
-					filepath.Join(dir, "options.go"),
-					outFilename,
-					"Options",
-					"testcase",
-					params.OutPrefix,
-					params.Defaults,
-					true,
-					true,
-					params.AllVariadic,
-					params.Constructor,
-					params.OptionTypeName,
-				)
+				err := optionsgen.Run(optionsgen.NewOptions(
+					optionsgen.WithVersion("qa-version"),
+					optionsgen.WithInFilename(filepath.Join(dir, "options.go")),
+					optionsgen.WithOutFilename(outFilename),
+					optionsgen.WithStructName("Options"),
+					optionsgen.WithPackageName("testcase"),
+					optionsgen.WithOutPrefix(params.OutPrefix),
+					optionsgen.WithDefaults(params.Defaults),
+					optionsgen.WithShowWarnings(true),
+					optionsgen.WithWithIsset(true),
+					optionsgen.WithAllVariadic(params.AllVariadic),
+					optionsgen.WithConstructorTypeRender(params.Constructor),
+					optionsgen.WithOutOptionTypeName(params.OptionTypeName),
+				))
 				assert.NoError(t, err)
 
 				helpEqualFiles(t, expFilename, outFilename)
@@ -66,20 +66,20 @@ func TestRun(t *testing.T) {
 		t.Parallel()
 
 		dir := t.TempDir()
-		err := optionsgen.Run(
-			"qa-version",
-			filepath.Join(dir, "options.go"),
-			filepath.Join(dir, "options_generated.go"),
-			"Options",
-			"testcase",
-			"XXX",
-			optionsgen.Defaults{From: optionsgen.DefaultsFromTag, Param: ""},
-			true,
-			false,
-			false,
-			optionsgen.ConstructorPublicRender,
-			"",
-		)
+		err := optionsgen.Run(optionsgen.NewOptions(
+			optionsgen.WithVersion("qa-version"),
+			optionsgen.WithInFilename(filepath.Join(dir, "options.go")),
+			optionsgen.WithOutFilename(filepath.Join(dir, "options_generated.go")),
+			optionsgen.WithStructName("Options"),
+			optionsgen.WithPackageName("testcase"),
+			optionsgen.WithOutPrefix("XXX"),
+			optionsgen.WithDefaults(optionsgen.Defaults{From: optionsgen.DefaultsFromTag, Param: ""}),
+			optionsgen.WithShowWarnings(true),
+			optionsgen.WithWithIsset(false),
+			optionsgen.WithAllVariadic(false),
+			optionsgen.WithConstructorTypeRender(optionsgen.ConstructorPublicRender),
+			optionsgen.WithOutOptionTypeName(""),
+		))
 		assert.ErrorIs(t, err, syscall.ENOENT)
 	})
 }
