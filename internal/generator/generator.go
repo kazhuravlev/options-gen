@@ -64,6 +64,7 @@ type TagOption struct {
 
 // RenderOptions will render file and out it's content.
 func RenderOptions(
+	version string,
 	packageName, optionsStructName string,
 	fileImports []string,
 	spec *OptionSpec,
@@ -85,6 +86,7 @@ func RenderOptions(
 	}
 
 	tplContext := map[string]interface{}{
+		"version":       version,
 		"packageName":   packageName,
 		"imports":       fileImports,
 		"options":       spec.Options,

@@ -21,8 +21,6 @@ func main() {
 		}
 	}
 
-	fmt.Println(Version)
-
 	var (
 		inFilename            string
 		outFilename           string
@@ -107,6 +105,7 @@ func main() {
 	}
 
 	errRun := optionsgen.Run(
+		Version,
 		inFilename,
 		outFilename,
 		optionsStructName,
