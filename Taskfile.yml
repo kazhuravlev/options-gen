@@ -13,10 +13,17 @@ tasks:
       - echo "- Run all routines"
       - task: tidy
       - task: tools:install
+      - task: generate
       - task: fmt
       - task: lint
       - task: tests
       - task: examples:update
+
+  generate:
+    desc: Generate code
+    cmds:
+      - echo "- Run codegen"
+      - go generate ./options-gen/...
 
   tidy:
     cmds:
