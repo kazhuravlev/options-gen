@@ -22,7 +22,7 @@ const(
 var opt{{$.optionsPrefix}}IsSet = [{{ .optionsLen }}]bool{}
 {{ end }}
 
-type Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParamsSpec }} func(o *{{ .optionsStructInstanceType }})
+type {{$.optionsTypeName}}{{ $.optionsTypeParamsSpec }} func(o *{{ .optionsStructInstanceType }})
 
 {{if ne .constructorTypeRender "no" }}
 func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsStructType }}(
@@ -31,7 +31,7 @@ func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsS
 			{{ .Field }} {{ .Type }},
 		{{ end }}
 	{{- end -}}
-	options ...Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }},
+	options ...{{$.optionsTypeName}}{{ $.optionsTypeParams }},
 ) {{ .optionsStructInstanceType }} {
 	o := {{ .optionsStructInstanceType }}{}
 	{{ if .withIsset }}
@@ -95,7 +95,7 @@ func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsS
 		{{- if ne .Docstring "" -}}
 			{{ .Docstring }}
 		{{- end }}
-		func With{{$.optionsPrefix}}{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{if .TagOption.Variadic}}...{{end}}{{ .Type }}) Opt{{ $.optionsStructName }}Setter{{ $.optionsTypeParams }} {
+		func With{{$.optionsPrefix}}{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{if .TagOption.Variadic}}...{{end}}{{ .Type }}) {{$.optionsTypeName}}{{ $.optionsTypeParams }} {
 			return func(o *{{ $.optionsStructInstanceType }}) {
 				{{if .TagOption.Variadic}}o.{{ .Field }} = append(o.{{ .Field }}, opt...){{else}}o.{{ .Field }} = opt{{end}}
 				{{ if $.withIsset -}}

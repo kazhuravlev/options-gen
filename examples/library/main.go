@@ -33,6 +33,7 @@ func main() {
 			false,
 			false,
 			optionsgen.ConstructorPublicRender,
+			"",
 		); err != nil {
 			panic(err)
 		}
