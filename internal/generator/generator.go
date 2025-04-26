@@ -81,10 +81,6 @@ func RenderOptions(
 		optionsStructInstanceType += spec.TypeParams
 	}
 
-	if optionTypeName == "" {
-		optionTypeName = "Opt" + optionsStructName + "Setter"
-	}
-
 	tplContext := map[string]interface{}{
 		"version":       version,
 		"packageName":   packageName,
