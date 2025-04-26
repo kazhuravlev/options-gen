@@ -23,18 +23,20 @@ func main() {
 		},
 	} {
 		if err := optionsgen.Run(
-			"qa-version",
-			"./example_in.go",
-			params.outFname,
-			params.structName,
-			"main",
-			"Some",
-			optionsgen.Defaults{From: optionsgen.DefaultsFromTag, Param: ""},
-			true,
-			false,
-			false,
-			optionsgen.ConstructorPublicRender,
-			"",
+			optionsgen.NewOptions(
+				optionsgen.WithVersion("qa-version"),
+				optionsgen.WithInFilename("./example_in.go"),
+				optionsgen.WithOutFilename(params.outFname),
+				optionsgen.WithStructName(params.structName),
+				optionsgen.WithPackageName("main"),
+				optionsgen.WithOutPrefix("Some"),
+				optionsgen.WithDefaults(optionsgen.Defaults{From: optionsgen.DefaultsFromTag, Param: ""}),
+				optionsgen.WithShowWarnings(true),
+				optionsgen.WithWithIsset(false),
+				optionsgen.WithAllVariadic(false),
+				optionsgen.WithConstructorTypeRender(optionsgen.ConstructorPublicRender),
+				optionsgen.WithOutOptionTypeName(""),
+			),
 		); err != nil {
 			panic(err)
 		}
