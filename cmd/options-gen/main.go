@@ -6,12 +6,23 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 
 	optionsgen "github.com/kazhuravlev/options-gen/options-gen"
 )
 
+var Version = "unknown-local"
+
 func main() {
+	if bi, ok := debug.ReadBuildInfo(); ok {
+		if bi.Main.Version != "" {
+			Version = bi.Main.Version
+		}
+	}
+
+	fmt.Println(Version)
+
 	var (
 		inFilename            string
 		outFilename           string
