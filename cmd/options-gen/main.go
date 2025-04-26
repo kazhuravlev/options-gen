@@ -23,7 +23,7 @@ func main() {
 		withIsset             bool
 		allVariadic           bool
 		constructorTypeRender optionsgen.ConstructorTypeRender
-		outOptionTypeName     string
+		outSetterName         string
 	)
 
 	envGoFile := os.Getenv("GOFILE")
@@ -66,9 +66,9 @@ func main() {
 			string(optionsgen.ConstructorPrivateRender),
 			string(optionsgen.ConstructorNoRender),
 		}, ", ")+".")
-	flag.StringVar(&outOptionTypeName,
-		"out-option-type-name", "",
-		"name for the option type (function alias). If not specified, the 'Opt[StructName]Setter' template is used.")
+	flag.StringVar(&outSetterName,
+		"out-setter-name", "",
+		"name for the option setter type (function alias). If not specified, the 'Opt[StructName]Setter' template is used.")
 	flag.Parse()
 
 	if isEmpty(inFilename, outFilename, outPackageName, optionsStructName, defaultsFrom) {
@@ -106,7 +106,7 @@ func main() {
 		withIsset,
 		allVariadic,
 		constructorTypeRender,
-		outOptionTypeName,
+		outSetterName,
 	)
 	if errRun != nil {
 		//nolint:forbidigo
