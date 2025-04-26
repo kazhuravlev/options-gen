@@ -12,12 +12,17 @@ import (
 	optionsgen "github.com/kazhuravlev/options-gen/options-gen"
 )
 
-var Version = "unknown-local"
+const versionUnknown = "unknown-local"
+
+var Version = versionUnknown
 
 func main() {
-	if bi, ok := debug.ReadBuildInfo(); ok {
-		if bi.Main.Version != "" {
-			Version = bi.Main.Version
+	// In case if not - someone (task examples:update) explicitly set the value of Version.
+	if Version == versionUnknown {
+		if bi, ok := debug.ReadBuildInfo(); ok {
+			if bi.Main.Version != "" {
+				Version = bi.Main.Version
+			}
 		}
 	}
 
