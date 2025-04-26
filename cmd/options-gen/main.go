@@ -68,7 +68,7 @@ func main() {
 		}, ", ")+".")
 	flag.StringVar(&outOptionTypeName,
 		"out-option-type-name", "",
-		"name for the option type (function alias). If not specified, the 'Opt<StructName>Setter' template is used.")
+		"name for the option type (function alias). If not specified, the 'Opt[StructName]Setter' template is used.")
 	flag.Parse()
 
 	if isEmpty(inFilename, outFilename, outPackageName, optionsStructName, defaultsFrom) {
