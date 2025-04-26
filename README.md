@@ -173,7 +173,7 @@ it will have the following arguments:
 - `out-option-type-name` - name for the option type (function alias).
   If not specified, the "Opt[StructName]Setter" template is used.
 
-  Default: empty string
+  Default: `Opt[StructName]Setter`
 
 See an [Examples](#Examples).
 
