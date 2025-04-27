@@ -59,9 +59,8 @@ func formatComment(comment string) string {
 	return buf.String()
 }
 
-func findStructTypeParamsAndFields(filePath, typeName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll
+func findStructTypeParamsAndFields(fset *token.FileSet, filePath, typeName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll
 	workDir := path.Dir(filePath)
-	fset := token.NewFileSet()
 
 	node, err := parser.ParseDir(fset, workDir, nil, parser.ParseComments)
 	if err != nil {
@@ -100,16 +99,14 @@ func findStructTypeParamsAndFields(filePath, typeName string) (*ast.File, []*ast
 	return nil, nil, nil, errors.New("cannot find target struct")
 }
 
-func findStructTypeParamsAndFields2(filePath, optStructName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll
+func findStructTypeParamsAndFields2(fset *token.FileSet, filePath, optStructName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll
 	workDir := path.Dir(filePath)
-	fset := token.NewFileSet()
 
 	// Configure the loader to use types package instead of ParseDir
 	cfg := &packages.Config{
 		Mode: packages.NeedName |
 			packages.NeedSyntax |
 			packages.NeedTypes |
-			packages.NeedTypesInfo |
 			packages.NeedImports |
 			packages.NeedDeps,
 		Dir:   workDir,
