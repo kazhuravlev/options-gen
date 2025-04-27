@@ -60,7 +60,6 @@ func formatComment(comment string) string {
 }
 
 func findStructTypeParamsAndFields(fset *token.FileSet, filePath, typeName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll
-	// TODO(kazhuravlev): should be replaces to findStructTypeParamsAndFields2 but after fixing the performance issues.
 	workDir := path.Dir(filePath)
 
 	node, err := parser.ParseDir(fset, workDir, nil, parser.ParseComments)
@@ -100,11 +99,11 @@ func findStructTypeParamsAndFields(fset *token.FileSet, filePath, typeName strin
 	return nil, nil, nil, errors.New("cannot find target struct")
 }
 
-func findStructTypeParamsAndFields2(fset *token.FileSet, filePath, optStructName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll
+func findStructTypeParamsAndFields2(fset *token.FileSet, filePath, optStructName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll,unused
 	workDir := path.Dir(filePath)
 
 	// Configure the loader to use types package instead of ParseDir
-	cfg := &packages.Config{
+	cfg := &packages.Config{ //nolint:exhaustruct
 		Mode: packages.NeedSyntax |
 			packages.NeedTypes |
 			packages.NeedDeps,
@@ -135,15 +134,15 @@ func findStructTypeParamsAndFields2(fset *token.FileSet, filePath, optStructName
 	var found bool
 
 SearchLoop:
-	for _, f := range pkg.Syntax {
-		for _, decl := range f.Decls {
+	for _, astFile := range pkg.Syntax {
+		for _, decl := range astFile.Decls {
 			genDecl, ok := decl.(*ast.GenDecl)
 			if !ok {
 				continue
 			}
 
 			for _, spec := range genDecl.Specs {
-				typeSpec, ok := spec.(*ast.TypeSpec)
+				typeSpec, ok := spec.(*ast.TypeSpec) //nolint:varnamelen
 				if !ok {
 					continue
 				}
@@ -157,7 +156,7 @@ SearchLoop:
 					continue
 				}
 
-				file = f
+				file = astFile
 				typeParams = extractFields(typeSpec.TypeParams)
 				fields = extractFields(structType.Fields)
 				found = true
