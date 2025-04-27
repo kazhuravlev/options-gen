@@ -89,16 +89,20 @@ func Run(opts Options) error {
 		}
 	}
 
-	res, err := generator.Render(
-		opts.version,
-		opts.packageName, opts.structName, imports,
-		optionSpec,
-		tagName, varName, funcName,
-		opts.outPrefix,
-		opts.withIsset,
-		string(opts.constructorTypeRender),
-		outOptionTypeName,
-	)
+	res, err := generator.Render(generator.NewOptions(
+		generator.WithVersion(opts.version),
+		generator.WithPackageName(opts.packageName),
+		generator.WithOptionsStructName(opts.structName),
+		generator.WithFileImports(imports),
+		generator.WithSpec(optionSpec),
+		generator.WithTagName(tagName),
+		generator.WithVarName(varName),
+		generator.WithFuncName(funcName),
+		generator.WithPrefix(opts.outPrefix),
+		generator.WithWithIsset(opts.withIsset),
+		generator.WithConstructorTypeRender(string(opts.constructorTypeRender)),
+		generator.WithOptionTypeName(outOptionTypeName),
+	))
 	if err != nil {
 		return fmt.Errorf("cannot renderOptions template: %w", err)
 	}
