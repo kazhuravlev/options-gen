@@ -584,7 +584,7 @@ func TestGetOptionSpecEmbedAnotherPkg(t *testing.T) { //nolint:funlen
 			},
 		},
 		Warnings: []string{
-			"Warning: consider to make `StructForEmbed` is private. This is will not allow to users to avoid constructor method.",
+			"Warning: consider to make `StructForEmbed` is private. This is will not allow to users to avoid constructor method.", //nolint:lll
 		},
 		Imports: []string{
 			`"fmt"`,
@@ -624,7 +624,7 @@ func TestGetOptionSpecEmbedAnotherPkgPtr(t *testing.T) { //nolint:funlen
 			},
 		},
 		Warnings: []string{
-			"Warning: consider to make `StructForEmbed` is private. This is will not allow to users to avoid constructor method.",
+			"Warning: consider to make `StructForEmbed` is private. This is will not allow to users to avoid constructor method.", //nolint:lll
 		},
 		Imports: []string{
 			`"fmt"`,
@@ -789,5 +789,4 @@ func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
 			`"github.com/stretchr/testify/require"`,
 		},
 	}, *res)
-
 }
