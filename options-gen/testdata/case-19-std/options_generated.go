@@ -6,23 +6,12 @@ import (
 	"time"
 )
 
-type optField int8
-
-const (
-	FieldDuration optField = 0
-)
-
-var optIsSet = [1]bool{}
-
 type OptOptionsSetter func(o *Options)
 
 func NewOptions(
 	options ...OptOptionsSetter,
 ) Options {
 	o := Options{}
-
-	var empty [1]bool
-	optIsSet = empty
 
 	// Setting defaults from field tag (if present)
 
@@ -35,14 +24,10 @@ func NewOptions(
 func WithDuration(opt time.Duration) OptOptionsSetter {
 	return func(o *Options) {
 		o.Duration = opt
-		optIsSet[FieldDuration] = true
+
 	}
 }
 
 func (o *Options) Validate() error {
 	return nil
-}
-
-func (o *Options) IsSet(field optField) bool {
-	return optIsSet[field]
 }

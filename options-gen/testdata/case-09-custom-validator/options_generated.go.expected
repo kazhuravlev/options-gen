@@ -9,15 +9,6 @@ import (
 	validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"
 )
 
-type optField int8
-
-const (
-	Fieldamount optField = 0
-	Fieldage    optField = 1
-)
-
-var optIsSet = [2]bool{}
-
 type OptOptionsSetter func(o *Options)
 
 func NewOptions(
@@ -27,15 +18,11 @@ func NewOptions(
 ) Options {
 	o := Options{}
 
-	var empty [2]bool
-	optIsSet = empty
-
 	// Setting defaults from field tag (if present)
 
 	o.amount = amount
-	optIsSet[Fieldamount] = true
+
 	o.age = age
-	optIsSet[Fieldage] = true
 
 	for _, opt := range options {
 		opt(&o)
@@ -47,10 +34,6 @@ func (o *Options) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
 	errs.Add(errors461e464ebed9.NewValidationError("age", _validate_Options_age(o)))
 	return errs.AsError()
-}
-
-func (o *Options) IsSet(field optField) bool {
-	return optIsSet[field]
 }
 
 func _validate_Options_age(o *Options) error {

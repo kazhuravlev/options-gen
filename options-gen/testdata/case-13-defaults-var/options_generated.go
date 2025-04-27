@@ -11,17 +11,6 @@ import (
 	validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"
 )
 
-type optXXXField int8
-
-const (
-	FieldXXXname        optXXXField = 0
-	FieldXXXtimeout     optXXXField = 1
-	FieldXXXmaxAttempts optXXXField = 2
-	FieldXXXhttpClient  optXXXField = 3
-)
-
-var optXXXIsSet = [4]bool{}
-
 type OptOptionsSetter func(o *Options)
 
 func NewOptions(
@@ -29,18 +18,14 @@ func NewOptions(
 ) Options {
 	o := Options{}
 
-	var empty [4]bool
-	optXXXIsSet = empty
-
 	// Setting defaults from variable
 	o.name = defaultOptions.name
-	optXXXIsSet[FieldXXXname] = true
+
 	o.timeout = defaultOptions.timeout
-	optXXXIsSet[FieldXXXtimeout] = true
+
 	o.maxAttempts = defaultOptions.maxAttempts
-	optXXXIsSet[FieldXXXmaxAttempts] = true
+
 	o.httpClient = defaultOptions.httpClient
-	optXXXIsSet[FieldXXXhttpClient] = true
 
 	for _, opt := range options {
 		opt(&o)
@@ -51,28 +36,28 @@ func NewOptions(
 func WithXXXName(opt string) OptOptionsSetter {
 	return func(o *Options) {
 		o.name = opt
-		optXXXIsSet[FieldXXXname] = true
+
 	}
 }
 
 func WithXXXTimeout(opt time.Duration) OptOptionsSetter {
 	return func(o *Options) {
 		o.timeout = opt
-		optXXXIsSet[FieldXXXtimeout] = true
+
 	}
 }
 
 func WithXXXMaxAttempts(opt int) OptOptionsSetter {
 	return func(o *Options) {
 		o.maxAttempts = opt
-		optXXXIsSet[FieldXXXmaxAttempts] = true
+
 	}
 }
 
 func WithXXXHttpClient(opt *http.Client) OptOptionsSetter {
 	return func(o *Options) {
 		o.httpClient = opt
-		optXXXIsSet[FieldXXXhttpClient] = true
+
 	}
 }
 
@@ -83,10 +68,6 @@ func (o *Options) Validate() error {
 	errs.Add(errors461e464ebed9.NewValidationError("maxAttempts", _validate_Options_maxAttempts(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("httpClient", _validate_Options_httpClient(o)))
 	return errs.AsError()
-}
-
-func (o *Options) IsSet(field optXXXField) bool {
-	return optXXXIsSet[field]
 }
 
 func _validate_Options_name(o *Options) error {

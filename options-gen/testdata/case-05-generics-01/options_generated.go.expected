@@ -9,16 +9,6 @@ import (
 	validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"
 )
 
-type optSomeField int8
-
-const (
-	FieldSomerequiredKey optSomeField = 0
-	FieldSomekey         optSomeField = 1
-	FieldSomeoptKey      optSomeField = 2
-)
-
-var optSomeIsSet = [3]bool{}
-
 type OptOptionsSetter[T string] func(o *Options[T])
 
 func NewOptions[T string](
@@ -28,15 +18,11 @@ func NewOptions[T string](
 ) Options[T] {
 	o := Options[T]{}
 
-	var empty [3]bool
-	optSomeIsSet = empty
-
 	// Setting defaults from field tag (if present)
 
 	o.requiredKey = requiredKey
-	optSomeIsSet[FieldSomerequiredKey] = true
+
 	o.key = key
-	optSomeIsSet[FieldSomekey] = true
 
 	for _, opt := range options {
 		opt(&o)
@@ -47,7 +33,7 @@ func NewOptions[T string](
 func WithSomeOptKey[T string](opt T) OptOptionsSetter[T] {
 	return func(o *Options[T]) {
 		o.optKey = opt
-		optSomeIsSet[FieldSomeoptKey] = true
+
 	}
 }
 
@@ -55,10 +41,6 @@ func (o *Options[T]) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
 	errs.Add(errors461e464ebed9.NewValidationError("requiredKey", _validate_Options_requiredKey[T](o)))
 	return errs.AsError()
-}
-
-func (o *Options[T]) IsSet(field optSomeField) bool {
-	return optSomeIsSet[field]
 }
 
 func _validate_Options_requiredKey[T string](o *Options[T]) error {

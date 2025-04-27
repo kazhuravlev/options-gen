@@ -9,43 +9,6 @@ import (
 	validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"
 )
 
-type optField int8
-
-const (
-	FieldvalInt        optField = 0
-	FieldvalInt8       optField = 1
-	FieldvalInt16      optField = 2
-	FieldvalInt32      optField = 3
-	FieldvalInt64      optField = 4
-	FieldvalUInt       optField = 5
-	FieldvalUInt8      optField = 6
-	FieldvalUInt16     optField = 7
-	FieldvalUInt32     optField = 8
-	FieldvalUInt64     optField = 9
-	FieldvalFloat32    optField = 10
-	FieldvalFloat64    optField = 11
-	FieldvalString     optField = 12
-	FieldvalBytes      optField = 13
-	FieldvalBool       optField = 14
-	FieldoptValInt     optField = 15
-	FieldoptValInt8    optField = 16
-	FieldoptValInt16   optField = 17
-	FieldoptValInt32   optField = 18
-	FieldoptValInt64   optField = 19
-	FieldoptValUInt    optField = 20
-	FieldoptValUInt8   optField = 21
-	FieldoptValUInt16  optField = 22
-	FieldoptValUInt32  optField = 23
-	FieldoptValUInt64  optField = 24
-	FieldoptValFloat32 optField = 25
-	FieldoptValFloat64 optField = 26
-	FieldoptValString  optField = 27
-	FieldoptValBytes   optField = 28
-	FieldoptValBool    optField = 29
-)
-
-var optIsSet = [30]bool{}
-
 type OptOptionsSetter func(o *Options)
 
 func NewOptions(
@@ -68,41 +31,37 @@ func NewOptions(
 ) Options {
 	o := Options{}
 
-	var empty [30]bool
-	optIsSet = empty
-
 	// Setting defaults from field tag (if present)
 
 	o.valInt = valInt
-	optIsSet[FieldvalInt] = true
+
 	o.valInt8 = valInt8
-	optIsSet[FieldvalInt8] = true
+
 	o.valInt16 = valInt16
-	optIsSet[FieldvalInt16] = true
+
 	o.valInt32 = valInt32
-	optIsSet[FieldvalInt32] = true
+
 	o.valInt64 = valInt64
-	optIsSet[FieldvalInt64] = true
+
 	o.valUInt = valUInt
-	optIsSet[FieldvalUInt] = true
+
 	o.valUInt8 = valUInt8
-	optIsSet[FieldvalUInt8] = true
+
 	o.valUInt16 = valUInt16
-	optIsSet[FieldvalUInt16] = true
+
 	o.valUInt32 = valUInt32
-	optIsSet[FieldvalUInt32] = true
+
 	o.valUInt64 = valUInt64
-	optIsSet[FieldvalUInt64] = true
+
 	o.valFloat32 = valFloat32
-	optIsSet[FieldvalFloat32] = true
+
 	o.valFloat64 = valFloat64
-	optIsSet[FieldvalFloat64] = true
+
 	o.valString = valString
-	optIsSet[FieldvalString] = true
+
 	o.valBytes = valBytes
-	optIsSet[FieldvalBytes] = true
+
 	o.valBool = valBool
-	optIsSet[FieldvalBool] = true
 
 	for _, opt := range options {
 		opt(&o)
@@ -114,7 +73,7 @@ func NewOptions(
 func WithOptValInt(opt int) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValInt = opt
-		optIsSet[FieldoptValInt] = true
+
 	}
 }
 
@@ -122,14 +81,14 @@ func WithOptValInt(opt int) OptOptionsSetter {
 func WithOptValInt8(opt int8) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValInt8 = opt
-		optIsSet[FieldoptValInt8] = true
+
 	}
 }
 
 func WithOptValInt16(opt int16) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValInt16 = opt
-		optIsSet[FieldoptValInt16] = true
+
 	}
 }
 
@@ -139,7 +98,7 @@ func WithOptValInt16(opt int16) OptOptionsSetter {
 func WithOptValInt32(opt int32) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValInt32 = opt
-		optIsSet[FieldoptValInt32] = true
+
 	}
 }
 
@@ -149,77 +108,77 @@ func WithOptValInt32(opt int32) OptOptionsSetter {
 func WithOptValInt64(opt int64) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValInt64 = opt
-		optIsSet[FieldoptValInt64] = true
+
 	}
 }
 
 func WithOptValUInt(opt uint) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValUInt = opt
-		optIsSet[FieldoptValUInt] = true
+
 	}
 }
 
 func WithOptValUInt8(opt uint8) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValUInt8 = opt
-		optIsSet[FieldoptValUInt8] = true
+
 	}
 }
 
 func WithOptValUInt16(opt uint16) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValUInt16 = opt
-		optIsSet[FieldoptValUInt16] = true
+
 	}
 }
 
 func WithOptValUInt32(opt uint32) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValUInt32 = opt
-		optIsSet[FieldoptValUInt32] = true
+
 	}
 }
 
 func WithOptValUInt64(opt uint64) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValUInt64 = opt
-		optIsSet[FieldoptValUInt64] = true
+
 	}
 }
 
 func WithOptValFloat32(opt float32) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValFloat32 = opt
-		optIsSet[FieldoptValFloat32] = true
+
 	}
 }
 
 func WithOptValFloat64(opt float64) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValFloat64 = opt
-		optIsSet[FieldoptValFloat64] = true
+
 	}
 }
 
 func WithOptValString(opt string) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValString = opt
-		optIsSet[FieldoptValString] = true
+
 	}
 }
 
 func WithOptValBytes(opt []byte) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValBytes = opt
-		optIsSet[FieldoptValBytes] = true
+
 	}
 }
 
 func WithOptValBool(opt bool) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValBool = opt
-		optIsSet[FieldoptValBool] = true
+
 	}
 }
 
@@ -241,10 +200,6 @@ func (o *Options) Validate() error {
 	errs.Add(errors461e464ebed9.NewValidationError("optValBytes", _validate_Options_optValBytes(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("optValBool", _validate_Options_optValBool(o)))
 	return errs.AsError()
-}
-
-func (o *Options) IsSet(field optField) bool {
-	return optIsSet[field]
 }
 
 func _validate_Options_optValInt(o *Options) error {
