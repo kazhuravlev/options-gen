@@ -57,8 +57,16 @@ func formatComment(comment string) string {
 	return buf.String()
 }
 
-func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName string) (*ast.File, []*ast.Field, []*ast.Field, bool) { //nolint:lll
-	for _, pkgObj := range packages {
+func findStructTypeParamsAndFields(filePath, typeName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll
+	workDir := path.Dir(filePath)
+	fset := token.NewFileSet()
+
+	node, err := parser.ParseDir(fset, workDir, nil, parser.ParseComments)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("cannot parse file: %w", err)
+	}
+
+	for _, pkgObj := range node {
 		for _, fileObj := range pkgObj.Files {
 			for _, decl := range fileObj.Decls {
 				genDecl, ok := decl.(*ast.GenDecl)
@@ -81,13 +89,15 @@ func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName st
 						continue
 					}
 
-					return fileObj, extractFields(typeSpec.TypeParams), extractFields(structType.Fields), true
+					return fileObj, extractFields(typeSpec.TypeParams), extractFields(structType.Fields), nil
 				}
 			}
 		}
 	}
 
-	return nil, nil, nil, false
+	return nil, nil, nil, errors.New("cannot find target struct")
+}
+
 }
 
 func extractFields(fl *ast.FieldList) []*ast.Field {
