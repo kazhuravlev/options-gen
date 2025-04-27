@@ -161,6 +161,7 @@ SearchLoop:
 				typeParams = extractFields(typeSpec.TypeParams)
 				fields = extractFields(structType.Fields)
 				found = true
+
 				break SearchLoop
 			}
 		}
