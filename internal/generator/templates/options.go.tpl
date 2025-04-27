@@ -102,8 +102,8 @@ func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsS
 				{{- else -}}
 					o.{{ .Field }} = opt
 				{{- end -}}
-				{{ if $.withIsset -}}
-				opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
+				{{ if $.withIsset }}
+					opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
 				{{- end }}
 			}
 		}
