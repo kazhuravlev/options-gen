@@ -89,7 +89,7 @@ func Run(opts Options) error {
 		}
 	}
 
-	res, err := generator.RenderOptions(
+	res, err := generator.Render(
 		opts.version,
 		opts.packageName, opts.structName, imports,
 		optionSpec,

@@ -62,8 +62,8 @@ type TagOption struct {
 	Skip          bool
 }
 
-// RenderOptions will render file and out it's content.
-func RenderOptions(
+// Render will render file and out it's content.
+func Render(
 	version string,
 	packageName, optionsStructName string,
 	fileImports []string,
