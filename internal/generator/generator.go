@@ -62,48 +62,43 @@ type TagOption struct {
 	Skip          bool
 }
 
-// RenderOptions will render file and out it's content.
-func RenderOptions(
-	version string,
-	packageName, optionsStructName string,
-	fileImports []string,
-	spec *OptionSpec,
-	tagName, varName, funcName, prefix string,
-	withIsset bool,
-	constructorTypeRender string,
-	optionTypeName string,
-) ([]byte, error) {
-	optionsStructType := optionsStructName
-	optionsStructInstanceType := optionsStructName
+// Render will render file and out it's content.
+func Render(opts Options) ([]byte, error) {
+	if err := opts.Validate(); err != nil {
+		return nil, fmt.Errorf("bad configuration: %w", err)
+	}
 
-	if spec.TypeParamsSpec != "" {
-		optionsStructType += spec.TypeParamsSpec
-		optionsStructInstanceType += spec.TypeParams
+	optionsStructType := opts.optionsStructName
+	optionsStructInstanceType := opts.optionsStructName
+
+	if opts.spec.TypeParamsSpec != "" {
+		optionsStructType += opts.spec.TypeParamsSpec
+		optionsStructInstanceType += opts.spec.TypeParams
 	}
 
 	tplContext := map[string]interface{}{
-		"version":       version,
-		"packageName":   packageName,
-		"imports":       fileImports,
-		"options":       spec.Options,
-		"optionsLen":    len(spec.Options),
-		"hasValidation": spec.HasValidation(),
+		"version":       opts.version,
+		"packageName":   opts.packageName,
+		"imports":       opts.fileImports,
+		"options":       opts.spec.Options,
+		"optionsLen":    len(opts.spec.Options),
+		"hasValidation": opts.spec.HasValidation(),
 
-		"optionsTypeParamsSpec": spec.TypeParamsSpec,
-		"optionsTypeParams":     spec.TypeParams,
+		"optionsTypeParamsSpec": opts.spec.TypeParamsSpec,
+		"optionsTypeParams":     opts.spec.TypeParams,
 
-		"optionsPrefix":             prefix,
-		"optionsStructName":         optionsStructName,
+		"optionsPrefix":             opts.prefix,
+		"optionsStructName":         opts.optionsStructName,
 		"optionsStructType":         optionsStructType,
 		"optionsStructInstanceType": optionsStructInstanceType,
-		"optionsTypeName":           optionTypeName,
-		"defaultsTagName":           tagName,
-		"defaultsVarName":           varName,
-		"defaultsFuncName":          funcName,
+		"optionsTypeName":           opts.optionTypeName,
+		"defaultsTagName":           opts.tagName,
+		"defaultsVarName":           opts.varName,
+		"defaultsFuncName":          opts.funcName,
 
-		"withIsset": withIsset,
+		"withIsset": opts.withIsset,
 
-		"constructorTypeRender": constructorTypeRender,
+		"constructorTypeRender": opts.constructorTypeRender,
 	}
 	buf := new(bytes.Buffer)
 
