@@ -31,7 +31,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 		`"github.com/kazhuravlev/options-gen/internal/generator/testdata"`,
 		`"github.com/stretchr/testify/require"`,
 	}, res.Imports)
-	req.Equal(t, &generator.OptionSpec{
+	req.Equal(t, generator.OptionSpec{
 		TypeParamsSpec: "",
 		TypeParams:     "",
 		Options: []generator.OptionMeta{
@@ -260,7 +260,7 @@ func TestGetOptionSpec_Generics(t *testing.T) {
 		`"github.com/kazhuravlev/options-gen/internal/generator/testdata"`,
 		`"github.com/stretchr/testify/require"`,
 	}, res.Imports)
-	req.Equal(t, &generator.OptionSpec{
+	req.Equal(t, generator.OptionSpec{
 		TypeParamsSpec: "[T1 int | string, T2, T3 any]",
 		TypeParams:     "[T1, T2, T3]",
 		Options: []generator.OptionMeta{
@@ -409,7 +409,7 @@ func TestGetOptionSpecInline(t *testing.T) { //nolint:funlen
 		`"github.com/kazhuravlev/options-gen/internal/generator/testdata"`,
 		`"github.com/stretchr/testify/require"`,
 	}, res.Imports)
-	req.Equal(t, &generator.OptionSpec{
+	req.Equal(t, generator.OptionSpec{
 		TypeParamsSpec: "",
 		TypeParams:     "",
 		Options: []generator.OptionMeta{
@@ -447,7 +447,7 @@ func TestGetOptionSpecInlinePtr(t *testing.T) { //nolint:funlen
 		`"github.com/kazhuravlev/options-gen/internal/generator/testdata"`,
 		`"github.com/stretchr/testify/require"`,
 	}, res.Imports)
-	req.Equal(t, &generator.OptionSpec{
+	req.Equal(t, generator.OptionSpec{
 		TypeParamsSpec: "",
 		TypeParams:     "",
 		Options: []generator.OptionMeta{
@@ -485,7 +485,7 @@ func TestGetOptionSpecEmbed(t *testing.T) { //nolint:funlen
 		`"github.com/kazhuravlev/options-gen/internal/generator/testdata"`,
 		`"github.com/stretchr/testify/require"`,
 	}, res.Imports)
-	req.Equal(t, &generator.OptionSpec{
+	req.Equal(t, generator.OptionSpec{
 		TypeParamsSpec: "",
 		TypeParams:     "",
 		Options: []generator.OptionMeta{
@@ -523,7 +523,7 @@ func TestGetOptionSpecEmbedPtr(t *testing.T) { //nolint:funlen
 		`"github.com/kazhuravlev/options-gen/internal/generator/testdata"`,
 		`"github.com/stretchr/testify/require"`,
 	}, res.Imports)
-	req.Equal(t, &generator.OptionSpec{
+	req.Equal(t, generator.OptionSpec{
 		TypeParamsSpec: "",
 		TypeParams:     "",
 		Options: []generator.OptionMeta{
@@ -561,7 +561,7 @@ func TestGetOptionSpecEmbedAnotherPkg(t *testing.T) { //nolint:funlen
 		`"github.com/kazhuravlev/options-gen/internal/generator/testdata"`,
 		`"github.com/stretchr/testify/require"`,
 	}, res.Imports)
-	req.Equal(t, &generator.OptionSpec{
+	req.Equal(t, generator.OptionSpec{
 		TypeParamsSpec: "",
 		TypeParams:     "",
 		Options: []generator.OptionMeta{
@@ -599,7 +599,7 @@ func TestGetOptionSpecEmbedAnotherPkgPtr(t *testing.T) { //nolint:funlen
 		`"github.com/kazhuravlev/options-gen/internal/generator/testdata"`,
 		`"github.com/stretchr/testify/require"`,
 	}, res.Imports)
-	req.Equal(t, &generator.OptionSpec{
+	req.Equal(t, generator.OptionSpec{
 		TypeParamsSpec: "",
 		TypeParams:     "",
 		Options: []generator.OptionMeta{
@@ -653,7 +653,7 @@ func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
 		`"github.com/kazhuravlev/options-gen/internal/generator/testdata"`,
 		`"github.com/stretchr/testify/require"`,
 	}, res.Imports)
-	req.Equal(t, &generator.OptionSpec{
+	req.Equal(t, generator.OptionSpec{
 		TypeParamsSpec: "",
 		TypeParams:     "",
 		Options: []generator.OptionMeta{

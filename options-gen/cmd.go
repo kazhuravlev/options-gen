@@ -94,7 +94,7 @@ func Run(opts Options) error {
 		generator.WithPackageName(opts.packageName),
 		generator.WithOptionsStructName(opts.structName),
 		generator.WithFileImports(spec.Imports),
-		generator.WithSpec(spec.Spec),
+		generator.WithSpec(&spec.Spec),
 		generator.WithTagName(tagName),
 		generator.WithVarName(varName),
 		generator.WithFuncName(funcName),

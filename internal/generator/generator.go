@@ -118,7 +118,7 @@ func Render(opts Options) ([]byte, error) {
 }
 
 type GetOptionSpecRes struct {
-	Spec     *OptionSpec
+	Spec     OptionSpec
 	Warnings []string
 	Imports  []string
 }
@@ -234,7 +234,7 @@ func GetOptionSpec(filePath, optStructName, tagName string, allVariadic bool) (*
 	}
 
 	return &GetOptionSpecRes{
-		Spec: &OptionSpec{
+		Spec: OptionSpec{
 			TypeParamsSpec: tpSpec,
 			TypeParams:     tpString,
 			Options:        options,
