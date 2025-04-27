@@ -23,7 +23,7 @@ tasks:
     desc: Generate code
     cmds:
       - echo "- Run codegen"
-      - go generate ./options-gen/...
+      - go generate ./options-gen/... ./internal/...
 
   tidy:
     cmds:
