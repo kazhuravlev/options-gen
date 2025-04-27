@@ -101,6 +101,7 @@ func readParams(filename string) Params {
 			Param: "",
 		},
 		Constructor:    optionsgen.ConstructorPublicRender,
+		WithIsset:      false,
 		AllVariadic:    false,
 		OptionTypeName: "",
 	}
