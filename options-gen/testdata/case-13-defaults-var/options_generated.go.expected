@@ -20,11 +20,8 @@ func NewOptions(
 
 	// Setting defaults from variable
 	o.name = defaultOptions.name
-
 	o.timeout = defaultOptions.timeout
-
 	o.maxAttempts = defaultOptions.maxAttempts
-
 	o.httpClient = defaultOptions.httpClient
 
 	for _, opt := range options {
