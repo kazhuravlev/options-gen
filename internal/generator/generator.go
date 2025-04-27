@@ -117,11 +117,17 @@ func Render(opts Options) ([]byte, error) {
 	return formatted, nil
 }
 
+type GetOptionSpecRes struct {
+	Spec     *OptionSpec
+	Warnings []string
+	Imports  []string
+}
+
 // GetOptionSpec read the input filename by filePath, find optionsStructName
 // and scan for options.
-func GetOptionSpec(filePath, optStructName, tagName string, allVariadic bool) (*OptionSpec, []string, []string, error) {
+func GetOptionSpec(filePath, optStructName, tagName string, allVariadic bool) (*GetOptionSpecRes, error) {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		return nil, nil, nil, fmt.Errorf("source file not exist: %w", syscall.ENOENT)
+		return nil, fmt.Errorf("source file not exist: %w", syscall.ENOENT)
 	}
 
 	workDir := path.Dir(filePath)
@@ -129,12 +135,12 @@ func GetOptionSpec(filePath, optStructName, tagName string, allVariadic bool) (*
 
 	node, err := parser.ParseDir(fset, workDir, nil, parser.ParseComments)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("cannot parse dir: %w", err)
+		return nil, fmt.Errorf("cannot parse dir: %w", err)
 	}
 
 	file, typeParams, fields, ok := findStructTypeParamsAndFields(node, optStructName)
 	if !ok {
-		return nil, nil, nil, errors.New("cannot find target struct")
+		return nil, errors.New("cannot find target struct")
 	}
 
 	options := make([]OptionMeta, 0, len(fields))
@@ -175,18 +181,18 @@ func GetOptionSpec(filePath, optStructName, tagName string, allVariadic bool) (*
 
 		if optMeta.TagOption.Default != "" {
 			if optMeta.TagOption.IsRequired {
-				return nil, nil, nil, fmt.Errorf("field `%s`: mandatory option cannot have a default value", optMeta.Field)
+				return nil, fmt.Errorf("field `%s`: mandatory option cannot have a default value", optMeta.Field)
 			}
 
 			if err := checkDefaultValue(optMeta.Type, optMeta.TagOption.Default); err != nil {
-				return nil, nil, nil, fmt.Errorf("field `%s`: invalid `%s` tag value: %w", tagName, optMeta.Field, err)
+				return nil, fmt.Errorf("field `%s`: invalid `%s` tag value: %w", tagName, optMeta.Field, err)
 			}
 		}
 
 		if optMeta.TagOption.Variadic || allVariadic { //nolint:nestif
 			if optMeta.TagOption.IsRequired {
 				if optMeta.TagOption.Variadic {
-					return nil, nil, nil, fmt.Errorf("field `%s`: this field is mandatory and could not be variadic", fieldName)
+					return nil, fmt.Errorf("field `%s`: this field is mandatory and could not be variadic", fieldName)
 				}
 
 				options = append(options, optMeta)
@@ -202,7 +208,7 @@ func GetOptionSpec(filePath, optStructName, tagName string, allVariadic bool) (*
 					continue
 				}
 
-				return nil, nil, nil, fmt.Errorf("field `%s`: this type could not be variadic: %w", fieldName, err)
+				return nil, fmt.Errorf("field `%s`: this type could not be variadic: %w", fieldName, err)
 			}
 
 			if !optMeta.TagOption.VariadicIsSet {
@@ -219,7 +225,7 @@ func GetOptionSpec(filePath, optStructName, tagName string, allVariadic bool) (*
 
 	tpSpec, tpString, err := typeParamsStr(typeParams)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("unable to extract type params %w", err)
+		return nil, fmt.Errorf("unable to extract type params %w", err)
 	}
 
 	importSlice := make([]string, len(file.Imports))
@@ -227,11 +233,15 @@ func GetOptionSpec(filePath, optStructName, tagName string, allVariadic bool) (*
 		importSlice[i] = file.Imports[i].Path.Value
 	}
 
-	return &OptionSpec{
-		TypeParamsSpec: tpSpec,
-		TypeParams:     tpString,
-		Options:        options,
-	}, warnings, importSlice, nil
+	return &GetOptionSpecRes{
+		Spec: &OptionSpec{
+			TypeParamsSpec: tpSpec,
+			TypeParams:     tpString,
+			Options:        options,
+		},
+		Warnings: warnings,
+		Imports:  importSlice,
+	}, nil
 }
 
 func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, []string) {
