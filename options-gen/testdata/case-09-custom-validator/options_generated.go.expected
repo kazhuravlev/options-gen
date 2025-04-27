@@ -16,12 +16,11 @@ func NewOptions(
 	age int,
 	options ...OptOptionsSetter,
 ) Options {
-	o := Options{}
+	var o Options
 
 	// Setting defaults from field tag (if present)
 
 	o.amount = amount
-
 	o.age = age
 
 	for _, opt := range options {

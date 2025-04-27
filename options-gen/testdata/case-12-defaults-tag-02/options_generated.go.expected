@@ -15,15 +15,13 @@ type OptOptionsSetter func(o *Options)
 func NewOptions(
 	options ...OptOptionsSetter,
 ) Options {
-	o := Options{}
+	var o Options
 
 	// Setting defaults from field tag (if present)
+
 	o.pingPeriod, _ = time.ParseDuration("3s")
-
 	o.name = "unknown"
-
 	o.maxAttempts = 10
-
 	o.eps = 0.0001
 
 	for _, opt := range options {

@@ -11,7 +11,7 @@ type OptOptionsSetter func(o *Options)
 func NewOptions(
 	options ...OptOptionsSetter,
 ) Options {
-	o := Options{}
+	var o Options
 
 	// Setting defaults from field tag (if present)
 

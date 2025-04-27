@@ -18,37 +18,24 @@ func NewOptions(
 	rWCloser io.ReadWriteCloser,
 	options ...OptOptionsSetter,
 ) Options {
-	o := Options{}
+	var o Options
 
 	// Setting defaults from field tag (if present)
+
 	o.valInt = 1
-
 	o.valInt8 = 8
-
 	o.valInt16 = 16
-
 	o.valInt32 = 32
-
 	o.valInt64 = 64
-
 	o.valUInt = 11
-
 	o.valUInt8 = 88
-
 	o.valUInt16 = 1616
-
 	o.valUInt32 = 3232
-
 	o.valUInt64 = 6464
-
 	o.valFloat32 = 32.32
-
 	o.valFloat64 = 64.64
-
 	o.valDuration, _ = time.ParseDuration("3s")
-
 	o.valString = "golang"
-
 	o.valBool = true
 
 	o.rWCloser = rWCloser

@@ -16,7 +16,7 @@ type OptOptionsSetter func(o *Options)
 func NewOptions(
 	options ...OptOptionsSetter,
 ) Options {
-	o := Options{}
+	var o Options
 
 	// Setting defaults from variable
 	o.name = defaultOptions.name

@@ -9,12 +9,11 @@ func NewOptions[T comparable](
 	d2 *SomeData[T],
 	options ...OptOptionsSetter[T],
 ) Options[T] {
-	o := Options[T]{}
+	var o Options[T]
 
 	// Setting defaults from field tag (if present)
 
 	o.d1 = d1
-
 	o.d2 = d2
 
 	for _, opt := range options {

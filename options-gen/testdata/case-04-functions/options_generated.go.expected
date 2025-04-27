@@ -16,18 +16,14 @@ func NewOptions(
 	local localFnType,
 	options ...OptOptionsSetter,
 ) Options {
-	o := Options{}
+	var o Options
 
 	// Setting defaults from field tag (if present)
 
 	o.fnTypeParam = fnTypeParam
-
 	o.fnParam = fnParam
-
 	o.handlerFunc = handlerFunc
-
 	o.middleware = middleware
-
 	o.local = local
 
 	for _, opt := range options {

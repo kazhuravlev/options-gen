@@ -19,16 +19,13 @@ func NewOptions[KeyT int | string, TT any](
 	key KeyT,
 	options ...OptOptionsSetter[KeyT, TT],
 ) Options[KeyT, TT] {
-	o := Options[KeyT, TT]{}
+	var o Options[KeyT, TT]
 
 	// Setting defaults from field tag (if present)
 
 	o.requiredHandler = requiredHandler
-
 	o.requiredKey = requiredKey
-
 	o.handler = handler
-
 	o.key = key
 
 	for _, opt := range options {
