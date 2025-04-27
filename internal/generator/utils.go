@@ -7,6 +7,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -263,4 +264,100 @@ func loadPkg(fset *token.FileSet, pkgName, dirPath string) (*packages.Package, e
 	}
 
 	return pkgs[0], nil
+}
+
+func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, []string) {
+	var tagOpt TagOption
+	if tag == nil {
+		return tagOpt, nil
+	}
+
+	value := tag.Value
+	tagOpt.GoValidator = reflect.StructTag(strings.Trim(value, "`")).Get("validate")
+	tagOpt.Default = reflect.StructTag(strings.Trim(value, "`")).Get(tagName)
+
+	var warnings []string
+	optionTag := reflect.StructTag(strings.Trim(value, "`")).Get("option")
+	for _, opt := range strings.Split(optionTag, ",") {
+		optParts := strings.SplitN(opt, "=", keyValueSliceSize)
+		var optName, optValue string
+		optName = optParts[0]
+
+		if len(optParts) > 1 {
+			optValue = optParts[1]
+		}
+
+		switch optName {
+		case "mandatory":
+			tagOpt.IsRequired = true
+
+		case "required":
+			// NOTE: remove the tag.
+			warnings = append(warnings, fmt.Sprintf(
+				"Deprecated: use `option:\"mandatory\"` "+
+					"instead for field `%s` to force the passing "+
+					"option in the constructor argument\n", fieldName))
+
+			tagOpt.IsRequired = true
+
+		case "not-empty":
+			// NOTE: remove the tag.
+			warnings = append(warnings, fmt.Sprintf(
+				"Deprecated: use "+
+					"github.com/go-playground/validator `validate` tag to check "+
+					"the field `%s` content\n", fieldName))
+
+			if !strings.Contains(tagOpt.GoValidator, "required") {
+				if tagOpt.GoValidator == "" {
+					tagOpt.GoValidator = "required"
+				} else {
+					tagOpt.GoValidator += ",required"
+				}
+			}
+
+		case "variadic":
+			val, err := strconv.ParseBool(optValue)
+			if err != nil {
+				warnings = append(warnings, fmt.Sprintf("Error: parse variadic for the field %s failed: %s\n",
+					fieldName, err.Error()))
+			}
+
+			tagOpt.Variadic = val
+			tagOpt.VariadicIsSet = true
+
+		case "-":
+			tagOpt.Skip = true
+		}
+	}
+
+	return tagOpt, warnings
+}
+
+func typeParamsStr(params []*ast.Field) (string, string, error) {
+	if len(params) == 0 {
+		return "", "", nil
+	}
+
+	paramNames := make([]string, 0, len(params))
+	paramNamesWithTypes := make([]string, len(params))
+	for i, param := range params {
+		if len(param.Names) == 0 {
+			return "", "", fmt.Errorf("unnamed param %s", param.Type)
+		}
+
+		names := make([]string, len(param.Names))
+		for i := range param.Names {
+			names[i] = param.Names[i].Name
+		}
+
+		paramNames = append(paramNames, names...)
+
+		typeName := types.ExprString(param.Type)
+		paramNamesWithTypes[i] = fmt.Sprintf("%s %s", strings.Join(names, ", "), typeName)
+	}
+
+	paramNamesStr := fmt.Sprintf("[%s]", strings.Join(paramNames, ", "))
+	paramExprStr := fmt.Sprintf("[%s]", strings.Join(paramNamesWithTypes, ", "))
+
+	return paramExprStr, paramNamesStr, nil
 }
