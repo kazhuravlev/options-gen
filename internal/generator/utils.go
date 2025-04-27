@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"go/parser"
 	"go/token"
 	"go/types"
+	"path"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -98,6 +100,80 @@ func findStructTypeParamsAndFields(filePath, typeName string) (*ast.File, []*ast
 	return nil, nil, nil, errors.New("cannot find target struct")
 }
 
+func findStructTypeParamsAndFields2(filePath, optStructName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll
+	workDir := path.Dir(filePath)
+	fset := token.NewFileSet()
+
+	// Configure the loader to use types package instead of ParseDir
+	cfg := &packages.Config{
+		Mode: packages.NeedName |
+			packages.NeedSyntax |
+			packages.NeedTypes |
+			packages.NeedTypesInfo |
+			packages.NeedImports |
+			packages.NeedDeps,
+		Dir:   workDir,
+		Tests: true,
+		Fset:  fset,
+	}
+
+	// Load the package that contains the file we want to parse
+	pkgs, err := packages.Load(cfg, "file="+filePath)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("load package: %w", err)
+	}
+
+	if len(pkgs) == 0 {
+		return nil, nil, nil, errors.New("no packages found")
+	}
+
+	pkg := pkgs[0]
+	if len(pkg.Errors) > 0 {
+		return nil, nil, nil, fmt.Errorf("package contains errors: %v", pkg.Errors)
+	}
+
+	// Find the struct
+	var file *ast.File
+	var typeParams []*ast.Field
+	var fields []*ast.Field
+	var found bool
+
+SearchLoop:
+	for _, f := range pkg.Syntax {
+		for _, decl := range f.Decls {
+			genDecl, ok := decl.(*ast.GenDecl)
+			if !ok {
+				continue
+			}
+
+			for _, spec := range genDecl.Specs {
+				typeSpec, ok := spec.(*ast.TypeSpec)
+				if !ok {
+					continue
+				}
+
+				if typeSpec.Name.Name != optStructName {
+					continue
+				}
+
+				structType, ok := typeSpec.Type.(*ast.StructType)
+				if !ok {
+					continue
+				}
+
+				file = f
+				typeParams = extractFields(typeSpec.TypeParams)
+				fields = extractFields(structType.Fields)
+				found = true
+				break SearchLoop
+			}
+		}
+	}
+	if !found {
+		return nil, nil, nil, errors.New("cannot find target struct")
+	}
+
+	return file, typeParams, fields, nil
 }
 
 func extractFields(fl *ast.FieldList) []*ast.Field {
