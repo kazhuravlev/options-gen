@@ -35,28 +35,24 @@ func NewOptions(
 func WithSomePingPeriod(opt time.Duration) OptOptionsSetter {
 	return func(o *Options) {
 		o.pingPeriod = opt
-
 	}
 }
 
 func WithSomeName(opt string) OptOptionsSetter {
 	return func(o *Options) {
 		o.name = opt
-
 	}
 }
 
 func WithSomeMaxAttempts(opt int) OptOptionsSetter {
 	return func(o *Options) {
 		o.maxAttempts = opt
-
 	}
 }
 
 func WithSomeEps(opt float32) OptOptionsSetter {
 	return func(o *Options) {
 		o.eps = opt
-
 	}
 }
 

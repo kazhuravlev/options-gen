@@ -73,7 +73,6 @@ func NewOptions(
 func WithOptValInt(opt int) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValInt = opt
-
 	}
 }
 
@@ -81,14 +80,12 @@ func WithOptValInt(opt int) OptOptionsSetter {
 func WithOptValInt8(opt int8) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValInt8 = opt
-
 	}
 }
 
 func WithOptValInt16(opt int16) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValInt16 = opt
-
 	}
 }
 
@@ -98,7 +95,6 @@ func WithOptValInt16(opt int16) OptOptionsSetter {
 func WithOptValInt32(opt int32) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValInt32 = opt
-
 	}
 }
 
@@ -108,77 +104,66 @@ func WithOptValInt32(opt int32) OptOptionsSetter {
 func WithOptValInt64(opt int64) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValInt64 = opt
-
 	}
 }
 
 func WithOptValUInt(opt uint) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValUInt = opt
-
 	}
 }
 
 func WithOptValUInt8(opt uint8) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValUInt8 = opt
-
 	}
 }
 
 func WithOptValUInt16(opt uint16) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValUInt16 = opt
-
 	}
 }
 
 func WithOptValUInt32(opt uint32) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValUInt32 = opt
-
 	}
 }
 
 func WithOptValUInt64(opt uint64) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValUInt64 = opt
-
 	}
 }
 
 func WithOptValFloat32(opt float32) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValFloat32 = opt
-
 	}
 }
 
 func WithOptValFloat64(opt float64) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValFloat64 = opt
-
 	}
 }
 
 func WithOptValString(opt string) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValString = opt
-
 	}
 }
 
 func WithOptValBytes(opt ...byte) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValBytes = append(o.optValBytes, opt...)
-
 	}
 }
 
 func WithOptValBool(opt bool) OptOptionsSetter {
 	return func(o *Options) {
 		o.optValBool = opt
-
 	}
 }
 

@@ -39,35 +39,30 @@ func NewOptions(
 func WithOptFnTypeParam(opt FnType) OptOptionsSetter {
 	return func(o *Options) {
 		o.optFnTypeParam = opt
-
 	}
 }
 
 func WithOptFnParam(opt func(server *http.Server) error) OptOptionsSetter {
 	return func(o *Options) {
 		o.optFnParam = opt
-
 	}
 }
 
 func WithOptHandlerFunc(opt http.HandlerFunc) OptOptionsSetter {
 	return func(o *Options) {
 		o.optHandlerFunc = opt
-
 	}
 }
 
 func WithOptMiddleware(opt func(next http.HandlerFunc) http.HandlerFunc) OptOptionsSetter {
 	return func(o *Options) {
 		o.optMiddleware = opt
-
 	}
 }
 
 func WithOptLocal(opt localFnType) OptOptionsSetter {
 	return func(o *Options) {
 		o.optLocal = opt
-
 	}
 }
 

@@ -7,7 +7,6 @@ type OptOptionsSetter func(o *Options)
 func WithName(opt string) OptOptionsSetter {
 	return func(o *Options) {
 		o.name = opt
-
 	}
 }
 

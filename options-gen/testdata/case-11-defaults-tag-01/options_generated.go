@@ -62,112 +62,96 @@ func NewOptions(
 func WithOptStringer(opt fmt.Stringer) OptOptionsSetter {
 	return func(o *Options) {
 		o.optStringer = opt
-
 	}
 }
 
 func WithValInt(opt int) OptOptionsSetter {
 	return func(o *Options) {
 		o.valInt = opt
-
 	}
 }
 
 func WithValInt8(opt int8) OptOptionsSetter {
 	return func(o *Options) {
 		o.valInt8 = opt
-
 	}
 }
 
 func WithValInt16(opt int16) OptOptionsSetter {
 	return func(o *Options) {
 		o.valInt16 = opt
-
 	}
 }
 
 func WithValInt32(opt int32) OptOptionsSetter {
 	return func(o *Options) {
 		o.valInt32 = opt
-
 	}
 }
 
 func WithValInt64(opt int64) OptOptionsSetter {
 	return func(o *Options) {
 		o.valInt64 = opt
-
 	}
 }
 
 func WithValUInt(opt uint) OptOptionsSetter {
 	return func(o *Options) {
 		o.valUInt = opt
-
 	}
 }
 
 func WithValUInt8(opt uint8) OptOptionsSetter {
 	return func(o *Options) {
 		o.valUInt8 = opt
-
 	}
 }
 
 func WithValUInt16(opt uint16) OptOptionsSetter {
 	return func(o *Options) {
 		o.valUInt16 = opt
-
 	}
 }
 
 func WithValUInt32(opt uint32) OptOptionsSetter {
 	return func(o *Options) {
 		o.valUInt32 = opt
-
 	}
 }
 
 func WithValUInt64(opt uint64) OptOptionsSetter {
 	return func(o *Options) {
 		o.valUInt64 = opt
-
 	}
 }
 
 func WithValFloat32(opt float32) OptOptionsSetter {
 	return func(o *Options) {
 		o.valFloat32 = opt
-
 	}
 }
 
 func WithValFloat64(opt float64) OptOptionsSetter {
 	return func(o *Options) {
 		o.valFloat64 = opt
-
 	}
 }
 
 func WithValDuration(opt time.Duration) OptOptionsSetter {
 	return func(o *Options) {
 		o.valDuration = opt
-
 	}
 }
 
 func WithValString(opt string) OptOptionsSetter {
 	return func(o *Options) {
 		o.valString = opt
-
 	}
 }
 
 func WithValBool(opt bool) OptOptionsSetter {
 	return func(o *Options) {
 		o.valBool = opt
-
 	}
 }
 

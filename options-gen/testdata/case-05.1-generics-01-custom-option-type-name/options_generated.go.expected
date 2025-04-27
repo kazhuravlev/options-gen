@@ -33,7 +33,6 @@ func NewOptions[T string](
 func WithSomeOptKey[T string](opt T) CustomOpt[T] {
 	return func(o *Options[T]) {
 		o.optKey = opt
-
 	}
 }
 

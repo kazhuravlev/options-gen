@@ -26,14 +26,12 @@ func NewOptions[T comparable](
 func WithD3[T comparable](opt SomeData[T]) OptOptionsSetter[T] {
 	return func(o *Options[T]) {
 		o.d3 = opt
-
 	}
 }
 
 func WithD4[T comparable](opt *SomeData[T]) OptOptionsSetter[T] {
 	return func(o *Options[T]) {
 		o.d4 = opt
-
 	}
 }
 

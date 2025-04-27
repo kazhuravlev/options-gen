@@ -24,7 +24,6 @@ func NewOptions(
 func WithDuration(opt time.Duration) OptOptionsSetter {
 	return func(o *Options) {
 		o.Duration = opt
-
 	}
 }
 

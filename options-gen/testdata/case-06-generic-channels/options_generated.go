@@ -33,14 +33,12 @@ func NewOptions[T any](
 func WithCh3[T any](opt chan T) OptOptionsSetter[T] {
 	return func(o *Options[T]) {
 		o.ch3 = opt
-
 	}
 }
 
 func WithCh4[T any](opt <-chan T) OptOptionsSetter[T] {
 	return func(o *Options[T]) {
 		o.ch4 = opt
-
 	}
 }
 

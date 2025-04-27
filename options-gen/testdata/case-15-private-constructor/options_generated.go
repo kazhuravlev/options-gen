@@ -20,7 +20,6 @@ func newOptions(
 func WithName(opt string) OptOptionsSetter {
 	return func(o *Options) {
 		o.name = opt
-
 	}
 }
 
