@@ -5,7 +5,6 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"go/parser"
 	"go/token"
 	"go/types"
 	"os"
@@ -96,14 +95,9 @@ func GetOptionSpec(filePath, optStructName, tagName string, allVariadic bool) (*
 	workDir := path.Dir(filePath)
 	fset := token.NewFileSet()
 
-	node, err := parser.ParseDir(fset, workDir, nil, parser.ParseComments)
+	file, typeParams, fields, err := findStructTypeParamsAndFields(fset, filePath, optStructName)
 	if err != nil {
-		return nil, fmt.Errorf("cannot parse dir: %w", err)
-	}
-
-	file, typeParams, fields, ok := findStructTypeParamsAndFields(node, optStructName)
-	if !ok {
-		return nil, errors.New("cannot find target struct")
+		return nil, fmt.Errorf("cannot find target struct: %w", err)
 	}
 
 	options := make([]OptionMeta, 0, len(fields))
@@ -191,9 +185,10 @@ func GetOptionSpec(filePath, optStructName, tagName string, allVariadic bool) (*
 		return nil, fmt.Errorf("unable to extract type params %w", err)
 	}
 
+	// Process imports
 	importSlice := make([]string, len(file.Imports))
-	for i := range file.Imports {
-		importSlice[i] = file.Imports[i].Path.Value
+	for i, imp := range file.Imports {
+		importSlice[i] = imp.Path.Value
 	}
 
 	return &GetOptionSpecRes{

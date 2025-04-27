@@ -36,6 +36,7 @@ func TestRun(t *testing.T) {
 		for _, dir := range testDirs {
 			dir := dir
 			t.Run(dir, func(t *testing.T) {
+				t.Parallel()
 				outFilename := filepath.Join(dir, "options_generated.go")
 				expFilename := filepath.Join(dir, "options_generated.go.expected")
 				paramsFilename := filepath.Join(dir, ".params.json")

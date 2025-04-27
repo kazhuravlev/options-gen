@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"go/parser"
 	"go/token"
 	"go/types"
+	"path"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -24,10 +26,8 @@ var errIsNotSlice = errors.New("it is not slice")
 // When we remove support for Go versions below 1.22, we will be able to use code like
 //
 // var (
-//
 //	importPackageMask             = regexp.MustCompile(`(?<pkgName>[\w_\-\.\d]+)(\/v\d+)?$`)
 //	importPackageMaskPkgNameIndex = importPackageMask.SubexpIndex("pkgName")
-//
 // )
 
 var importPackageMask = regexp.MustCompile(`([\w_\-\.\d]+)(\/v\d+)?$`)
@@ -59,8 +59,15 @@ func formatComment(comment string) string {
 	return buf.String()
 }
 
-func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName string) (*ast.File, []*ast.Field, []*ast.Field, bool) { //nolint:lll
-	for _, pkgObj := range packages {
+func findStructTypeParamsAndFields(fset *token.FileSet, filePath, typeName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll
+	workDir := path.Dir(filePath)
+
+	node, err := parser.ParseDir(fset, workDir, nil, parser.ParseComments)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("cannot parse file: %w", err)
+	}
+
+	for _, pkgObj := range node {
 		for _, fileObj := range pkgObj.Files {
 			for _, decl := range fileObj.Decls {
 				genDecl, ok := decl.(*ast.GenDecl)
@@ -83,13 +90,86 @@ func findStructTypeParamsAndFields(packages map[string]*ast.Package, typeName st
 						continue
 					}
 
-					return fileObj, extractFields(typeSpec.TypeParams), extractFields(structType.Fields), true
+					return fileObj, extractFields(typeSpec.TypeParams), extractFields(structType.Fields), nil
 				}
 			}
 		}
 	}
 
-	return nil, nil, nil, false
+	return nil, nil, nil, errors.New("cannot find target struct")
+}
+
+func findStructTypeParamsAndFields2(fset *token.FileSet, filePath, optStructName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll,unused
+	workDir := path.Dir(filePath)
+
+	// Configure the loader to use types package instead of ParseDir
+	cfg := &packages.Config{ //nolint:exhaustruct
+		Mode: packages.NeedSyntax |
+			packages.NeedTypes |
+			packages.NeedDeps,
+		Dir:   workDir,
+		Tests: true,
+		Fset:  fset,
+	}
+
+	// Load the package that contains the file we want to parse
+	pkgs, err := packages.Load(cfg, "file="+filePath)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("load package: %w", err)
+	}
+
+	if len(pkgs) == 0 {
+		return nil, nil, nil, errors.New("no packages found")
+	}
+
+	pkg := pkgs[0]
+	if len(pkg.Errors) > 0 {
+		return nil, nil, nil, fmt.Errorf("package contains errors: %v", pkg.Errors)
+	}
+
+	// Find the struct
+	var file *ast.File
+	var typeParams []*ast.Field
+	var fields []*ast.Field
+	var found bool
+
+SearchLoop:
+	for _, astFile := range pkg.Syntax {
+		for _, decl := range astFile.Decls {
+			genDecl, ok := decl.(*ast.GenDecl)
+			if !ok {
+				continue
+			}
+
+			for _, spec := range genDecl.Specs {
+				typeSpec, ok := spec.(*ast.TypeSpec) //nolint:varnamelen
+				if !ok {
+					continue
+				}
+
+				if typeSpec.Name.Name != optStructName {
+					continue
+				}
+
+				structType, ok := typeSpec.Type.(*ast.StructType)
+				if !ok {
+					continue
+				}
+
+				file = astFile
+				typeParams = extractFields(typeSpec.TypeParams)
+				fields = extractFields(structType.Fields)
+				found = true
+
+				break SearchLoop
+			}
+		}
+	}
+	if !found {
+		return nil, nil, nil, errors.New("cannot find target struct")
+	}
+
+	return file, typeParams, fields, nil
 }
 
 func extractFields(fl *ast.FieldList) []*ast.Field {
@@ -244,12 +324,7 @@ func findImportPath(imports []*ast.ImportSpec, pkgName string) (string, string) 
 // loadPkg loads a package by full import path.
 func loadPkg(fset *token.FileSet, pkgName, dirPath string) (*packages.Package, error) {
 	cfg := &packages.Config{ //nolint:exhaustruct
-		Mode: packages.NeedName |
-			packages.NeedSyntax |
-			packages.NeedTypes |
-			packages.NeedImports |
-			packages.NeedDeps |
-			packages.NeedTypesInfo,
+		Mode: packages.NeedTypes | packages.NeedDeps,
 		Dir:  dirPath,
 		Fset: fset,
 	}
