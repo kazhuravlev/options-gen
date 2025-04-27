@@ -33,7 +33,7 @@ func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsS
 	{{- end -}}
 	options ...{{$.optionsTypeName}}{{ $.optionsTypeParams }},
 ) {{ .optionsStructInstanceType }} {
-	o := {{ .optionsStructInstanceType }}{}
+	var o {{ .optionsStructInstanceType }}
 	{{ if .withIsset }}
 		var empty [{{ .optionsLen }}]bool
 		opt{{$.optionsPrefix}}IsSet = empty
@@ -62,22 +62,26 @@ func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsS
 
 	{{ if .defaultsTagName }}
 		// Setting defaults from field tag (if present)
-        {{ range .options -}}
-            {{ if .TagOption.Default -}}
-                {{ if eq .Type "time.Duration" }}o.{{ .Field }}, _ = time.ParseDuration("{{ .TagOption.Default }}")
-                {{- else if eq .Type "string" }}o.{{ .Field }} = "{{ .TagOption.Default }}"
-                {{- else }}o.{{ .Field }} = {{ .TagOption.Default }}{{ end }}
-                {{ if $.withIsset -}}
-	                opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
-                {{- end }}
-            {{ end -}}
-        {{ end }}
-	{{ end }}
+    {{ range .options -}}
+      {{ if .TagOption.Default -}}
+        {{- if eq .Type "time.Duration" }}
+	        o.{{ .Field }}, _ = time.ParseDuration("{{ .TagOption.Default }}")
+        {{- else if eq .Type "string" }}
+	        o.{{ .Field }} = "{{ .TagOption.Default }}"
+        {{- else }}
+	        o.{{ .Field }} = {{ .TagOption.Default }}
+        {{- end }}
+        {{- if $.withIsset }}
+          opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
+        {{- end }}
+      {{- end }}
+    {{- end }}
+	{{- end }}
 
 	{{ range .options }}
 	    {{- if .TagOption.IsRequired -}}
 	        o.{{ .Field }} = {{ .Field }}
-          {{ if $.withIsset -}}
+          {{- if $.withIsset }}
 		        opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
           {{- end }}
       {{ end -}}

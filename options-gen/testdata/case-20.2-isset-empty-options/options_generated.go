@@ -13,7 +13,7 @@ type OptOptionsSetter func(o *Options)
 func NewOptions(
 	options ...OptOptionsSetter,
 ) Options {
-	o := Options{}
+	var o Options
 
 	var empty [0]bool
 	optIsSet = empty

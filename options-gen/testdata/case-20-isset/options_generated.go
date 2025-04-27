@@ -66,7 +66,7 @@ func NewOptions(
 	valBool bool,
 	options ...OptOptionsSetter,
 ) Options {
-	o := Options{}
+	var o Options
 
 	var empty [30]bool
 	optIsSet = empty

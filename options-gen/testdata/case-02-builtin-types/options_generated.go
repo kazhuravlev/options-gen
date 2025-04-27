@@ -29,38 +29,24 @@ func NewOptions(
 	valBool bool,
 	options ...OptOptionsSetter,
 ) Options {
-	o := Options{}
+	var o Options
 
 	// Setting defaults from field tag (if present)
 
 	o.valInt = valInt
-
 	o.valInt8 = valInt8
-
 	o.valInt16 = valInt16
-
 	o.valInt32 = valInt32
-
 	o.valInt64 = valInt64
-
 	o.valUInt = valUInt
-
 	o.valUInt8 = valUInt8
-
 	o.valUInt16 = valUInt16
-
 	o.valUInt32 = valUInt32
-
 	o.valUInt64 = valUInt64
-
 	o.valFloat32 = valFloat32
-
 	o.valFloat64 = valFloat64
-
 	o.valString = valString
-
 	o.valBytes = valBytes
-
 	o.valBool = valBool
 
 	for _, opt := range options {
