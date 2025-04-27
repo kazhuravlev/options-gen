@@ -69,7 +69,7 @@ func Run(opts Options) error {
 		}
 	}
 
-	optionSpec, warnings, imports, err := generator.GetOptionSpec(
+	spec, err := generator.GetOptionSpec(
 		opts.inFilename,
 		opts.structName,
 		tagName,
@@ -93,8 +93,8 @@ func Run(opts Options) error {
 		generator.WithVersion(opts.version),
 		generator.WithPackageName(opts.packageName),
 		generator.WithOptionsStructName(opts.structName),
-		generator.WithFileImports(imports),
-		generator.WithSpec(optionSpec),
+		generator.WithFileImports(spec.Imports),
+		generator.WithSpec(&spec.Spec),
 		generator.WithTagName(tagName),
 		generator.WithVarName(varName),
 		generator.WithFuncName(funcName),
@@ -113,7 +113,7 @@ func Run(opts Options) error {
 	}
 
 	if opts.showWarnings {
-		for _, warning := range warnings {
+		for _, warning := range spec.Warnings {
 			log.Println(warning)
 		}
 	}
