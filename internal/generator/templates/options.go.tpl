@@ -43,7 +43,7 @@ func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsS
 		// Setting defaults from variable
 		{{ range .options -}}
 			o.{{ .Field }} = {{ $.defaultsVarName }}.{{ .Field }}
-      {{ if $.withIsset -}}
+      {{- if $.withIsset }}
 				opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
       {{- end }}
     {{ end }}
@@ -54,7 +54,7 @@ func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsS
 		defaultOpts := {{ $.defaultsFuncName }}{{ $.optionsTypeParams }}()
 		{{ range .options -}}
 			o.{{ .Field }} = defaultOpts.{{ .Field }}
-      {{ if $.withIsset -}}
+      {{- if $.withIsset }}
 				opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
       {{- end }}
     {{ end }}
