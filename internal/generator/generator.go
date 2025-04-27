@@ -95,7 +95,7 @@ func GetOptionSpec(filePath, optStructName, tagName string, allVariadic bool) (*
 	workDir := path.Dir(filePath)
 	fset := token.NewFileSet()
 
-	file, typeParams, fields, err := findStructTypeParamsAndFields(filePath, optStructName)
+	file, typeParams, fields, err := findStructTypeParamsAndFields(fset, filePath, optStructName)
 	if err != nil {
 		return nil, fmt.Errorf("cannot find target struct: %w", err)
 	}

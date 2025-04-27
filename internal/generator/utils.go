@@ -60,6 +60,7 @@ func formatComment(comment string) string {
 }
 
 func findStructTypeParamsAndFields(fset *token.FileSet, filePath, typeName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll
+	// TODO(kazhuravlev): should be replaces to findStructTypeParamsAndFields2 but after fixing the performance issues.
 	workDir := path.Dir(filePath)
 
 	node, err := parser.ParseDir(fset, workDir, nil, parser.ParseComments)
