@@ -6,26 +6,12 @@ import (
 	"github.com/kazhuravlev/options-gen/options-gen/testdata/case-18-embed-inline-no-panic/embedpkg"
 )
 
-type optField int8
-
-const (
-	FieldEmbedStruct optField = 0
-	FieldStruct      optField = 1
-	Fieldinline      optField = 2
-	Fieldname        optField = 3
-)
-
-var optIsSet = [4]bool{}
-
 type OptOptionsSetter func(o *Options)
 
 func NewOptions(
 	options ...OptOptionsSetter,
 ) Options {
-	o := Options{}
-
-	var empty [4]bool
-	optIsSet = empty
+	var o Options
 
 	// Setting defaults from field tag (if present)
 
@@ -36,37 +22,21 @@ func NewOptions(
 }
 
 func WithEmbedStruct(opt EmbedStruct) OptOptionsSetter {
-	return func(o *Options) {
-		o.EmbedStruct = opt
-		optIsSet[FieldEmbedStruct] = true
-	}
+	return func(o *Options) { o.EmbedStruct = opt }
 }
 
 func WithStruct(opt *embedpkg.Struct) OptOptionsSetter {
-	return func(o *Options) {
-		o.Struct = opt
-		optIsSet[FieldStruct] = true
-	}
+	return func(o *Options) { o.Struct = opt }
 }
 
 func WithInline(opt struct{ inlineField string }) OptOptionsSetter {
-	return func(o *Options) {
-		o.inline = opt
-		optIsSet[Fieldinline] = true
-	}
+	return func(o *Options) { o.inline = opt }
 }
 
 func WithName(opt string) OptOptionsSetter {
-	return func(o *Options) {
-		o.name = opt
-		optIsSet[Fieldname] = true
-	}
+	return func(o *Options) { o.name = opt }
 }
 
 func (o *Options) Validate() error {
 	return nil
-}
-
-func (o *Options) IsSet(field optField) bool {
-	return optIsSet[field]
 }

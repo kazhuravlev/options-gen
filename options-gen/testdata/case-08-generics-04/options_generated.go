@@ -2,17 +2,6 @@
 
 package testcase
 
-type optField int8
-
-const (
-	Fieldd1 optField = 0
-	Fieldd2 optField = 1
-	Fieldd3 optField = 2
-	Fieldd4 optField = 3
-)
-
-var optIsSet = [4]bool{}
-
 type OptOptionsSetter[T comparable] func(o *Options[T])
 
 func NewOptions[T comparable](
@@ -20,17 +9,12 @@ func NewOptions[T comparable](
 	d2 *SomeData[T],
 	options ...OptOptionsSetter[T],
 ) Options[T] {
-	o := Options[T]{}
-
-	var empty [4]bool
-	optIsSet = empty
+	var o Options[T]
 
 	// Setting defaults from field tag (if present)
 
 	o.d1 = d1
-	optIsSet[Fieldd1] = true
 	o.d2 = d2
-	optIsSet[Fieldd2] = true
 
 	for _, opt := range options {
 		opt(&o)
@@ -39,23 +23,13 @@ func NewOptions[T comparable](
 }
 
 func WithD3[T comparable](opt SomeData[T]) OptOptionsSetter[T] {
-	return func(o *Options[T]) {
-		o.d3 = opt
-		optIsSet[Fieldd3] = true
-	}
+	return func(o *Options[T]) { o.d3 = opt }
 }
 
 func WithD4[T comparable](opt *SomeData[T]) OptOptionsSetter[T] {
-	return func(o *Options[T]) {
-		o.d4 = opt
-		optIsSet[Fieldd4] = true
-	}
+	return func(o *Options[T]) { o.d4 = opt }
 }
 
 func (o *Options[T]) Validate() error {
 	return nil
-}
-
-func (o *Options[T]) IsSet(field optField) bool {
-	return optIsSet[field]
 }

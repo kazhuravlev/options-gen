@@ -50,7 +50,7 @@ func TestRun(t *testing.T) {
 					optionsgen.WithOutPrefix(params.OutPrefix),
 					optionsgen.WithDefaults(params.Defaults),
 					optionsgen.WithShowWarnings(true),
-					optionsgen.WithWithIsset(true),
+					optionsgen.WithWithIsset(params.WithIsset),
 					optionsgen.WithAllVariadic(params.AllVariadic),
 					optionsgen.WithConstructorTypeRender(params.Constructor),
 					optionsgen.WithOutOptionTypeName(params.OptionTypeName),
@@ -88,6 +88,7 @@ type Params struct {
 	OutPrefix      string                           `json:"out_prefix"` //nolint:tagliatelle
 	Defaults       optionsgen.Defaults              `json:"defaults"`
 	Constructor    optionsgen.ConstructorTypeRender `json:"constructor"`
+	WithIsset      bool                             `json:"with_isset"`       //nolint:tagliatelle
 	AllVariadic    bool                             `json:"all_variadic"`     //nolint:tagliatelle
 	OptionTypeName string                           `json:"option_type_name"` //nolint:tagliatelle
 }
@@ -100,6 +101,7 @@ func readParams(filename string) Params {
 			Param: "",
 		},
 		Constructor:    optionsgen.ConstructorPublicRender,
+		WithIsset:      false,
 		AllVariadic:    false,
 		OptionTypeName: "",
 	}

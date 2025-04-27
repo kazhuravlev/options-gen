@@ -10,36 +10,19 @@ import (
 	validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"
 )
 
-type optSomeField int8
-
-const (
-	FieldSomepingPeriod  optSomeField = 0
-	FieldSomename        optSomeField = 1
-	FieldSomemaxAttempts optSomeField = 2
-	FieldSomeeps         optSomeField = 3
-)
-
-var optSomeIsSet = [4]bool{}
-
 type OptOptionsSetter func(o *Options)
 
 func NewOptions(
 	options ...OptOptionsSetter,
 ) Options {
-	o := Options{}
-
-	var empty [4]bool
-	optSomeIsSet = empty
+	var o Options
 
 	// Setting defaults from field tag (if present)
+
 	o.pingPeriod, _ = time.ParseDuration("3s")
-	optSomeIsSet[FieldSomepingPeriod] = true
 	o.name = "unknown"
-	optSomeIsSet[FieldSomename] = true
 	o.maxAttempts = 10
-	optSomeIsSet[FieldSomemaxAttempts] = true
 	o.eps = 0.0001
-	optSomeIsSet[FieldSomeeps] = true
 
 	for _, opt := range options {
 		opt(&o)
@@ -48,31 +31,19 @@ func NewOptions(
 }
 
 func WithSomePingPeriod(opt time.Duration) OptOptionsSetter {
-	return func(o *Options) {
-		o.pingPeriod = opt
-		optSomeIsSet[FieldSomepingPeriod] = true
-	}
+	return func(o *Options) { o.pingPeriod = opt }
 }
 
 func WithSomeName(opt string) OptOptionsSetter {
-	return func(o *Options) {
-		o.name = opt
-		optSomeIsSet[FieldSomename] = true
-	}
+	return func(o *Options) { o.name = opt }
 }
 
 func WithSomeMaxAttempts(opt int) OptOptionsSetter {
-	return func(o *Options) {
-		o.maxAttempts = opt
-		optSomeIsSet[FieldSomemaxAttempts] = true
-	}
+	return func(o *Options) { o.maxAttempts = opt }
 }
 
 func WithSomeEps(opt float32) OptOptionsSetter {
-	return func(o *Options) {
-		o.eps = opt
-		optSomeIsSet[FieldSomeeps] = true
-	}
+	return func(o *Options) { o.eps = opt }
 }
 
 func (o *Options) Validate() error {
@@ -82,10 +53,6 @@ func (o *Options) Validate() error {
 	errs.Add(errors461e464ebed9.NewValidationError("maxAttempts", _validate_Options_maxAttempts(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("eps", _validate_Options_eps(o)))
 	return errs.AsError()
-}
-
-func (o *Options) IsSet(field optSomeField) bool {
-	return optSomeIsSet[field]
 }
 
 func _validate_Options_pingPeriod(o *Options) error {

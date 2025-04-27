@@ -2,29 +2,12 @@
 
 package testcase
 
-type optField int8
-
-const (
-	Fielda optField = 0
-	Fieldb optField = 1
-	Fieldc optField = 2
-	Fieldd optField = 3
-	Fielde optField = 4
-	Fieldf optField = 5
-	Fieldg optField = 6
-)
-
-var optIsSet = [7]bool{}
-
 type OptOptionsSetter[A comparable, B, C any, D int | string, E []A, F, G []any] func(o *Options[A, B, C, D, E, F, G])
 
 func NewOptions[A comparable, B, C any, D int | string, E []A, F, G []any](
 	options ...OptOptionsSetter[A, B, C, D, E, F, G],
 ) Options[A, B, C, D, E, F, G] {
-	o := Options[A, B, C, D, E, F, G]{}
-
-	var empty [7]bool
-	optIsSet = empty
+	var o Options[A, B, C, D, E, F, G]
 
 	// Setting defaults from field tag (if present)
 
@@ -35,58 +18,33 @@ func NewOptions[A comparable, B, C any, D int | string, E []A, F, G []any](
 }
 
 func WithA[A comparable, B, C any, D int | string, E []A, F, G []any](opt A) OptOptionsSetter[A, B, C, D, E, F, G] {
-	return func(o *Options[A, B, C, D, E, F, G]) {
-		o.a = opt
-		optIsSet[Fielda] = true
-	}
+	return func(o *Options[A, B, C, D, E, F, G]) { o.a = opt }
 }
 
 func WithB[A comparable, B, C any, D int | string, E []A, F, G []any](opt B) OptOptionsSetter[A, B, C, D, E, F, G] {
-	return func(o *Options[A, B, C, D, E, F, G]) {
-		o.b = opt
-		optIsSet[Fieldb] = true
-	}
+	return func(o *Options[A, B, C, D, E, F, G]) { o.b = opt }
 }
 
 func WithC[A comparable, B, C any, D int | string, E []A, F, G []any](opt C) OptOptionsSetter[A, B, C, D, E, F, G] {
-	return func(o *Options[A, B, C, D, E, F, G]) {
-		o.c = opt
-		optIsSet[Fieldc] = true
-	}
+	return func(o *Options[A, B, C, D, E, F, G]) { o.c = opt }
 }
 
 func WithD[A comparable, B, C any, D int | string, E []A, F, G []any](opt D) OptOptionsSetter[A, B, C, D, E, F, G] {
-	return func(o *Options[A, B, C, D, E, F, G]) {
-		o.d = opt
-		optIsSet[Fieldd] = true
-	}
+	return func(o *Options[A, B, C, D, E, F, G]) { o.d = opt }
 }
 
 func WithE[A comparable, B, C any, D int | string, E []A, F, G []any](opt E) OptOptionsSetter[A, B, C, D, E, F, G] {
-	return func(o *Options[A, B, C, D, E, F, G]) {
-		o.e = opt
-		optIsSet[Fielde] = true
-	}
+	return func(o *Options[A, B, C, D, E, F, G]) { o.e = opt }
 }
 
 func WithF[A comparable, B, C any, D int | string, E []A, F, G []any](opt F) OptOptionsSetter[A, B, C, D, E, F, G] {
-	return func(o *Options[A, B, C, D, E, F, G]) {
-		o.f = opt
-		optIsSet[Fieldf] = true
-	}
+	return func(o *Options[A, B, C, D, E, F, G]) { o.f = opt }
 }
 
 func WithG[A comparable, B, C any, D int | string, E []A, F, G []any](opt G) OptOptionsSetter[A, B, C, D, E, F, G] {
-	return func(o *Options[A, B, C, D, E, F, G]) {
-		o.g = opt
-		optIsSet[Fieldg] = true
-	}
+	return func(o *Options[A, B, C, D, E, F, G]) { o.g = opt }
 }
 
 func (o *Options[A, B, C, D, E, F, G]) Validate() error {
 	return nil
-}
-
-func (o *Options[A, B, C, D, E, F, G]) IsSet(field optField) bool {
-	return optIsSet[field]
 }

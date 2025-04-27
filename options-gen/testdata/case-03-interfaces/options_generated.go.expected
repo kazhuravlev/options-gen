@@ -7,21 +7,6 @@ import (
 	"io"
 )
 
-type optField int8
-
-const (
-	Fieldany         optField = 0
-	Fieldstringer    optField = 1
-	FieldrWCloser    optField = 2
-	Fieldlocal       optField = 3
-	FieldoptAny      optField = 4
-	FieldoptStringer optField = 5
-	FieldoptRWCloser optField = 6
-	FieldoptLocal    optField = 7
-)
-
-var optIsSet = [8]bool{}
-
 type OptOptionsSetter func(o *Options)
 
 func NewOptions(
@@ -31,21 +16,14 @@ func NewOptions(
 	local localInterface,
 	options ...OptOptionsSetter,
 ) Options {
-	o := Options{}
-
-	var empty [8]bool
-	optIsSet = empty
+	var o Options
 
 	// Setting defaults from field tag (if present)
 
 	o.any = any
-	optIsSet[Fieldany] = true
 	o.stringer = stringer
-	optIsSet[Fieldstringer] = true
 	o.rWCloser = rWCloser
-	optIsSet[FieldrWCloser] = true
 	o.local = local
-	optIsSet[Fieldlocal] = true
 
 	for _, opt := range options {
 		opt(&o)
@@ -54,37 +32,21 @@ func NewOptions(
 }
 
 func WithOptAny(opt any) OptOptionsSetter {
-	return func(o *Options) {
-		o.optAny = opt
-		optIsSet[FieldoptAny] = true
-	}
+	return func(o *Options) { o.optAny = opt }
 }
 
 func WithOptStringer(opt fmt.Stringer) OptOptionsSetter {
-	return func(o *Options) {
-		o.optStringer = opt
-		optIsSet[FieldoptStringer] = true
-	}
+	return func(o *Options) { o.optStringer = opt }
 }
 
 func WithOptRWCloser(opt io.ReadWriteCloser) OptOptionsSetter {
-	return func(o *Options) {
-		o.optRWCloser = opt
-		optIsSet[FieldoptRWCloser] = true
-	}
+	return func(o *Options) { o.optRWCloser = opt }
 }
 
 func WithOptLocal(opt localInterface) OptOptionsSetter {
-	return func(o *Options) {
-		o.optLocal = opt
-		optIsSet[FieldoptLocal] = true
-	}
+	return func(o *Options) { o.optLocal = opt }
 }
 
 func (o *Options) Validate() error {
 	return nil
-}
-
-func (o *Options) IsSet(field optField) bool {
-	return optIsSet[field]
 }

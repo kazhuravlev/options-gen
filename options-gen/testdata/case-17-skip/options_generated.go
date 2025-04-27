@@ -2,23 +2,12 @@
 
 package testcase
 
-type optField int8
-
-const (
-	Fieldname optField = 0
-)
-
-var optIsSet = [1]bool{}
-
 type OptOptionsSetter func(o *Options)
 
 func NewOptions(
 	options ...OptOptionsSetter,
 ) Options {
-	o := Options{}
-
-	var empty [1]bool
-	optIsSet = empty
+	var o Options
 
 	// Setting defaults from field tag (if present)
 
@@ -29,16 +18,9 @@ func NewOptions(
 }
 
 func WithName(opt string) OptOptionsSetter {
-	return func(o *Options) {
-		o.name = opt
-		optIsSet[Fieldname] = true
-	}
+	return func(o *Options) { o.name = opt }
 }
 
 func (o *Options) Validate() error {
 	return nil
-}
-
-func (o *Options) IsSet(field optField) bool {
-	return optIsSet[field]
 }

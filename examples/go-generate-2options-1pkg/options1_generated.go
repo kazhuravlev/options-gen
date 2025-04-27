@@ -25,7 +25,7 @@ type OptOptions1Setter func(o *Options1)
 func NewOptions1(
 	options ...OptOptions1Setter,
 ) Options1 {
-	o := Options1{}
+	var o Options1
 
 	var empty [4]bool
 	optKKKIsSet = empty

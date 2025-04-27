@@ -15,7 +15,7 @@ func NewParams(
 	hash string,
 	options ...OptParamsSetter,
 ) Params {
-	o := Params{}
+	var o Params
 
 	// Setting defaults from field tag (if present)
 

@@ -9,17 +9,6 @@ import (
 	validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"
 )
 
-type optField int8
-
-const (
-	Fieldch1 optField = 0
-	Fieldch2 optField = 1
-	Fieldch3 optField = 2
-	Fieldch4 optField = 3
-)
-
-var optIsSet = [4]bool{}
-
 type OptOptionsSetter[T any] func(o *Options[T])
 
 func NewOptions[T any](
@@ -27,17 +16,12 @@ func NewOptions[T any](
 	ch2 <-chan T,
 	options ...OptOptionsSetter[T],
 ) Options[T] {
-	o := Options[T]{}
-
-	var empty [4]bool
-	optIsSet = empty
+	var o Options[T]
 
 	// Setting defaults from field tag (if present)
 
 	o.ch1 = ch1
-	optIsSet[Fieldch1] = true
 	o.ch2 = ch2
-	optIsSet[Fieldch2] = true
 
 	for _, opt := range options {
 		opt(&o)
@@ -46,27 +30,17 @@ func NewOptions[T any](
 }
 
 func WithCh3[T any](opt chan T) OptOptionsSetter[T] {
-	return func(o *Options[T]) {
-		o.ch3 = opt
-		optIsSet[Fieldch3] = true
-	}
+	return func(o *Options[T]) { o.ch3 = opt }
 }
 
 func WithCh4[T any](opt <-chan T) OptOptionsSetter[T] {
-	return func(o *Options[T]) {
-		o.ch4 = opt
-		optIsSet[Fieldch4] = true
-	}
+	return func(o *Options[T]) { o.ch4 = opt }
 }
 
 func (o *Options[T]) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
 	errs.Add(errors461e464ebed9.NewValidationError("ch1", _validate_Options_ch1[T](o)))
 	return errs.AsError()
-}
-
-func (o *Options[T]) IsSet(field optField) bool {
-	return optIsSet[field]
 }
 
 func _validate_Options_ch1[T any](o *Options[T]) error {

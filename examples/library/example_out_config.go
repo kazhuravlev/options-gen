@@ -7,7 +7,7 @@ type OptConfigSetter func(o *Config)
 func NewConfig(
 	options ...OptConfigSetter,
 ) Config {
-	o := Config{}
+	var o Config
 
 	// Setting defaults from field tag (if present)
 
@@ -18,10 +18,7 @@ func NewConfig(
 }
 
 func WithSomeName(opt string) OptConfigSetter {
-	return func(o *Config) {
-		o.name = opt
-
-	}
+	return func(o *Config) { o.name = opt }
 }
 
 func (o *Config) Validate() error {
