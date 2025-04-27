@@ -30,9 +30,7 @@ func NewOptions[T string](
 }
 
 func WithSomeOptKey[T string](opt T) OptOptionsSetter[T] {
-	return func(o *Options[T]) {
-		o.optKey = opt
-	}
+	return func(o *Options[T]) { o.optKey = opt }
 }
 
 func (o *Options[T]) Validate() error {

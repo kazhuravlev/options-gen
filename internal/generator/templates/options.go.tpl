@@ -101,14 +101,14 @@ func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsS
 		{{- end }}
 		func With{{$.optionsPrefix}}{{ .Name }}{{ $.optionsTypeParamsSpec }}(opt {{if .TagOption.Variadic}}...{{end}}{{ .Type }}) {{$.optionsTypeName}}{{ $.optionsTypeParams }} {
 			return func(o *{{ $.optionsStructInstanceType }}) {
-				{{ if .TagOption.Variadic -}}
+				{{- if .TagOption.Variadic -}}
 					o.{{ .Field }} = append(o.{{ .Field }}, opt...)
 				{{- else -}}
 					o.{{ .Field }} = opt
 				{{- end -}}
 				{{ if $.withIsset }}
 					opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
-				{{- end }}
+				{{- end -}}
 			}
 		}
 	{{ end }}

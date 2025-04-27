@@ -34,27 +34,19 @@ func NewOptions(
 }
 
 func WithXXXName(opt string) OptOptionsSetter {
-	return func(o *Options) {
-		o.name = opt
-	}
+	return func(o *Options) { o.name = opt }
 }
 
 func WithXXXTimeout(opt time.Duration) OptOptionsSetter {
-	return func(o *Options) {
-		o.timeout = opt
-	}
+	return func(o *Options) { o.timeout = opt }
 }
 
 func WithXXXMaxAttempts(opt int) OptOptionsSetter {
-	return func(o *Options) {
-		o.maxAttempts = opt
-	}
+	return func(o *Options) { o.maxAttempts = opt }
 }
 
 func WithXXXHttpClient(opt *http.Client) OptOptionsSetter {
-	return func(o *Options) {
-		o.httpClient = opt
-	}
+	return func(o *Options) { o.httpClient = opt }
 }
 
 func (o *Options) Validate() error {

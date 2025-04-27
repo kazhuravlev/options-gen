@@ -18,45 +18,31 @@ func NewOptions[A comparable, B, C any, D int | string, E []A, F, G []any](
 }
 
 func WithA[A comparable, B, C any, D int | string, E []A, F, G []any](opt A) OptOptionsSetter[A, B, C, D, E, F, G] {
-	return func(o *Options[A, B, C, D, E, F, G]) {
-		o.a = opt
-	}
+	return func(o *Options[A, B, C, D, E, F, G]) { o.a = opt }
 }
 
 func WithB[A comparable, B, C any, D int | string, E []A, F, G []any](opt B) OptOptionsSetter[A, B, C, D, E, F, G] {
-	return func(o *Options[A, B, C, D, E, F, G]) {
-		o.b = opt
-	}
+	return func(o *Options[A, B, C, D, E, F, G]) { o.b = opt }
 }
 
 func WithC[A comparable, B, C any, D int | string, E []A, F, G []any](opt C) OptOptionsSetter[A, B, C, D, E, F, G] {
-	return func(o *Options[A, B, C, D, E, F, G]) {
-		o.c = opt
-	}
+	return func(o *Options[A, B, C, D, E, F, G]) { o.c = opt }
 }
 
 func WithD[A comparable, B, C any, D int | string, E []A, F, G []any](opt D) OptOptionsSetter[A, B, C, D, E, F, G] {
-	return func(o *Options[A, B, C, D, E, F, G]) {
-		o.d = opt
-	}
+	return func(o *Options[A, B, C, D, E, F, G]) { o.d = opt }
 }
 
 func WithE[A comparable, B, C any, D int | string, E []A, F, G []any](opt E) OptOptionsSetter[A, B, C, D, E, F, G] {
-	return func(o *Options[A, B, C, D, E, F, G]) {
-		o.e = opt
-	}
+	return func(o *Options[A, B, C, D, E, F, G]) { o.e = opt }
 }
 
 func WithF[A comparable, B, C any, D int | string, E []A, F, G []any](opt F) OptOptionsSetter[A, B, C, D, E, F, G] {
-	return func(o *Options[A, B, C, D, E, F, G]) {
-		o.f = opt
-	}
+	return func(o *Options[A, B, C, D, E, F, G]) { o.f = opt }
 }
 
 func WithG[A comparable, B, C any, D int | string, E []A, F, G []any](opt G) OptOptionsSetter[A, B, C, D, E, F, G] {
-	return func(o *Options[A, B, C, D, E, F, G]) {
-		o.g = opt
-	}
+	return func(o *Options[A, B, C, D, E, F, G]) { o.g = opt }
 }
 
 func (o *Options[A, B, C, D, E, F, G]) Validate() error {

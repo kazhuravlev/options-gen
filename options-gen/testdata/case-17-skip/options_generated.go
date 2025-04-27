@@ -18,9 +18,7 @@ func NewOptions(
 }
 
 func WithName(opt string) OptOptionsSetter {
-	return func(o *Options) {
-		o.name = opt
-	}
+	return func(o *Options) { o.name = opt }
 }
 
 func (o *Options) Validate() error {

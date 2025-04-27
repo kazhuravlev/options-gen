@@ -22,27 +22,19 @@ func NewOptions(
 }
 
 func WithEmbedStruct(opt EmbedStruct) OptOptionsSetter {
-	return func(o *Options) {
-		o.EmbedStruct = opt
-	}
+	return func(o *Options) { o.EmbedStruct = opt }
 }
 
 func WithStruct(opt *embedpkg.Struct) OptOptionsSetter {
-	return func(o *Options) {
-		o.Struct = opt
-	}
+	return func(o *Options) { o.Struct = opt }
 }
 
 func WithInline(opt struct{ inlineField string }) OptOptionsSetter {
-	return func(o *Options) {
-		o.inline = opt
-	}
+	return func(o *Options) { o.inline = opt }
 }
 
 func WithName(opt string) OptOptionsSetter {
-	return func(o *Options) {
-		o.name = opt
-	}
+	return func(o *Options) { o.name = opt }
 }
 
 func (o *Options) Validate() error {

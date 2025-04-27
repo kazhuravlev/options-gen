@@ -57,100 +57,70 @@ func NewOptions(
 
 // optValInt docstring-1
 func WithOptValInt(opt int) CustomOpt {
-	return func(o *Options) {
-		o.optValInt = opt
-	}
+	return func(o *Options) { o.optValInt = opt }
 }
 
 // docstring-2
 func WithOptValInt8(opt int8) CustomOpt {
-	return func(o *Options) {
-		o.optValInt8 = opt
-	}
+	return func(o *Options) { o.optValInt8 = opt }
 }
 
 func WithOptValInt16(opt int16) CustomOpt {
-	return func(o *Options) {
-		o.optValInt16 = opt
-	}
+	return func(o *Options) { o.optValInt16 = opt }
 }
 
 // Just
 // a
 // comment
 func WithOptValInt32(opt int32) CustomOpt {
-	return func(o *Options) {
-		o.optValInt32 = opt
-	}
+	return func(o *Options) { o.optValInt32 = opt }
 }
 
 // Just
 // a
 // comment
 func WithOptValInt64(opt int64) CustomOpt {
-	return func(o *Options) {
-		o.optValInt64 = opt
-	}
+	return func(o *Options) { o.optValInt64 = opt }
 }
 
 func WithOptValUInt(opt uint) CustomOpt {
-	return func(o *Options) {
-		o.optValUInt = opt
-	}
+	return func(o *Options) { o.optValUInt = opt }
 }
 
 func WithOptValUInt8(opt uint8) CustomOpt {
-	return func(o *Options) {
-		o.optValUInt8 = opt
-	}
+	return func(o *Options) { o.optValUInt8 = opt }
 }
 
 func WithOptValUInt16(opt uint16) CustomOpt {
-	return func(o *Options) {
-		o.optValUInt16 = opt
-	}
+	return func(o *Options) { o.optValUInt16 = opt }
 }
 
 func WithOptValUInt32(opt uint32) CustomOpt {
-	return func(o *Options) {
-		o.optValUInt32 = opt
-	}
+	return func(o *Options) { o.optValUInt32 = opt }
 }
 
 func WithOptValUInt64(opt uint64) CustomOpt {
-	return func(o *Options) {
-		o.optValUInt64 = opt
-	}
+	return func(o *Options) { o.optValUInt64 = opt }
 }
 
 func WithOptValFloat32(opt float32) CustomOpt {
-	return func(o *Options) {
-		o.optValFloat32 = opt
-	}
+	return func(o *Options) { o.optValFloat32 = opt }
 }
 
 func WithOptValFloat64(opt float64) CustomOpt {
-	return func(o *Options) {
-		o.optValFloat64 = opt
-	}
+	return func(o *Options) { o.optValFloat64 = opt }
 }
 
 func WithOptValString(opt string) CustomOpt {
-	return func(o *Options) {
-		o.optValString = opt
-	}
+	return func(o *Options) { o.optValString = opt }
 }
 
 func WithOptValBytes(opt []byte) CustomOpt {
-	return func(o *Options) {
-		o.optValBytes = opt
-	}
+	return func(o *Options) { o.optValBytes = opt }
 }
 
 func WithOptValBool(opt bool) CustomOpt {
-	return func(o *Options) {
-		o.optValBool = opt
-	}
+	return func(o *Options) { o.optValBool = opt }
 }
 
 func (o *Options) Validate() error {

@@ -35,21 +35,15 @@ func NewOptions[KeyT int | string, TT any](
 }
 
 func WithSomeOptHandler[KeyT int | string, TT any](opt http.Handler) OptOptionsSetter[KeyT, TT] {
-	return func(o *Options[KeyT, TT]) {
-		o.optHandler = opt
-	}
+	return func(o *Options[KeyT, TT]) { o.optHandler = opt }
 }
 
 func WithSomeOptKey[KeyT int | string, TT any](opt KeyT) OptOptionsSetter[KeyT, TT] {
-	return func(o *Options[KeyT, TT]) {
-		o.optKey = opt
-	}
+	return func(o *Options[KeyT, TT]) { o.optKey = opt }
 }
 
 func WithSomeAnyOpt[KeyT int | string, TT any](opt TT) OptOptionsSetter[KeyT, TT] {
-	return func(o *Options[KeyT, TT]) {
-		o.anyOpt = opt
-	}
+	return func(o *Options[KeyT, TT]) { o.anyOpt = opt }
 }
 
 func (o *Options[KeyT, TT]) Validate() error {
