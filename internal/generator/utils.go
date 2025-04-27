@@ -323,12 +323,7 @@ func findImportPath(imports []*ast.ImportSpec, pkgName string) (string, string) 
 // loadPkg loads a package by full import path.
 func loadPkg(fset *token.FileSet, pkgName, dirPath string) (*packages.Package, error) {
 	cfg := &packages.Config{ //nolint:exhaustruct
-		Mode: packages.NeedName |
-			packages.NeedSyntax |
-			packages.NeedTypes |
-			packages.NeedImports |
-			packages.NeedDeps |
-			packages.NeedTypesInfo,
+		Mode: packages.NeedTypes | packages.NeedDeps,
 		Dir:  dirPath,
 		Fset: fset,
 	}
