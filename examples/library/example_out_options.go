@@ -17,12 +17,11 @@ func NewOptions(
 	s3Endpoint string,
 	options ...OptOptionsSetter,
 ) Options {
-	o := Options{}
+	var o Options
 
 	// Setting defaults from field tag (if present)
 
 	o.service1 = service1
-
 	o.s3Endpoint = s3Endpoint
 
 	for _, opt := range options {
@@ -32,10 +31,7 @@ func NewOptions(
 }
 
 func WithSomePort(opt int) OptOptionsSetter {
-	return func(o *Options) {
-		o.port = opt
-
-	}
+	return func(o *Options) { o.port = opt }
 }
 
 func (o *Options) Validate() error {

@@ -7,7 +7,7 @@ type OptOptionsSetter[K comparable, V any] func(o *Options[K, V])
 func NewOptions[K comparable, V any](
 	options ...OptOptionsSetter[K, V],
 ) Options[K, V] {
-	o := Options[K, V]{}
+	var o Options[K, V]
 
 	// Setting defaults from func
 	defaultOpts := getDefaultOptions[K, V]()
@@ -20,10 +20,7 @@ func NewOptions[K comparable, V any](
 }
 
 func WithDefaultVal[K comparable, V any](opt V) OptOptionsSetter[K, V] {
-	return func(o *Options[K, V]) {
-		o.defaultVal = opt
-
-	}
+	return func(o *Options[K, V]) { o.defaultVal = opt }
 }
 
 func (o *Options[K, V]) Validate() error {

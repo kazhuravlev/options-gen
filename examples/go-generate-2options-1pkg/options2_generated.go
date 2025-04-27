@@ -25,7 +25,7 @@ type OptOptions2Setter func(o *Options2)
 func NewOptions2(
 	options ...OptOptions2Setter,
 ) Options2 {
-	o := Options2{}
+	var o Options2
 
 	var empty [4]bool
 	optNNNIsSet = empty
