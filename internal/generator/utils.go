@@ -104,10 +104,8 @@ func findStructTypeParamsAndFields2(fset *token.FileSet, filePath, optStructName
 
 	// Configure the loader to use types package instead of ParseDir
 	cfg := &packages.Config{
-		Mode: packages.NeedName |
-			packages.NeedSyntax |
+		Mode: packages.NeedSyntax |
 			packages.NeedTypes |
-			packages.NeedImports |
 			packages.NeedDeps,
 		Dir:   workDir,
 		Tests: true,
