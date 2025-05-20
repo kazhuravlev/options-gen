@@ -76,7 +76,7 @@ func findStructTypeParamsAndFields(fset *token.FileSet, filePath, typeName strin
 				}
 
 				for _, spec := range genDecl.Specs {
-					typeSpec, ok := spec.(*ast.TypeSpec) //nolint:varnamelen
+					typeSpec, ok := spec.(*ast.TypeSpec)
 					if !ok {
 						continue
 					}
@@ -85,12 +85,22 @@ func findStructTypeParamsAndFields(fset *token.FileSet, filePath, typeName strin
 						continue
 					}
 
-					structType, ok := typeSpec.Type.(*ast.StructType)
-					if !ok {
-						continue
-					}
+					switch castedType := typeSpec.Type.(type) {
+					case *ast.StructType:
+						return fileObj, extractFields(typeSpec.TypeParams), extractFields(castedType.Fields), nil
+					case *ast.SelectorExpr:
+						pkgIdent, ok := castedType.X.(*ast.Ident)
+						if !ok {
+							continue
+						}
 
-					return fileObj, extractFields(typeSpec.TypeParams), extractFields(structType.Fields), nil
+						importPath, _ := findImportPath(fileObj.Imports, pkgIdent.Name)
+						if importPath == "" {
+							continue
+						}
+
+						return findStructTypeParamsAndFields2(fset, importPath, castedType.Sel.Name, workDir, pkgIdent.Name)
+					}
 				}
 			}
 		}
@@ -99,8 +109,13 @@ func findStructTypeParamsAndFields(fset *token.FileSet, filePath, typeName strin
 	return nil, nil, nil, errors.New("cannot find target struct")
 }
 
-func findStructTypeParamsAndFields2(fset *token.FileSet, filePath, optStructName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll,unused
-	workDir := path.Dir(filePath)
+func findStructTypeParamsAndFields2(
+	fset *token.FileSet,
+	filePath, optStructName, workDir, pkgName string,
+) (*ast.File, []*ast.Field, []*ast.Field, error) {
+	if workDir == "" {
+		workDir = path.Dir(filePath)
+	}
 
 	// Configure the loader to use types package instead of ParseDir
 	cfg := &packages.Config{ //nolint:exhaustruct
@@ -113,7 +128,7 @@ func findStructTypeParamsAndFields2(fset *token.FileSet, filePath, optStructName
 	}
 
 	// Load the package that contains the file we want to parse
-	pkgs, err := packages.Load(cfg, "file="+filePath)
+	pkgs, err := packages.Load(cfg, filePath)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("load package: %w", err)
 	}
@@ -127,13 +142,8 @@ func findStructTypeParamsAndFields2(fset *token.FileSet, filePath, optStructName
 		return nil, nil, nil, fmt.Errorf("package contains errors: %v", pkg.Errors)
 	}
 
-	// Find the struct
-	var file *ast.File
-	var typeParams []*ast.Field
-	var fields []*ast.Field
-	var found bool
+	scope := pkg.Types.Scope()
 
-SearchLoop:
 	for _, astFile := range pkg.Syntax {
 		for _, decl := range astFile.Decls {
 			genDecl, ok := decl.(*ast.GenDecl)
@@ -156,20 +166,81 @@ SearchLoop:
 					continue
 				}
 
-				file = astFile
-				typeParams = extractFields(typeSpec.TypeParams)
-				fields = extractFields(structType.Fields)
-				found = true
+				typeParams := extractFields(typeSpec.TypeParams)
+				fields := extractFields(structType.Fields)
+				var toDelFields []int
 
-				break SearchLoop
+				for index, field := range fields {
+					public := true
+					for _, name := range field.Names {
+						public = public && isPublic(name.Name)
+					}
+
+					if !public {
+						toDelFields = append(toDelFields, index)
+
+						continue
+					}
+
+					field.Type = addPackageToType(field.Type, pkgName, scope)
+				}
+
+				for i := len(toDelFields) - 1; i >= 0; i-- {
+					idx := toDelFields[i]
+					fields = append(fields[:idx], fields[idx+1:]...)
+				}
+
+				return astFile, typeParams, fields, nil
 			}
 		}
 	}
-	if !found {
-		return nil, nil, nil, errors.New("cannot find target struct")
+
+	return nil, nil, nil, errors.New("cannot find target struct")
+}
+
+func addPackageToType(inExpr ast.Expr, pkgName string, scope *types.Scope) ast.Expr {
+	switch casted := inExpr.(type) {
+	case *ast.Ident:
+		if scope.Lookup(casted.Name) != nil {
+			inExpr = &ast.SelectorExpr{
+				Sel: casted,
+				X: &ast.Ident{
+					Name:    pkgName,
+					NamePos: token.NoPos,
+					Obj:     nil,
+				},
+			}
+		}
+	case *ast.StarExpr:
+		casted.X = addPackageToType(casted.X, pkgName, scope)
+	case *ast.MapType:
+		casted.Key = addPackageToType(casted.Key, pkgName, scope)
+		casted.Value = addPackageToType(casted.Value, pkgName, scope)
+	case *ast.SliceExpr:
+		casted.X = addPackageToType(casted.X, pkgName, scope)
+	case *ast.ArrayType:
+		casted.Elt = addPackageToType(casted.Elt, pkgName, scope)
+	case *ast.ChanType:
+		casted.Value = addPackageToType(casted.Value, pkgName, scope)
+	case *ast.FuncType:
+		for i := range extractFields(casted.Params) {
+			casted.Params.List[i].Type = addPackageToType(casted.Params.List[i].Type, pkgName, scope)
+		}
+
+		for i := range extractFields(casted.Results) {
+			casted.Results.List[i].Type = addPackageToType(casted.Results.List[i].Type, pkgName, scope)
+		}
+	case *ast.InterfaceType:
+		for i := range extractFields(casted.Methods) {
+			casted.Methods.List[i].Type = addPackageToType(casted.Methods.List[i].Type, pkgName, scope)
+		}
+	case *ast.StructType:
+		for i := range extractFields(casted.Fields) {
+			casted.Fields.List[i].Type = addPackageToType(casted.Fields.List[i].Type, pkgName, scope)
+		}
 	}
 
-	return file, typeParams, fields, nil
+	return inExpr
 }
 
 func extractFields(fl *ast.FieldList) []*ast.Field {
@@ -304,9 +375,16 @@ func findImportPath(imports []*ast.ImportSpec, pkgName string) (string, string) 
 		}
 
 		// If the import has an alias, check that
+		//nolint:nestif // too many checks
 		if imp.Name != nil {
-			aliasName, err := strconv.Unquote(imp.Name.Name)
-			if err == nil && aliasName == pkgName {
+			aliasName := imp.Name.Name
+			if strings.HasPrefix(aliasName, `"`) {
+				if a, err := strconv.Unquote(imp.Name.Name); err == nil {
+					aliasName = a
+				}
+			}
+
+			if aliasName == pkgName {
 				return importPath, aliasName
 			}
 		} else {
