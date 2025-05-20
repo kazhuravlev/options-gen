@@ -79,6 +79,10 @@ func Run(opts Options) error {
 		return fmt.Errorf("cannot get options spec: %w", err)
 	}
 
+	if err := applyExcludes(spec, opts.exclude); err != nil {
+		return fmt.Errorf("apply excludes: %w", err)
+	}
+
 	outOptionTypeName := opts.outOptionTypeName
 	if outOptionTypeName == "" {
 		outOptionTypeName = "Opt" + opts.structName + "Setter"
@@ -115,6 +119,29 @@ func Run(opts Options) error {
 	if opts.showWarnings {
 		for _, warning := range spec.Warnings {
 			log.Println(warning)
+		}
+	}
+
+	return nil
+}
+
+func applyExcludes(specs *generator.GetOptionSpecRes, excludes []string) error {
+	for _, pattern := range excludes {
+		reg, err := regexp.Compile(pattern)
+		if err != nil {
+			return fmt.Errorf("compile pattern '%s': %w", pattern, err)
+		}
+
+		var toDel []int
+		for index, field := range specs.Spec.Options {
+			if reg.MatchString(field.Name) {
+				toDel = append(toDel, index)
+			}
+		}
+
+		for i := len(toDel) - 1; i >= 0; i-- {
+			idx := toDel[i]
+			specs.Spec.Options = generator.DeleteByIndex(specs.Spec.Options, idx)
 		}
 	}
 

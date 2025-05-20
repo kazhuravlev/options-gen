@@ -175,6 +175,9 @@ it will have the following arguments:
 
   Default: `Opt[StructName]Setter`
 
+- `exclude` - list of masks for field names excluded from semicolon-separated generation
+
+  Default: ''
 See an [Examples](#Examples).
 
 ### Using out-prefix for multiple Options structs

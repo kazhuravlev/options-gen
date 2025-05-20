@@ -38,6 +38,7 @@ func main() {
 		allVariadic           bool
 		constructorTypeRender optionsgen.ConstructorTypeRender
 		outSetterName         string
+		exclude               string
 	)
 
 	envGoFile := os.Getenv("GOFILE")
@@ -83,6 +84,7 @@ func main() {
 	flag.StringVar(&outSetterName,
 		"out-setter-name", "",
 		"name for the option setter type (function alias). If not specified, the 'Opt[StructName]Setter' template is used.")
+	flag.StringVar(&exclude, "exclude", "", "list of masks for field names excluded from semicolon-separated generation")
 	flag.Parse()
 
 	if isEmpty(inFilename, outFilename, outPackageName, optionsStructName, defaultsFrom) {
@@ -123,6 +125,7 @@ func main() {
 			optionsgen.WithAllVariadic(allVariadic),
 			optionsgen.WithConstructorTypeRender(constructorTypeRender),
 			optionsgen.WithOutOptionTypeName(outSetterName),
+			optionsgen.WithExclude(splitExcludes(exclude)...),
 		),
 	)
 	if errRun != nil {
@@ -180,4 +183,12 @@ func isEmpty(values ...string) bool {
 	}
 
 	return false
+}
+
+func splitExcludes(exclude string) []string {
+	if len(exclude) == 0 {
+		return nil
+	}
+
+	return strings.Split(exclude, ";")
 }

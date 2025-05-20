@@ -108,6 +108,13 @@ func WithOutOptionTypeName(opt string) OptOptionsSetter {
 	}
 }
 
+func WithExclude(opt ...string) OptOptionsSetter {
+	return func(o *Options) {
+		o.exclude = append(o.exclude, opt...)
+
+	}
+}
+
 func (o *Options) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
 	errs.Add(errors461e464ebed9.NewValidationError("version", _validate_Options_version(o)))

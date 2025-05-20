@@ -187,7 +187,7 @@ func findStructTypeParamsAndFields2(
 
 				for i := len(toDelFields) - 1; i >= 0; i-- {
 					idx := toDelFields[i]
-					fields = append(fields[:idx], fields[idx+1:]...)
+					fields = DeleteByIndex(fields, idx)
 				}
 
 				return astFile, typeParams, fields, nil
@@ -513,4 +513,12 @@ func typeParamsStr(params []*ast.Field) (string, string, error) {
 	paramExprStr := fmt.Sprintf("[%s]", strings.Join(paramNamesWithTypes, ", "))
 
 	return paramExprStr, paramNamesStr, nil
+}
+
+func DeleteByIndex[T any](input []T, index int) []T {
+	if len(input) < index {
+		return input
+	}
+
+	return append(input[:index], input[index+1:]...)
 }
