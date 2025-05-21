@@ -8,6 +8,7 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
+	"os"
 	"path"
 	"reflect"
 	"regexp"
@@ -111,10 +112,10 @@ func findStructTypeParamsAndFields(fset *token.FileSet, filePath, typeName strin
 
 func findStructTypeParamsAndFields2(
 	fset *token.FileSet,
-	filePath, optStructName, workDir, pkgName string,
+	importPath, optStructName, workDir, pkgName string,
 ) (*ast.File, []*ast.Field, []*ast.Field, error) {
 	if workDir == "" {
-		workDir = path.Dir(filePath)
+		workDir = path.Dir(importPath)
 	}
 
 	// Configure the loader to use types package instead of ParseDir
@@ -127,8 +128,12 @@ func findStructTypeParamsAndFields2(
 		Fset:  fset,
 	}
 
+	if stat, err := os.Stat(importPath); err == nil && !stat.IsDir() {
+		importPath = "file=" + importPath
+	}
+
 	// Load the package that contains the file we want to parse
-	pkgs, err := packages.Load(cfg, filePath)
+	pkgs, err := packages.Load(cfg, importPath)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("load package: %w", err)
 	}
