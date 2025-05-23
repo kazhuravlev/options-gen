@@ -175,7 +175,7 @@ it will have the following arguments:
 
   Default: `Opt[StructName]Setter`
 
-- `exclude` - list of masks for field names excluded from semicolon-separated generation
+- `exclude` - list of masks for field names excluded from generation, semicolon-separated
 
   Default: ''
 See an [Examples](#Examples).

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime/debug"
 	"strings"
 
@@ -84,7 +85,7 @@ func main() {
 	flag.StringVar(&outSetterName,
 		"out-setter-name", "",
 		"name for the option setter type (function alias). If not specified, the 'Opt[StructName]Setter' template is used.")
-	flag.StringVar(&exclude, "exclude", "", "list of masks for field names excluded from semicolon-separated generation")
+	flag.StringVar(&exclude, "exclude", "", "list of masks for field names excluded from generation, semicolon-separated")
 	flag.Parse()
 
 	if isEmpty(inFilename, outFilename, outPackageName, optionsStructName, defaultsFrom) {
@@ -111,6 +112,14 @@ func main() {
 		return
 	}
 
+	excludes, err := splitExcludes(exclude)
+	if err != nil {
+		//nolint:forbidigo
+		fmt.Println("parse excludes", err.Error())
+
+		return
+	}
+
 	errRun := optionsgen.Run(
 		optionsgen.NewOptions(
 			optionsgen.WithVersion(Version),
@@ -125,7 +134,7 @@ func main() {
 			optionsgen.WithAllVariadic(allVariadic),
 			optionsgen.WithConstructorTypeRender(constructorTypeRender),
 			optionsgen.WithOutOptionTypeName(outSetterName),
-			optionsgen.WithExclude(splitExcludes(exclude)...),
+			optionsgen.WithExclude(excludes...),
 		),
 	)
 	if errRun != nil {
@@ -185,10 +194,22 @@ func isEmpty(values ...string) bool {
 	return false
 }
 
-func splitExcludes(exclude string) []string {
+func splitExcludes(exclude string) ([]*regexp.Regexp, error) {
 	if len(exclude) == 0 {
-		return nil
+		return nil, nil
 	}
 
-	return strings.Split(exclude, ";")
+	patterns := strings.Split(exclude, ";")
+	result := make([]*regexp.Regexp, 0, len(patterns))
+
+	for _, pattern := range patterns {
+		reg, err := regexp.Compile(pattern)
+		if err != nil {
+			return nil, fmt.Errorf("compile pattern '%s': %w", pattern, err)
+		}
+
+		result = append(result, reg)
+	}
+
+	return result, nil
 }

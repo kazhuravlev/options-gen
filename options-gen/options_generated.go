@@ -4,6 +4,7 @@ package optionsgen
 
 import (
 	fmt461e464ebed9 "fmt"
+	"regexp"
 
 	errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
 	validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"
@@ -108,7 +109,7 @@ func WithOutOptionTypeName(opt string) OptOptionsSetter {
 	}
 }
 
-func WithExclude(opt ...string) OptOptionsSetter {
+func WithExclude(opt ...*regexp.Regexp) OptOptionsSetter {
 	return func(o *Options) {
 		o.exclude = append(o.exclude, opt...)
 

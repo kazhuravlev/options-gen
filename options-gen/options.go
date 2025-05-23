@@ -1,5 +1,7 @@
 package optionsgen
 
+import "regexp"
+
 //go:generate toolset run options-gen -from-struct=Options -all-variadic=true
 type Options struct {
 	version               string `validate:"required"`
@@ -14,5 +16,5 @@ type Options struct {
 	allVariadic           bool
 	constructorTypeRender ConstructorTypeRender `validate:"required"`
 	outOptionTypeName     string
-	exclude               []string
+	exclude               []*regexp.Regexp
 }

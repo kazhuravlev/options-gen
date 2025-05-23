@@ -12,10 +12,10 @@ import (
 
 const gofile = "generator_test.go"
 
-func TestGetOptionSpec(t *testing.T) { //nolint:funlen
+func TestGetOptionSpec(t *testing.T) { //nolint:funle, niln
 	t.Parallel()
 
-	res, err := generator.GetOptionSpec(gofile, "TestOptions", "default", false)
+	res, err := generator.GetOptionSpec(gofile, "TestOptions", "default", false, nil)
 	req.NoError(t, err)
 	req.Equal(t, generator.GetOptionSpecRes{
 		Spec: generator.OptionSpec{
@@ -251,7 +251,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 func TestGetOptionSpec_Generics(t *testing.T) {
 	t.Parallel()
 
-	res, err := generator.GetOptionSpec(gofile, "TestOptionsGen", "default", false)
+	res, err := generator.GetOptionSpec(gofile, "TestOptionsGen", "default", false, nil)
 	req.NoError(t, err)
 	req.Equal(t, generator.GetOptionSpecRes{
 		Spec: generator.OptionSpec{
@@ -400,7 +400,7 @@ type TestOptionsEmbedAnotherPkgPtr struct {
 func TestGetOptionSpecInline(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	res, err := generator.GetOptionSpec(gofile, "TestOptionsInline", "default", false)
+	res, err := generator.GetOptionSpec(gofile, "TestOptionsInline", "default", false, nil)
 	req.NoError(t, err)
 	req.Equal(t, generator.GetOptionSpecRes{
 		Spec: generator.OptionSpec{
@@ -440,7 +440,7 @@ func TestGetOptionSpecInline(t *testing.T) { //nolint:funlen
 func TestGetOptionSpecInlinePtr(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	res, err := generator.GetOptionSpec(gofile, "TestOptionsInlinePtr", "default", false)
+	res, err := generator.GetOptionSpec(gofile, "TestOptionsInlinePtr", "default", false, nil)
 	req.NoError(t, err)
 	req.Equal(t, generator.GetOptionSpecRes{
 		Spec: generator.OptionSpec{
@@ -480,7 +480,7 @@ func TestGetOptionSpecInlinePtr(t *testing.T) { //nolint:funlen
 func TestGetOptionSpecEmbed(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	res, err := generator.GetOptionSpec(gofile, "TestOptionsEmbed", "default", false)
+	res, err := generator.GetOptionSpec(gofile, "TestOptionsEmbed", "default", false, nil)
 	req.NoError(t, err)
 	req.Equal(t, generator.GetOptionSpecRes{
 		Spec: generator.OptionSpec{
@@ -520,7 +520,7 @@ func TestGetOptionSpecEmbed(t *testing.T) { //nolint:funlen
 func TestGetOptionSpecEmbedPtr(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	res, err := generator.GetOptionSpec(gofile, "TestOptionsEmbedPtr", "default", false)
+	res, err := generator.GetOptionSpec(gofile, "TestOptionsEmbedPtr", "default", false, nil)
 	req.NoError(t, err)
 	req.Equal(t, generator.GetOptionSpecRes{
 		Spec: generator.OptionSpec{
@@ -560,7 +560,7 @@ func TestGetOptionSpecEmbedPtr(t *testing.T) { //nolint:funlen
 func TestGetOptionSpecEmbedAnotherPkg(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	res, err := generator.GetOptionSpec(gofile, "TestOptionsEmbedAnotherPkg", "default", false)
+	res, err := generator.GetOptionSpec(gofile, "TestOptionsEmbedAnotherPkg", "default", false, nil)
 	req.NoError(t, err)
 	req.Equal(t, generator.GetOptionSpecRes{
 		Spec: generator.OptionSpec{
@@ -600,7 +600,7 @@ func TestGetOptionSpecEmbedAnotherPkg(t *testing.T) { //nolint:funlen
 func TestGetOptionSpecEmbedAnotherPkgPtr(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	res, err := generator.GetOptionSpec(gofile, "TestOptionsEmbedAnotherPkgPtr", "default", false)
+	res, err := generator.GetOptionSpec(gofile, "TestOptionsEmbedAnotherPkgPtr", "default", false, nil)
 	req.NoError(t, err)
 	req.Equal(t, generator.GetOptionSpecRes{
 		Spec: generator.OptionSpec{
@@ -658,7 +658,7 @@ type TestOptionSliceAlias struct {
 func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
-	res, err := generator.GetOptionSpec(gofile, "TestOptionSliceAlias", "default", true)
+	res, err := generator.GetOptionSpec(gofile, "TestOptionSliceAlias", "default", true, nil)
 	req.NoError(t, err)
 	req.Equal(t, generator.GetOptionSpecRes{
 		Spec: generator.OptionSpec{
