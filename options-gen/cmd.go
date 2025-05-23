@@ -74,6 +74,7 @@ func Run(opts Options) error {
 		opts.structName,
 		tagName,
 		opts.allVariadic,
+		opts.exclude,
 	)
 	if err != nil {
 		return fmt.Errorf("cannot get options spec: %w", err)

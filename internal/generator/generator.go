@@ -9,6 +9,7 @@ import (
 	"go/types"
 	"os"
 	"path"
+	"regexp"
 	"syscall"
 	"text/template"
 
@@ -87,7 +88,11 @@ type GetOptionSpecRes struct {
 
 // GetOptionSpec read the input filename by filePath, find optionsStructName
 // and scan for options.
-func GetOptionSpec(filePath, optStructName, tagName string, allVariadic bool) (*GetOptionSpecRes, error) {
+func GetOptionSpec(
+	filePath, optStructName, tagName string,
+	allVariadic bool,
+	excludes []*regexp.Regexp,
+) (*GetOptionSpecRes, error) {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		return nil, fmt.Errorf("source file not exist: %w", syscall.ENOENT)
 	}
@@ -195,9 +200,27 @@ func GetOptionSpec(filePath, optStructName, tagName string, allVariadic bool) (*
 		Spec: OptionSpec{
 			TypeParamsSpec: tpSpec,
 			TypeParams:     tpString,
-			Options:        options,
+			Options:        applyExcludes(options, excludes),
 		},
 		Warnings: warnings,
 		Imports:  importSlice,
 	}, nil
+}
+
+func applyExcludes(options []OptionMeta, excludes []*regexp.Regexp) []OptionMeta {
+	for _, reg := range excludes {
+		var toDel []int
+		for index, field := range options {
+			if reg.MatchString(field.Name) {
+				toDel = append(toDel, index)
+			}
+		}
+
+		for i := len(toDel) - 1; i >= 0; i-- {
+			idx := toDel[i]
+			options = deleteByIndex(options, idx)
+		}
+	}
+
+	return options
 }
