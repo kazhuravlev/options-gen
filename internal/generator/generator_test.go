@@ -12,7 +12,7 @@ import (
 
 const gofile = "generator_test.go"
 
-func TestGetOptionSpec(t *testing.T) { //nolint:funle, niln
+func TestGetOptionSpec(t *testing.T) {
 	t.Parallel()
 
 	res, err := generator.GetOptionSpec(gofile, "TestOptions", "default", false, nil)
