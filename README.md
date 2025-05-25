@@ -115,7 +115,7 @@ type Options[T any] struct {
 
 And just `go generate ./...`.
 
-## Examples
+## More Examples
 
 See an [examples](./examples) to get real-world examples.
 
