@@ -375,7 +375,16 @@ type Options struct {
 }
 ```
 
-...will produce function `func (o *Options) IsSet(field optField) bool{...}`. 
+...will produce function `func (o *Options) IsSet(field optField) bool{...}`.
+
+You can then use it to check if a field was explicitly set:
+
+```go
+opts := NewOptions(WithName("alice"))
+if opts.IsSet(optFieldName) {
+	// name was explicitly set to "alice"
+}
+``` 
 
 ### Custom validator
 
