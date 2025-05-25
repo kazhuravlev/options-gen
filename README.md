@@ -183,7 +183,27 @@ it will have the following arguments:
 
 When you have multiple option structs in the same package, the `out-prefix` flag helps avoid naming conflicts:
 
-You can find an example in [that example](./examples/go-generate-2options-1pkg/) directory.
+```go
+// client_options.go
+//go:generate options-gen -from-struct=ClientOptions -out-prefix=Client -out-filename=client_options_generated.go
+type ClientOptions struct {
+	timeout time.Duration `option:"mandatory"`
+	retries int          `default:"3"`
+}
+
+// server_options.go  
+//go:generate options-gen -from-struct=ServerOptions -out-prefix=Server -out-filename=server_options_generated.go
+type ServerOptions struct {
+	listenAddr string `option:"mandatory" validate:"required,hostname_port"`
+	maxConns   int    `default:"100"`
+}
+
+// Generated functions will be:
+// - NewClientOptions() and ClientOption
+// - NewServerOptions() and ServerOption
+```
+
+You can find a complete example in [this directory](./examples/go-generate-2options-1pkg/).
 
 ### Option tag
 
