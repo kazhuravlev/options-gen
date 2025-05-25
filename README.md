@@ -384,12 +384,21 @@ You can override `options-gen` validator for specific struct by implementing
 the `Validator()` method:
 
 ```go
-import "github.com/mycoolmodule/internal/validator"
+import (
+	"github.com/go-playground/validator/v10"
+)
 
-// ...
+type Options struct {
+	age      int    `validate:"adult"`
+	username string `validate:"required,alphanum"`
+}
 
 func (Options) Validator() *validator.Validate {
-	return validator.Validator
+	v := validator.New()
+	v.RegisterValidation("adult", func(fl validator.FieldLevel) bool {
+		return fl.Field().Int() >= 18
+	})
+	return v
 }
 ```
 
