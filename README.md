@@ -421,6 +421,22 @@ To generate variadic functions, you can use the `-all-variadic=true` option or s
 specific fields. You can also generate a fallback variadic function when `-all-variadic=true` is included using the
 `option:"variadic=false"` tag.
 
+```go
+//go:generate options-gen -from-struct=Options
+type Options struct {
+	// Default: accepts []string
+	tags []string
+	// Variadic: accepts multiple string arguments
+	labels []string `option:"variadic=true"`
+}
+
+// Usage:
+opts := NewOptions(
+	WithTags([]string{"api", "v2"}),
+	WithLabels("prod", "us-east-1", "critical"),
+)
+```
+
 ### Skip fields
 
 If you don't need to generate a setter for a specific field, you can specify this using the tag `option:"-"`.
