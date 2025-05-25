@@ -115,9 +115,68 @@ type Options[T any] struct {
 
 And just `go generate ./...`.
 
-## Examples
+## More Examples
 
-See an [examples](./examples) to get real-world examples.
+### Real-world HTTP Client
+
+```go
+//go:generate options-gen -from-struct=Options
+type Options struct {
+	httpClient  *http.Client  `option:"mandatory"`
+	baseURL     string        `option:"mandatory" validate:"required,url"`
+	token       string        `validate:"required"`
+	timeout     time.Duration `default:"30s" validate:"min=1s,max=5m"`
+	maxRetries  int           `default:"3" validate:"min=0,max=10"`
+	userAgent   string        `default:"options-gen/1.0"`
+}
+
+type Client struct {
+	opts Options
+}
+
+func NewClient(opts Options) (*Client, error) {
+	if err := opts.Validate(); err != nil {
+		return nil, fmt.Errorf("validate options: %w", err)
+	}
+	
+	return &Client{opts: opts}, nil
+}
+
+// Usage:
+client, err := NewClient(NewOptions(
+	httpClient,
+	"https://api.example.com",
+	WithToken("secret-token"),
+	WithTimeout(10*time.Second),
+))
+```
+
+### Field Exclusion
+
+```go
+//go:generate options-gen -from-struct=Options -exclude="internal*;debug*"
+type Options struct {
+	addr         string `option:"mandatory" validate:"required,hostname_port"`
+	internalConn net.Conn // excluded: matches "internal*"
+	debugMode    bool     // excluded: matches "debug*"
+	logLevel     string   // included
+}
+```
+
+### Custom Option Type Name
+
+```go
+//go:generate options-gen -from-struct=Options -out-setter-name=HTTPOption
+type Options struct {
+	timeout time.Duration
+	headers map[string]string
+}
+
+// Generated code will use HTTPOption instead of OptOptionsSetter:
+// type HTTPOption func(*Options)
+```
+
+See more [examples](./examples) for additional use cases.
 
 ## Configuration
 
@@ -178,13 +237,32 @@ it will have the following arguments:
 - `exclude` - list of masks for field names excluded from generation, semicolon-separated
 
   Default: ''
-See an [Examples](#Examples).
 
 ### Using out-prefix for multiple Options structs
 
 When you have multiple option structs in the same package, the `out-prefix` flag helps avoid naming conflicts:
 
-You can find an example in [that example](./examples/go-generate-2options-1pkg/) directory.
+```go
+// client_options.go
+//go:generate options-gen -from-struct=ClientOptions -out-prefix=Client -out-filename=client_options_generated.go
+type ClientOptions struct {
+	timeout time.Duration `option:"mandatory"`
+	retries int          `default:"3"`
+}
+
+// server_options.go  
+//go:generate options-gen -from-struct=ServerOptions -out-prefix=Server -out-filename=server_options_generated.go
+type ServerOptions struct {
+	listenAddr string `option:"mandatory" validate:"required,hostname_port"`
+	maxConns   int    `default:"100"`
+}
+
+// Generated functions will be:
+// - NewClientOptions() and ClientOption
+// - NewServerOptions() and ServerOption
+```
+
+You can find a complete example in [this directory](./examples/go-generate-2options-1pkg/).
 
 ### Option tag
 
@@ -376,7 +454,16 @@ type Options struct {
 }
 ```
 
-...will produce function `func (o *Options) IsSet(field optField) bool{...}`. 
+...will produce function `func (o *Options) IsSet(field optField) bool{...}`.
+
+You can then use it to check if a field was explicitly set:
+
+```go
+opts := NewOptions(WithName("alice"))
+if opts.IsSet(optFieldName) {
+	// name was explicitly set to "alice"
+}
+``` 
 
 ### Custom validator
 
@@ -384,12 +471,21 @@ You can override `options-gen` validator for specific struct by implementing
 the `Validator()` method:
 
 ```go
-import "github.com/mycoolmodule/internal/validator"
+import (
+	"github.com/go-playground/validator/v10"
+)
 
-// ...
+type Options struct {
+	age      int    `validate:"adult"`
+	username string `validate:"required,alphanum"`
+}
 
 func (Options) Validator() *validator.Validate {
-	return validator.Validator
+	v := validator.New()
+	v.RegisterValidation("adult", func(fl validator.FieldLevel) bool {
+		return fl.Field().Int() >= 18
+	})
+	return v
 }
 ```
 
@@ -421,6 +517,22 @@ To generate variadic functions, you can use the `-all-variadic=true` option or s
 specific fields. You can also generate a fallback variadic function when `-all-variadic=true` is included using the
 `option:"variadic=false"` tag.
 
+```go
+//go:generate options-gen -from-struct=Options
+type Options struct {
+	// Default: accepts []string
+	tags []string
+	// Variadic: accepts multiple string arguments
+	labels []string `option:"variadic=true"`
+}
+
+// Usage:
+opts := NewOptions(
+	WithTags([]string{"api", "v2"}),
+	WithLabels("prod", "us-east-1", "critical"),
+)
+```
+
 ### Skip fields
 
 If you don't need to generate a setter for a specific field, you can specify this using the tag `option:"-"`.
@@ -430,6 +542,42 @@ type Options struct {
 	name string `option:"-"`
 }
 ```
+
+### Generating Options for External Package Structs
+
+While you cannot directly use `--from-struct=github.com/user/pkg.StructName`, you can generate options for structs from external packages using type aliases:
+
+```go
+package myapp
+
+import (
+	"github.com/gorilla/websocket"
+	"github.com/redis/go-redis/v9"
+)
+
+// Create a type alias for the external struct
+type WebsocketOptions = websocket.Dialer
+
+//go:generate options-gen -from-struct=WebsocketOptions
+// This will generate setters for all exported fields from websocket.Dialer
+
+// You can also alias and extend external structs
+type RedisOptions redis.Options
+
+//go:generate options-gen -from-struct=RedisOptions
+// This generates setters for all fields from redis.Options
+
+// Example with generic external types
+type CacheOptions[T any] = genericpkg.Cache[T]
+
+//go:generate options-gen -from-struct=CacheOptions
+```
+
+**Important notes about external structs:**
+- Only exported (public) fields from the external struct will have setters generated
+- The external package must be available during `go generate` 
+- Generated imports are automatically managed
+- Validation tags from the original struct are not preserved (you'd need to wrap the struct instead)
 
 ## Contributing
 
