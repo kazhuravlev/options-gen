@@ -117,7 +117,39 @@ And just `go generate ./...`.
 
 ## More Examples
 
-See an [examples](./examples) to get real-world examples.
+### Real-world HTTP Client
+
+```go
+//go:generate options-gen -from-struct=Options
+type Options struct {
+	httpClient  *http.Client  `option:"mandatory"`
+	baseURL     string        `option:"mandatory" validate:"required,url"`
+	token       string        `validate:"required"`
+	timeout     time.Duration `default:"30s" validate:"min=1s,max=5m"`
+	maxRetries  int           `default:"3" validate:"min=0,max=10"`
+	userAgent   string        `default:"options-gen/1.0"`
+}
+
+type Client struct {
+	opts Options
+}
+
+func NewClient(opts Options) (*Client, error) {
+	if err := opts.Validate(); err != nil {
+		return nil, fmt.Errorf("validate options: %w", err)
+	}
+	
+	return &Client{opts: opts}, nil
+}
+
+// Usage:
+client, err := NewClient(NewOptions(
+	httpClient,
+	"https://api.example.com",
+	WithToken("secret-token"),
+	WithTimeout(10*time.Second),
+))
+```
 
 ## Configuration
 
