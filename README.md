@@ -151,6 +151,18 @@ client, err := NewClient(NewOptions(
 ))
 ```
 
+### Field Exclusion
+
+```go
+//go:generate options-gen -from-struct=Options -exclude="internal*;debug*"
+type Options struct {
+	addr         string `option:"mandatory" validate:"required,hostname_port"`
+	internalConn net.Conn // excluded: matches "internal*"
+	debugMode    bool     // excluded: matches "debug*"
+	logLevel     string   // included
+}
+```
+
 ## Configuration
 
 To configure this tool you should know two things: how to work with cli tool
