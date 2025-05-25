@@ -163,6 +163,21 @@ type Options struct {
 }
 ```
 
+### Custom Option Type Name
+
+```go
+//go:generate options-gen -from-struct=Options -out-setter-name=HTTPOption
+type Options struct {
+	timeout time.Duration
+	headers map[string]string
+}
+
+// Generated code will use HTTPOption instead of OptOptionsSetter:
+// type HTTPOption func(*Options)
+```
+
+See more [examples](./examples) for additional use cases.
+
 ## Configuration
 
 To configure this tool you should know two things: how to work with cli tool
