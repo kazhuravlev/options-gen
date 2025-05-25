@@ -543,6 +543,42 @@ type Options struct {
 }
 ```
 
+### Generating Options for External Package Structs
+
+While you cannot directly use `--from-struct=github.com/user/pkg.StructName`, you can generate options for structs from external packages using type aliases:
+
+```go
+package myapp
+
+import (
+	"github.com/gorilla/websocket"
+	"github.com/redis/go-redis/v9"
+)
+
+// Create a type alias for the external struct
+type WebsocketOptions = websocket.Dialer
+
+//go:generate options-gen -from-struct=WebsocketOptions
+// This will generate setters for all exported fields from websocket.Dialer
+
+// You can also alias and extend external structs
+type RedisOptions redis.Options
+
+//go:generate options-gen -from-struct=RedisOptions
+// This generates setters for all fields from redis.Options
+
+// Example with generic external types
+type CacheOptions[T any] = genericpkg.Cache[T]
+
+//go:generate options-gen -from-struct=CacheOptions
+```
+
+**Important notes about external structs:**
+- Only exported (public) fields from the external struct will have setters generated
+- The external package must be available during `go generate` 
+- Generated imports are automatically managed
+- Validation tags from the original struct are not preserved (you'd need to wrap the struct instead)
+
 ## Contributing
 
 The development process is pretty simple:
