@@ -41,7 +41,7 @@ tasks:
     run: once
     cmds:
       - echo "- Run install tools"
-      - go run github.com/kazhuravlev/toolset/cmd/toolset@latest sync
+      - go run github.com/kazhuravlev/toolset/cmd/toolset@v0.28.0 sync
 
   lint:
     desc: Run linter
