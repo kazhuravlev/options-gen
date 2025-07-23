@@ -233,7 +233,7 @@ import "./somepkg"
 			name: "local_intslice",
 			expr: &ast.Ident{
 				Name: "IntSlice",
-				Obj: &ast.Object{ //nolint:staticcheck
+				Obj: &ast.Object{
 					Kind: ast.Typ,
 					Decl: &ast.TypeSpec{
 						Name: &ast.Ident{Name: "IntSlice"},
