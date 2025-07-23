@@ -5,7 +5,7 @@ type Options struct {
 	version               string `validate:"required"`
 	packageName           string `validate:"required"`
 	optionsStructName     string `validate:"required"`
-	fileImports           []string
+	fileImports           []Import
 	spec                  *OptionSpec `validate:"required"`
 	tagName               string
 	varName               string
