@@ -2,7 +2,9 @@
 
 package testcase
 
-import "net/http"
+import (
+	http "github.com/kazhuravlev/options-gen/options-gen/testdata/case-00-package-name-collisions/pkg/net/api"
+)
 
 type OptOptionsSetter func(o *Options)
 
