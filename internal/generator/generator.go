@@ -83,7 +83,12 @@ func Render(opts Options) ([]byte, error) {
 type GetOptionSpecRes struct {
 	Spec     OptionSpec
 	Warnings []string
-	Imports  []string
+	Imports  []Import
+}
+
+type Import struct {
+	Path  string
+	Alias *string
 }
 
 // GetOptionSpec read the input filename by filePath, find optionsStructName
@@ -191,9 +196,17 @@ func GetOptionSpec(
 	}
 
 	// Process imports
-	importSlice := make([]string, len(file.Imports))
+	importSlice := make([]Import, len(file.Imports))
 	for i, imp := range file.Imports {
-		importSlice[i] = imp.Path.Value
+		var alias *string
+		if imp.Name != nil {
+			alias = &imp.Name.Name
+		}
+
+		importSlice[i] = Import{
+			Path:  imp.Path.Value,
+			Alias: alias,
+		}
 	}
 
 	return &GetOptionSpecRes{

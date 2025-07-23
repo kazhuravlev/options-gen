@@ -45,7 +45,7 @@ func WithOptionsStructName(opt string) OptOptionsSetter {
 	}
 }
 
-func WithFileImports(opt []string) OptOptionsSetter {
+func WithFileImports(opt []Import) OptOptionsSetter {
 	return func(o *Options) {
 		o.fileImports = opt
 

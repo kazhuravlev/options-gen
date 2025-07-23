@@ -7,7 +7,7 @@ import (
 	{{ if .hasValidation }}errors461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/errors"
 {{end}}{{end}}{{ if .hasValidation }}validator461e464ebed9 "github.com/kazhuravlev/options-gen/pkg/validator"{{ end }}
 	{{- range $import := .imports }}
-	{{ $import -}}
+	{{ $import.Path -}}
 	{{- end }}
 )
 
