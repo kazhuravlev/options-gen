@@ -24,7 +24,7 @@ func simpleImports(imports []string) []generator.Import {
 	return res
 }
 
-func TestGetOptionSpec(t *testing.T) { //nolint:funle, niln
+func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 	t.Parallel()
 
 	res, err := generator.GetOptionSpec(gofile, "TestOptions", "default", false, nil)
