@@ -8,7 +8,7 @@
 		},
 		{
 			"runtime": "go",
-			"module": "github.com/kazhuravlev/options-gen/cmd/options-gen@v0.54.0",
+			"module": "github.com/kazhuravlev/options-gen/cmd/options-gen@v0.55.0",
 			"alias": null,
 			"tags": null
 		}
