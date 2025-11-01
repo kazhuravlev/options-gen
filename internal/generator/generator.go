@@ -213,14 +213,14 @@ func GetOptionSpec(
 		Spec: OptionSpec{
 			TypeParamsSpec: tpSpec,
 			TypeParams:     tpString,
-			Options:        applyExcludes(options, excludes),
+			Options:        ApplyExcludes(options, excludes),
 		},
 		Warnings: warnings,
 		Imports:  importSlice,
 	}, nil
 }
 
-func applyExcludes(options []OptionMeta, excludes []*regexp.Regexp) []OptionMeta {
+func ApplyExcludes(options []OptionMeta, excludes []*regexp.Regexp) []OptionMeta {
 	for _, reg := range excludes {
 		var toDel []int
 		for index, field := range options {

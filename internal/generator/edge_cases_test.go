@@ -352,7 +352,7 @@ func TestApplyExcludes_EdgeCases(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := applyExcludes(tt.options, tt.excludes)
+			result := ApplyExcludes(tt.options, tt.excludes)
 			require.Equal(t, tt.want, len(result))
 		})
 	}
