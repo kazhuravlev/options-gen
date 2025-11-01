@@ -17,7 +17,21 @@ func NewOptions(
 ) Options {
 	var o Options
 
-	// Setting defaults from field tag (if present)
+	// Setting defaults from variable
+	o.version = defaultOptions.version
+	o.inFilename = defaultOptions.inFilename
+	o.outFilename = defaultOptions.outFilename
+	o.structName = defaultOptions.structName
+	o.packageName = defaultOptions.packageName
+	o.outPrefix = defaultOptions.outPrefix
+	o.defaults = defaultOptions.defaults
+	o.showWarnings = defaultOptions.showWarnings
+	o.withIsset = defaultOptions.withIsset
+	o.allVariadic = defaultOptions.allVariadic
+	o.constructorTypeRender = defaultOptions.constructorTypeRender
+	o.outOptionTypeName = defaultOptions.outOptionTypeName
+	o.exclude = defaultOptions.exclude
+	o.warningsHandler = defaultOptions.warningsHandler
 
 	for _, opt := range options {
 		opt(&o)
@@ -77,6 +91,10 @@ func WithExclude(opt ...*regexp.Regexp) OptOptionsSetter {
 	return func(o *Options) { o.exclude = append(o.exclude, opt...) }
 }
 
+func WithWarningsHandler(opt func(string)) OptOptionsSetter {
+	return func(o *Options) { o.warningsHandler = opt }
+}
+
 func (o *Options) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
 	errs.Add(errors461e464ebed9.NewValidationError("version", _validate_Options_version(o)))
@@ -86,6 +104,7 @@ func (o *Options) Validate() error {
 	errs.Add(errors461e464ebed9.NewValidationError("packageName", _validate_Options_packageName(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("defaults", _validate_Options_defaults(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("constructorTypeRender", _validate_Options_constructorTypeRender(o)))
+	errs.Add(errors461e464ebed9.NewValidationError("warningsHandler", _validate_Options_warningsHandler(o)))
 	return errs.AsError()
 }
 
@@ -134,6 +153,13 @@ func _validate_Options_defaults(o *Options) error {
 func _validate_Options_constructorTypeRender(o *Options) error {
 	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.constructorTypeRender, "required"); err != nil {
 		return fmt461e464ebed9.Errorf("field `constructorTypeRender` did not pass the test: %w", err)
+	}
+	return nil
+}
+
+func _validate_Options_warningsHandler(o *Options) error {
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.warningsHandler, "required"); err != nil {
+		return fmt461e464ebed9.Errorf("field `warningsHandler` did not pass the test: %w", err)
 	}
 	return nil
 }
