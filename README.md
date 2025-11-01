@@ -40,8 +40,8 @@ go install github.com/kazhuravlev/options-gen/cmd/options-gen@latest
 ```go
 //go:generate options-gen -from-struct=Options
 type Options struct {
-timeout time.Duration `option:"mandatory"` // Required parameter
-retries int           `default:"3"`        // Optional with default
+  timeout time.Duration `option:"mandatory"` // Required parameter
+  retries int           `default:"3"`        // Optional with default
 }
 ```
 
@@ -59,8 +59,8 @@ opts := NewOptions(30 * time.Second)
 
 // Override the default retries value
 opts := NewOptions(
-30 * time.Second, // mandatory timeout
-WithRetries(5),   // optional: override default
+  30 * time.Second, // mandatory timeout
+  WithRetries(5),   // optional: override default
 )
 ```
 
@@ -74,15 +74,15 @@ That's it! The tool generates type-safe constructors, setter functions, and vali
 package mypkg
 
 import (
-	"io"
-	"log"
+  "io"
+  "log"
 )
 
 //go:generate options-gen -out-filename=options_generated.go -from-struct=Options
 type Options struct {
-	logger     *log.Logger `option:"mandatory"` // Required: constructor parameter
-	listenAddr string      `option:"mandatory" validate:"required,hostname_port"`
-	closer     io.Closer   `validate:"required"` // Optional: generates WithCloser()
+  logger     *log.Logger `option:"mandatory"` // Required: constructor parameter
+  listenAddr string      `option:"mandatory" validate:"required,hostname_port"`
+  closer     io.Closer   `validate:"required"` // Optional: generates WithCloser()
 }
 ```
 
@@ -101,8 +101,8 @@ This generates `options_generated.go` with:
 package mypkg
 
 import (
-	"io"
-	"log"
+  "io"
+  "log"
 )
 
 // Option setter function type
@@ -110,32 +110,32 @@ type OptOptionsSetter func(o *Options)
 
 // Constructor with mandatory parameters
 func NewOptions(
-	logger *log.Logger, // mandatory fields become parameters
-	listenAddr string,
-	options ...OptOptionsSetter, // optional fields use setters
+  logger *log.Logger, // mandatory fields become parameters
+  listenAddr string,
+  options ...OptOptionsSetter, // optional fields use setters
 ) Options {
-	var o Options
-
-	// Set mandatory fields
-	o.logger = logger
-	o.listenAddr = listenAddr
-
-	// Apply optional setters
-	for _, opt := range options {
-		opt(&o)
-	}
-	return o
+  var o Options
+  
+  // Set mandatory fields
+  o.logger = logger
+  o.listenAddr = listenAddr
+  
+  // Apply optional setters
+  for _, opt := range options {
+    opt(&o)
+  }
+  return o
 }
 
 // Setter function for optional fields
 func WithCloser(val io.Closer) OptOptionsSetter {
-	return func(o *Options) { o.closer = val }
+  return func(o *Options) { o.closer = val }
 }
 
 // Validation based on struct tags
 func (o *Options) Validate() error {
-	// Validates using go-playground/validator
-	// Returns error if validation fails
+  // Validates using go-playground/validator
+  // Returns error if validation fails
 }
 ```
 
@@ -147,16 +147,16 @@ package mypkg
 import "fmt"
 
 type Component struct {
-	opts Options
+  opts Options
 }
 
 func New(opts Options) (*Component, error) {
-	// Always validate options in your constructor
-	if err := opts.Validate(); err != nil {
-		return nil, fmt.Errorf("cannot validate options: %w", err)
-	}
-
-	return &Component{opts: opts}, nil
+  // Always validate options in your constructor
+  if err := opts.Validate(); err != nil {
+    return nil, fmt.Errorf("cannot validate options: %w", err)
+  }
+    
+  return &Component{opts: opts}, nil
 }
 ```
 
@@ -166,28 +166,28 @@ func New(opts Options) (*Component, error) {
 package main
 
 import (
-	"log"
-	"os"
+  "log"
+  "os"
 )
 
 func main() {
-	logger := log.New(os.Stdout, "app: ", log.LstdFlags)
+  logger := log.New(os.Stdout, "app: ", log.LstdFlags)
 
-	// Create component with mandatory fields
-	c, err := mypkg.New(mypkg.NewOptions(
-		logger,           // mandatory: logger
-		"localhost:8080", // mandatory: listenAddr
-	))
-	if err != nil {
-		panic(err)
-	}
+  // Create component with mandatory fields
+  c, err := mypkg.New(mypkg.NewOptions(
+    logger,           // mandatory: logger
+    "localhost:8080", // mandatory: listenAddr
+  ))
+  if err != nil {
+    panic(err)
+  }
 
-	// Or with optional fields
-	c, err = mypkg.New(mypkg.NewOptions(
-		logger,
-		"localhost:8080",
-		mypkg.WithCloser(someCloser), // optional: set closer
-	))
+  // Or with optional fields
+  c, err = mypkg.New(mypkg.NewOptions(
+    logger,
+    "localhost:8080",
+    mypkg.WithCloser(someCloser), // optional: set closer
+  ))
 }
 ```
 
@@ -211,8 +211,8 @@ package mypkg
 
 //go:generate options-gen -from-struct=Options
 type Options[T any] struct {
-	addr string   `option:"mandatory" validate:"required,hostname_port"`
-	ch   <-chan T `option:"mandatory"`
+  addr string   `option:"mandatory" validate:"required,hostname_port"`
+  ch   <-chan T `option:"mandatory"`
 }
 ```
 
@@ -225,32 +225,32 @@ And just `go generate ./...`.
 ```go
 //go:generate options-gen -from-struct=Options
 type Options struct {
-httpClient  *http.Client  `option:"mandatory"`
-baseURL     string        `option:"mandatory" validate:"required,url"`
-token       string        `validate:"required"`
-timeout     time.Duration `default:"30s" validate:"min=1s,max=5m"`
-maxRetries  int           `default:"3" validate:"min=0,max=10"`
-userAgent   string        `default:"options-gen/1.0"`
+  httpClient  *http.Client  `option:"mandatory"`
+  baseURL     string        `option:"mandatory" validate:"required,url"`
+  token       string        `validate:"required"`
+  timeout     time.Duration `default:"30s" validate:"min=1s,max=5m"`
+  maxRetries  int           `default:"3" validate:"min=0,max=10"`
+  userAgent   string        `default:"options-gen/1.0"`
 }
 
 type Client struct {
-opts Options
+  opts Options
 }
 
 func NewClient(opts Options) (*Client, error) {
-if err := opts.Validate(); err != nil {
-return nil, fmt.Errorf("validate options: %w", err)
-}
+  if err := opts.Validate(); err != nil {
+    return nil, fmt.Errorf("validate options: %w", err)
+  }
 
-return &Client{opts: opts}, nil
+  return &Client{opts: opts}, nil
 }
 
 // Usage:
 client, err := NewClient(NewOptions(
-httpClient,
-"https://api.example.com",
-WithToken("secret-token"),
-WithTimeout(10*time.Second),
+  httpClient,
+  "https://api.example.com",
+  WithToken("secret-token"),
+  WithTimeout(10*time.Second),
 ))
 ```
 
@@ -259,10 +259,10 @@ WithTimeout(10*time.Second),
 ```go
 //go:generate options-gen -from-struct=Options -exclude="internal*;debug*"
 type Options struct {
-addr         string `option:"mandatory" validate:"required,hostname_port"`
-internalConn net.Conn // excluded: matches "internal*"
-debugMode    bool   // excluded: matches "debug*"
-logLevel     string // included
+  addr         string `option:"mandatory" validate:"required,hostname_port"`
+  internalConn net.Conn // excluded: matches "internal*"
+  debugMode    bool   // excluded: matches "debug*"
+  logLevel     string // included
 }
 ```
 
@@ -271,8 +271,8 @@ logLevel     string // included
 ```go
 //go:generate options-gen -from-struct=Options -out-setter-name=HTTPOption
 type Options struct {
-timeout time.Duration
-headers map[string]string
+  timeout time.Duration
+  headers map[string]string
 }
 
 // Generated code will use HTTPOption instead of OptOptionsSetter:
@@ -349,15 +349,15 @@ When you have multiple option structs in the same package, the `out-prefix` flag
 // client_options.go
 //go:generate options-gen -from-struct=ClientOptions -out-prefix=Client -out-filename=client_options_generated.go
 type ClientOptions struct {
-timeout time.Duration `option:"mandatory"`
-retries int          `default:"3"`
+  timeout time.Duration `option:"mandatory"`
+  retries int          `default:"3"`
 }
 
 // server_options.go  
 //go:generate options-gen -from-struct=ServerOptions -out-prefix=Server -out-filename=server_options_generated.go
 type ServerOptions struct {
-listenAddr string `option:"mandatory" validate:"required,hostname_port"`
-maxConns   int    `default:"100"`
+  listenAddr string `option:"mandatory" validate:"required,hostname_port"`
+  maxConns   int    `default:"100"`
 }
 
 // Generated functions will be:
@@ -383,7 +383,7 @@ field to the constructor. Like this:
 ```go
 // Mark Field1 as mandatory
 type Options struct {
-field1 string `option:"mandatory"`
+  field1 string `option:"mandatory"`
 }
 
 // options-gen will generate constructor like this
@@ -396,7 +396,7 @@ the `option:"mandatory"` feature for this field and get something like this:
 ```go
 // Do not mark Field1 as mandatory
 type Options struct {
-field1 string
+  field1 string
 }
 
 // options-gen will generate constructor like this
@@ -414,7 +414,7 @@ Just read the docs for `validator` library and add tag to fields like this:
 
 ```go
 type Options struct {
-maxDbConn int `validate:"required,min=1,max=16"`
+  maxDbConn int `validate:"required,min=1,max=16"`
 }
 ```
 
@@ -442,10 +442,10 @@ For numbers, strings, and `time.Duration` you can set the default value:
 // simple example
 //go:generate options-gen -from-struct=Options
 type Options struct {
-pingPeriod  time.Duration `default:"3s" validate:"min=100ms,max=30s"`
-name        string        `default:"unknown" validate:"required"`
-maxAttempts int           `default:"10" validate:"min=1,max=10"`
-eps         float32       `default:"0.0001" validate:"gt=0"`
+  pingPeriod  time.Duration `default:"3s" validate:"min=100ms,max=30s"`
+  name        string        `default:"unknown" validate:"required"`
+  maxAttempts int           `default:"10" validate:"min=1,max=10"`
+  eps         float32       `default:"0.0001" validate:"gt=0"`
 }
 ```
 
@@ -453,10 +453,10 @@ eps         float32       `default:"0.0001" validate:"gt=0"`
 // custom default tag
 //go:generate options-gen -from-struct=Options --default-from=tag=mydefaulttag
 type Options struct {
-pingPeriod  time.Duration `mydefaulttag:"3s" validate:"min=100ms,max=30s"`
-name        string        `mydefaulttag:"unknown" validate:"required"`
-maxAttempts int           `mydefaulttag:"10" validate:"min=1,max=10"`
-eps         float32       `mydefaulttag:"0.0001" validate:"gt=0"`
+  pingPeriod  time.Duration `mydefaulttag:"3s" validate:"min=100ms,max=30s"`
+  name        string        `mydefaulttag:"unknown" validate:"required"`
+  maxAttempts int           `mydefaulttag:"10" validate:"min=1,max=10"`
+  eps         float32       `mydefaulttag:"0.0001" validate:"gt=0"`
 }
 ```
 
@@ -476,11 +476,11 @@ you can do this like that:
 // simple example
 //go:generate options-gen -from-struct=Options -defaults-from=var
 type Options struct {
-httpClient *http.Client
+  httpClient *http.Client
 }
 
 var defaultOptions = Options{
-httpClient: &http.Client{},
+  httpClient: &http.Client{},
 }
 ```
 
@@ -488,11 +488,11 @@ httpClient: &http.Client{},
 // custom variable name
 //go:generate options-gen -from-struct=Options -defaults-from=var=myDefaults
 type Options struct {
-httpClient *http.Client
+  httpClient *http.Client
 }
 
 var myDefaults = Options{
-httpClient: &http.Client{},
+  httpClient: &http.Client{},
 }
 ```
 
@@ -504,13 +504,13 @@ The same as variable. See an examples:
 // simple example
 //go:generate options-gen -from-struct=Options -defaults-from=func
 type Options struct {
-httpClient *http.Client
+  httpClient *http.Client
 }
 
 func getDefaultOptions() Options {
-return Options{
-httpClient: &http.Client{},
-}
+  return Options{
+    httpClient: &http.Client{},
+  }
 }
 ```
 
@@ -518,13 +518,13 @@ httpClient: &http.Client{},
 // custom function name
 //go:generate options-gen -from-struct=Options -defaults-from=func=myDefaults
 type Options struct {
-httpClient *http.Client
+  httpClient *http.Client
 }
 
 func myDefaults() Options {
-return Options{
-httpClient: &http.Client{},
-}
+  return Options{
+    httpClient: &http.Client{},
+  }
 }
 ```
 
@@ -537,7 +537,7 @@ the `none` for `-defaults-from` flag.
 // defaults will now be parsed at all
 //go:generate options-gen -from-struct=Options -defaults-from=none
 type Options struct {
-name string `default:"joe"`
+  name string `default:"joe"`
 }
 ```
 
@@ -553,7 +553,7 @@ package app
 
 //go:generate options-gen -from-struct=Options -with-isset
 type Options struct {
-	name string
+  name string
 }
 ```
 
@@ -564,7 +564,7 @@ You can then use it to check if a field was explicitly set:
 ```go
 opts := NewOptions(WithName("alice"))
 if opts.IsSet(optFieldName) {
-// name was explicitly set to "alice"
+  // name was explicitly set to "alice"
 }
 ``` 
 
@@ -575,20 +575,20 @@ the `Validator()` method:
 
 ```go
 import (
-"github.com/go-playground/validator/v10"
+  "github.com/go-playground/validator/v10"
 )
 
 type Options struct {
-age      int    `validate:"adult"`
-username string `validate:"required,alphanum"`
+  age      int    `validate:"adult"`
+  username string `validate:"required,alphanum"`
 }
 
 func (Options) Validator() *validator.Validate {
-v := validator.New()
-v.RegisterValidation("adult", func (fl validator.FieldLevel) bool {
-return fl.Field().Int() >= 18
-})
-return v
+  v := validator.New()
+  v.RegisterValidation("adult", func (fl validator.FieldLevel) bool {
+    return fl.Field().Int() >= 18
+  })
+  return v
 }
 ```
 
@@ -598,17 +598,17 @@ Or you can override `options-gen` validator globally:
 package validator
 
 import (
-	goplvalidator "github.com/go-playground/validator/v10"
-	optsValidator "github.com/kazhuravlev/options-gen/pkg/validator"
+  goplvalidator "github.com/go-playground/validator/v10"
+  optsValidator "github.com/kazhuravlev/options-gen/pkg/validator"
 )
 
 var Validator = goplvalidator.New()
 
 func init() {
-	must(Validator.RegisterValidation( /* ... */))
-	must(Validator.RegisterAlias( /* ... */))
-
-	optsValidator.Set(Validator)
+  must(Validator.RegisterValidation( /* ... */))
+  must(Validator.RegisterAlias( /* ... */))
+  
+  optsValidator.Set(Validator)
 }
 ```
 
@@ -623,16 +623,16 @@ specific fields. You can also generate a fallback variadic function when `-all-v
 ```go
 //go:generate options-gen -from-struct=Options
 type Options struct {
-// Default: accepts []string
-tags []string
-// Variadic: accepts multiple string arguments
-labels []string `option:"variadic=true"`
+  // Default: accepts []string
+  tags []string
+  // Variadic: accepts multiple string arguments
+  labels []string `option:"variadic=true"`
 }
 
 // Usage:
 opts := NewOptions(
-WithTags([]string{"api", "v2"}),
-WithLabels("prod", "us-east-1", "critical"),
+  WithTags([]string{"api", "v2"}),
+  WithLabels("prod", "us-east-1", "critical"),
 )
 ```
 
@@ -642,7 +642,7 @@ If you don't need to generate a setter for a specific field, you can specify thi
 
 ```go
 type Options struct {
-name string `option:"-"`
+  name string `option:"-"`
 }
 ```
 
@@ -655,8 +655,8 @@ external packages using type aliases:
 package myapp
 
 import (
-	"github.com/gorilla/websocket"
-	"github.com/redis/go-redis/v9"
+  "github.com/gorilla/websocket"
+  "github.com/redis/go-redis/v9"
 )
 
 // Create a type alias for the external struct
