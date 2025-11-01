@@ -329,6 +329,7 @@ func TestDeleteByIndex_EdgeCases(t *testing.T) {
 
 			if !tt.expectErr {
 				require.Equal(t, tt.expected, result)
+
 			}
 		})
 	}
