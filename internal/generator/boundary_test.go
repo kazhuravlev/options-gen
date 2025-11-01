@@ -1,4 +1,4 @@
-package generator
+package generator_test
 
 import (
 	"fmt"
@@ -7,6 +7,9 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/kazhuravlev/options-gen/internal/generator"
+	"github.com/stretchr/testify/require"
 )
 
 // TestGetOptionSpec_BoundaryConditions tests boundary conditions and stress scenarios.
@@ -16,7 +19,7 @@ func TestGetOptionSpec_BoundaryConditions(t *testing.T) {
 		sourceCode string
 		structName string
 		wantErr    bool
-		validate   func(t *testing.T, res *GetOptionSpecRes)
+		validate   func(t *testing.T, res *generator.GetOptionSpecRes)
 	}{
 		{
 			name: "struct with 100 fields",
@@ -34,7 +37,7 @@ func TestGetOptionSpec_BoundaryConditions(t *testing.T) {
 			}(),
 			structName: "Options",
 			wantErr:    false,
-			validate: func(t *testing.T, res *GetOptionSpecRes) {
+			validate: func(t *testing.T, res *generator.GetOptionSpecRes) {
 				t.Helper()
 
 				if len(res.Spec.Options) != 100 {
@@ -50,7 +53,7 @@ type Options struct {
 }`, strings.Repeat("Field", 100)),
 			structName: "Options",
 			wantErr:    false,
-			validate: func(t *testing.T, res *GetOptionSpecRes) {
+			validate: func(t *testing.T, res *generator.GetOptionSpecRes) {
 				t.Helper()
 
 				if len(res.Spec.Options) != 1 {
@@ -66,7 +69,7 @@ type Options struct {
 }`,
 			structName: "Options",
 			wantErr:    false,
-			validate: func(t *testing.T, res *GetOptionSpecRes) {
+			validate: func(t *testing.T, res *generator.GetOptionSpecRes) {
 				t.Helper()
 
 				if len(res.Spec.Options) != 1 {
@@ -83,7 +86,7 @@ type Options struct {
 }`,
 			structName: "Options",
 			wantErr:    false,
-			validate: func(t *testing.T, res *GetOptionSpecRes) {
+			validate: func(t *testing.T, res *generator.GetOptionSpecRes) {
 				t.Helper()
 
 				if len(res.Spec.Options) != 0 {
@@ -103,7 +106,7 @@ type Options[T1, T2, T3, T4, T5 any] struct {
 }`,
 			structName: "Options",
 			wantErr:    false,
-			validate: func(t *testing.T, res *GetOptionSpecRes) {
+			validate: func(t *testing.T, res *generator.GetOptionSpecRes) {
 				t.Helper()
 
 				if res.Spec.TypeParams == "" {
@@ -121,7 +124,7 @@ type Options struct {
 }`,
 			structName: "Options",
 			wantErr:    false,
-			validate: func(t *testing.T, res *GetOptionSpecRes) {
+			validate: func(t *testing.T, res *generator.GetOptionSpecRes) {
 				t.Helper()
 
 				if len(res.Spec.Options) != 0 {
@@ -148,7 +151,7 @@ type Options struct {
 }`,
 			structName: "Options",
 			wantErr:    false,
-			validate: func(t *testing.T, res *GetOptionSpecRes) {
+			validate: func(t *testing.T, res *generator.GetOptionSpecRes) {
 				t.Helper()
 
 				if len(res.Spec.Options) != 3 {
@@ -166,7 +169,7 @@ type Options struct {
 }`,
 			structName: "Options",
 			wantErr:    false,
-			validate: func(t *testing.T, res *GetOptionSpecRes) {
+			validate: func(t *testing.T, res *generator.GetOptionSpecRes) {
 				t.Helper()
 
 				if len(res.Spec.Options) != 3 {
@@ -190,7 +193,7 @@ type Options struct {
 				t.Fatalf("failed to write test file: %v", err)
 			}
 
-			res, err := GetOptionSpec(filePath, tt.structName, "default", false, nil)
+			res, err := generator.GetOptionSpec(filePath, tt.structName, "default", false, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetOptionSpec() error = %v, wantErr %v", err, tt.wantErr)
 
@@ -208,45 +211,38 @@ type Options struct {
 func TestRender_LargeOutput(t *testing.T) {
 	const numFields = 200
 
-	options := make([]OptionMeta, numFields)
+	options := make([]generator.OptionMeta, numFields)
 	for i := 0; i < numFields; i++ {
-		options[i] = OptionMeta{
+		options[i] = generator.OptionMeta{
 			Name:  fmt.Sprintf("Field%d", i),
 			Field: fmt.Sprintf("field%d", i),
 			Type:  "string",
 		}
 	}
 
-	opts := Options{
-		version:               "test",
-		packageName:           "test",
-		optionsStructName:     "Options",
-		optionTypeName:        "Option",
-		tagName:               "default",
-		constructorTypeRender: "public",
-		spec: &OptionSpec{
-			Options: options,
-		},
-	}
+	opts := generator.NewOptions(
+		generator.WithVersion("test"),
+		generator.WithPackageName("test"),
+		generator.WithOptionsStructName("Options"),
+		generator.WithOptionTypeName("Option"),
+		generator.WithTagName("default"),
+		generator.WithConstructorTypeRender("public"),
+		generator.WithSpec(
+			&generator.OptionSpec{
+				Options: options,
+			},
+		),
+	)
 
-	result, err := Render(opts)
-	if err != nil {
-		t.Fatalf("Render() failed: %v", err)
-	}
-
-	if len(result) == 0 {
-		t.Error("Render() returned empty result")
-	}
+	result, err := generator.Render(opts)
+	require.NoError(t, err)
+	require.NotEmpty(t, result)
 
 	// Verify all fields have setters
 	output := string(result)
 	for i := 0; i < numFields; i++ {
 		setter := fmt.Sprintf("WithField%d", i)
-		if !strings.Contains(output, setter) {
-			t.Errorf("setter %s not found in output", setter)
-
-			break // Don't spam with errors
-		}
+		require.Contains(t, output, setter)
 	}
 }
 
@@ -316,9 +312,9 @@ func TestExcludePatterns_Comprehensive(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			options := make([]OptionMeta, len(tt.fields))
+			options := make([]generator.OptionMeta, len(tt.fields))
 			for i, field := range tt.fields {
-				options[i] = OptionMeta{
+				options[i] = generator.OptionMeta{
 					Name:  field,
 					Field: strings.ToLower(field),
 					Type:  "string",
@@ -326,10 +322,10 @@ func TestExcludePatterns_Comprehensive(t *testing.T) {
 			}
 
 			pattern := regexp.MustCompile(tt.excludeRegex)
-			result := applyExcludes(options, []*regexp.Regexp{pattern})
+			result := generator.ApplyExcludes(options, []*regexp.Regexp{pattern})
 
 			if len(result) != tt.expectedCount {
-				t.Errorf("applyExcludes() returned %d fields, want %d",
+				t.Errorf("ApplyExcludes() returned %d fields, want %d",
 					len(result), tt.expectedCount)
 			}
 		})
@@ -341,19 +337,19 @@ func TestParseTag_AllCombinations(t *testing.T) {
 	tests := []struct {
 		name       string
 		tag        string
-		expectOpts TagOption
+		expectOpts generator.TagOption
 	}{
 		{
 			name: "mandatory only",
 			tag:  `option:"mandatory"`,
-			expectOpts: TagOption{
+			expectOpts: generator.TagOption{
 				IsRequired: true,
 			},
 		},
 		{
 			name: "variadic only",
 			tag:  `option:"variadic=true"`,
-			expectOpts: TagOption{
+			expectOpts: generator.TagOption{
 				Variadic:      true,
 				VariadicIsSet: true,
 			},
@@ -361,14 +357,14 @@ func TestParseTag_AllCombinations(t *testing.T) {
 		{
 			name: "skip only",
 			tag:  `option:"-"`,
-			expectOpts: TagOption{
+			expectOpts: generator.TagOption{
 				Skip: true,
 			},
 		},
 		{
 			name: "mandatory and variadic (should be detected)",
 			tag:  `option:"mandatory,variadic=true"`,
-			expectOpts: TagOption{
+			expectOpts: generator.TagOption{
 				IsRequired:    true,
 				Variadic:      true,
 				VariadicIsSet: true,
@@ -377,21 +373,21 @@ func TestParseTag_AllCombinations(t *testing.T) {
 		{
 			name: "validation only",
 			tag:  `validate:"required,email"`,
-			expectOpts: TagOption{
+			expectOpts: generator.TagOption{
 				GoValidator: "required,email",
 			},
 		},
 		{
 			name: "default only",
 			tag:  `default:"test"`,
-			expectOpts: TagOption{
+			expectOpts: generator.TagOption{
 				Default: "test",
 			},
 		},
 		{
 			name: "all tags combined",
 			tag:  `option:"mandatory" validate:"required" default:"value"`,
-			expectOpts: TagOption{
+			expectOpts: generator.TagOption{
 				IsRequired:  true,
 				GoValidator: "required",
 				Default:     "value",
@@ -400,21 +396,21 @@ func TestParseTag_AllCombinations(t *testing.T) {
 		{
 			name: "deprecated required tag",
 			tag:  `option:"required"`,
-			expectOpts: TagOption{
+			expectOpts: generator.TagOption{
 				IsRequired: true,
 			},
 		},
 		{
 			name: "deprecated not-empty tag",
 			tag:  `option:"not-empty"`,
-			expectOpts: TagOption{
+			expectOpts: generator.TagOption{
 				GoValidator: "required",
 			},
 		},
 		{
 			name: "variadic false",
 			tag:  `option:"variadic=false"`,
-			expectOpts: TagOption{
+			expectOpts: generator.TagOption{
 				Variadic:      false,
 				VariadicIsSet: true,
 			},
@@ -453,7 +449,7 @@ type Options struct {
 
 	// Run many times to detect memory leaks
 	for i := 0; i < 1000; i++ {
-		_, err := GetOptionSpec(filePath, "Options", "default", false, nil)
+		_, err := generator.GetOptionSpec(filePath, "Options", "default", false, nil)
 		if err != nil {
 			t.Fatalf("iteration %d failed: %v", i, err)
 		}
@@ -464,54 +460,54 @@ type Options struct {
 func TestRender_InvalidConfiguration(t *testing.T) {
 	tests := []struct {
 		name    string
-		opts    Options
+		opts    generator.Options
 		wantErr bool
 	}{
 		{
 			name: "nil spec",
-			opts: Options{
-				version:               "test",
-				packageName:           "test",
-				optionsStructName:     "Options",
-				optionTypeName:        "Option",
-				constructorTypeRender: "public",
-				spec:                  nil, // nil spec
-			},
+			opts: generator.NewOptions(
+				generator.WithVersion("test"),
+				generator.WithPackageName("test"),
+				generator.WithOptionsStructName("Options"),
+				generator.WithOptionTypeName("Option"),
+				generator.WithConstructorTypeRender("public"),
+				generator.WithSpec(nil), // nil spec
+			),
 			wantErr: true,
 		},
 		{
 			name: "empty struct name",
-			opts: Options{
-				version:               "test",
-				packageName:           "test",
-				optionsStructName:     "", // empty
-				optionTypeName:        "Option",
-				constructorTypeRender: "public",
-				spec: &OptionSpec{
-					Options: []OptionMeta{},
-				},
-			},
+			opts: generator.NewOptions(
+				generator.WithVersion("test"),
+				generator.WithPackageName("test"),
+				generator.WithOptionsStructName(""), // empty
+				generator.WithOptionTypeName("Option"),
+				generator.WithConstructorTypeRender("public"),
+				generator.WithSpec(&generator.OptionSpec{
+					Options: []generator.OptionMeta{},
+				}),
+			),
 			wantErr: true,
 		},
 		{
 			name: "invalid constructor type",
-			opts: Options{
-				version:               "test",
-				packageName:           "test",
-				optionsStructName:     "Options",
-				optionTypeName:        "Option",
-				constructorTypeRender: "invalid", // invalid - but not validated by Render
-				spec: &OptionSpec{
-					Options: []OptionMeta{},
-				},
-			},
+			opts: generator.NewOptions(
+				generator.WithVersion("test"),
+				generator.WithPackageName("test"),
+				generator.WithOptionsStructName("Options"),
+				generator.WithOptionTypeName("Option"),
+				generator.WithConstructorTypeRender("invalid"), // invalid - but not validated by Render
+				generator.WithSpec(&generator.OptionSpec{
+					Options: []generator.OptionMeta{},
+				}),
+			),
 			wantErr: false, // Template doesn't validate constructor type
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := Render(tt.opts)
+			_, err := generator.Render(tt.opts)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Render() error = %v, wantErr %v", err, tt.wantErr)
 			}
