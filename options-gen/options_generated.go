@@ -104,7 +104,6 @@ func (o *Options) Validate() error {
 	errs.Add(errors461e464ebed9.NewValidationError("packageName", _validate_Options_packageName(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("defaults", _validate_Options_defaults(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("constructorTypeRender", _validate_Options_constructorTypeRender(o)))
-	errs.Add(errors461e464ebed9.NewValidationError("warningsHandler", _validate_Options_warningsHandler(o)))
 	return errs.AsError()
 }
 
@@ -153,13 +152,6 @@ func _validate_Options_defaults(o *Options) error {
 func _validate_Options_constructorTypeRender(o *Options) error {
 	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.constructorTypeRender, "required"); err != nil {
 		return fmt461e464ebed9.Errorf("field `constructorTypeRender` did not pass the test: %w", err)
-	}
-	return nil
-}
-
-func _validate_Options_warningsHandler(o *Options) error {
-	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.warningsHandler, "required"); err != nil {
-		return fmt461e464ebed9.Errorf("field `warningsHandler` did not pass the test: %w", err)
 	}
 	return nil
 }

@@ -20,7 +20,7 @@ type Options struct {
 	constructorTypeRender ConstructorTypeRender `validate:"required"`
 	outOptionTypeName     string
 	exclude               []*regexp.Regexp
-	warningsHandler       func(string) `validate:"required"`
+	warningsHandler       func(string)
 }
 
 var defaultOptions = Options{
