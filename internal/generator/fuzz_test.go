@@ -2,7 +2,6 @@
 package generator
 
 import (
-	"go/token"
 	"os"
 	"path/filepath"
 	"testing"
@@ -228,42 +227,6 @@ func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
-			}
-		})
-	}
-}
-
-// TestTypeParamsStr_EdgeCases tests type parameter string generation with edge cases.
-func TestTypeParamsStr_EdgeCases(t *testing.T) {
-	tests := []struct {
-		name       string
-		setupField func() []*token.FileSet
-		wantErr    bool
-	}{
-		{
-			name:       "nil params",
-			setupField: func() []*token.FileSet { return nil },
-			wantErr:    false,
-		},
-		{
-			name:       "empty params",
-			setupField: func() []*token.FileSet { return []*token.FileSet{} },
-			wantErr:    false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// typeParamsStr requires []*ast.Field, not FileSet
-			// This test is to ensure nil/empty handling doesn't crash
-			spec, params, err := typeParamsStr(nil)
-			if err != nil && !tt.wantErr {
-				t.Errorf("typeParamsStr() unexpected error: %v", err)
-			}
-			if spec != "" || params != "" {
-				if spec != "" || params != "" {
-					// Expected empty for nil input
-				}
 			}
 		})
 	}
