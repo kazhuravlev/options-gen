@@ -37,6 +37,7 @@ type Options struct {
 
 			if err := os.WriteFile(inputFile, []byte(sourceCode), 0o644); err != nil {
 				errors <- fmt.Errorf("goroutine %d: failed to write input: %w", id, err)
+
 				return
 			}
 
@@ -49,6 +50,7 @@ type Options struct {
 			)
 			if err := Run(opts); err != nil {
 				errors <- fmt.Errorf("goroutine %d: Run() failed: %w", id, err)
+
 				return
 			}
 

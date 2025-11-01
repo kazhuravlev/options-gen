@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestRun_ErrorCases tests error handling in various scenarios
+// TestRun_ErrorCases tests error handling in various scenarios.
 func TestRun_ErrorCases(t *testing.T) {
 	t.Parallel()
 
@@ -123,7 +123,7 @@ type Options struct {
 	}
 }
 
-// TestRun_WarningGeneration tests that warnings are properly generated
+// TestRun_WarningGeneration tests that warnings are properly generated.
 func TestRun_WarningGeneration(t *testing.T) {
 	t.Parallel()
 
@@ -161,7 +161,7 @@ type Options struct {
 	}, warnings)
 }
 
-// TestDefaultsFrom_AllModes tests all defaults modes
+// TestDefaultsFrom_AllModes tests all defaults modes.
 func TestDefaultsFrom_AllModes(t *testing.T) {
 	t.Parallel()
 
@@ -247,7 +247,7 @@ type Options struct {
 	}
 }
 
-// TestRun_OutputFilePermissions tests that output file has correct permissions
+// TestRun_OutputFilePermissions tests that output file has correct permissions.
 func TestRun_OutputFilePermissions(t *testing.T) {
 	t.Parallel()
 

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// FuzzParseTag tests the parseTag function with random inputs to find crashes
+// FuzzParseTag tests the parseTag function with random inputs to find crashes.
 func FuzzParseTag(f *testing.F) {
 	// Seed corpus with known valid and edge case inputs
 	f.Add(`option:"mandatory"`, "fieldName", "default")
@@ -48,7 +48,7 @@ func FuzzParseTag(f *testing.F) {
 	})
 }
 
-// FuzzCheckDefaultValue tests default value validation with random inputs
+// FuzzCheckDefaultValue tests default value validation with random inputs.
 func FuzzCheckDefaultValue(f *testing.F) {
 	// Seed with valid examples
 	f.Add("int", "42")
@@ -81,7 +81,7 @@ func FuzzCheckDefaultValue(f *testing.F) {
 	})
 }
 
-// FuzzNormalizeTypeName tests type name normalization
+// FuzzNormalizeTypeName tests type name normalization.
 func FuzzNormalizeTypeName(f *testing.F) {
 	f.Add("string")
 	f.Add("*string")
@@ -108,7 +108,7 @@ func FuzzNormalizeTypeName(f *testing.F) {
 	})
 }
 
-// FuzzFormatComment tests comment formatting
+// FuzzFormatComment tests comment formatting.
 func FuzzFormatComment(f *testing.F) {
 	f.Add("")
 	f.Add("Simple comment")
@@ -130,7 +130,7 @@ func FuzzFormatComment(f *testing.F) {
 	})
 }
 
-// FuzzFindImportPath tests import path finding
+// FuzzFindImportPath tests import path finding.
 func FuzzFindImportPath(f *testing.F) {
 	f.Add("fmt")
 	f.Add("strings")
@@ -151,7 +151,7 @@ func FuzzFindImportPath(f *testing.F) {
 	})
 }
 
-// TestGetOptionSpec_InvalidFiles tests GetOptionSpec with various invalid file scenarios
+// TestGetOptionSpec_InvalidFiles tests GetOptionSpec with various invalid file scenarios.
 func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -163,6 +163,8 @@ func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 		{
 			name: "non-existent file",
 			setup: func(t *testing.T) string {
+				t.Helper()
+
 				return "/tmp/nonexistent_file_12345.go"
 			},
 			cleanup: func(s string) {},
@@ -171,6 +173,8 @@ func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 		{
 			name: "empty file",
 			setup: func(t *testing.T) string {
+				t.Helper()
+
 				tmpDir := t.TempDir()
 				filePath := filepath.Join(tmpDir, "empty.go")
 				err := os.WriteFile(filePath, []byte(""), 0o644)
@@ -184,6 +188,8 @@ func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 		{
 			name: "file with syntax errors",
 			setup: func(t *testing.T) string {
+				t.Helper()
+
 				tmpDir := t.TempDir()
 				filePath := filepath.Join(tmpDir, "bad.go")
 				err := os.WriteFile(filePath, []byte("package test\ntype Options struct { invalid syntax"), 0o644)
@@ -197,6 +203,8 @@ func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 		{
 			name: "file without target struct",
 			setup: func(t *testing.T) string {
+				t.Helper()
+
 				tmpDir := t.TempDir()
 				filePath := filepath.Join(tmpDir, "nostruct.go")
 				err := os.WriteFile(filePath, []byte("package test\ntype Other struct{}"), 0o644)
@@ -224,7 +232,7 @@ func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 	}
 }
 
-// TestTypeParamsStr_EdgeCases tests type parameter string generation with edge cases
+// TestTypeParamsStr_EdgeCases tests type parameter string generation with edge cases.
 func TestTypeParamsStr_EdgeCases(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -261,7 +269,7 @@ func TestTypeParamsStr_EdgeCases(t *testing.T) {
 }
 
 // TestDeleteByIndex_EdgeCases tests the deleteByIndex helper with edge cases
-// This test documents the current behavior, including bugs
+// This test documents the current behavior, including bugs.
 func TestDeleteByIndex_EdgeCases(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -329,7 +337,6 @@ func TestDeleteByIndex_EdgeCases(t *testing.T) {
 
 			if !tt.expectErr {
 				require.Equal(t, tt.expected, result)
-
 			}
 		})
 	}

@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestRender_EdgeCases tests template rendering with edge cases that might expose bugs
+// TestRender_EdgeCases tests template rendering with edge cases that might expose bugs.
 func TestRender_EdgeCases(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -289,7 +289,7 @@ func TestRender_EdgeCases(t *testing.T) {
 	}
 }
 
-// TestApplyExcludes_EdgeCases tests field exclusion logic with edge cases
+// TestApplyExcludes_EdgeCases tests field exclusion logic with edge cases.
 func TestApplyExcludes_EdgeCases(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -358,7 +358,7 @@ func TestApplyExcludes_EdgeCases(t *testing.T) {
 	}
 }
 
-// TestCheckDefaultValue_AllTypes tests all supported default value types
+// TestCheckDefaultValue_AllTypes tests all supported default value types.
 func TestCheckDefaultValue_AllTypes(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -440,7 +440,7 @@ func TestCheckDefaultValue_AllTypes(t *testing.T) {
 	}
 }
 
-// TestIsPublic_EdgeCases tests isPublic with various unicode and edge cases
+// TestIsPublic_EdgeCases tests isPublic with various unicode and edge cases.
 func TestIsPublic_EdgeCases(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -470,7 +470,7 @@ func TestIsPublic_EdgeCases(t *testing.T) {
 	}
 }
 
-// TestNormalizeTypeName_EdgeCases tests type name normalization edge cases
+// TestNormalizeTypeName_EdgeCases tests type name normalization edge cases.
 func TestNormalizeTypeName_EdgeCases(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -503,7 +503,7 @@ func TestNormalizeTypeName_EdgeCases(t *testing.T) {
 	}
 }
 
-// TestFormatComment_EdgeCases tests comment formatting edge cases
+// TestFormatComment_EdgeCases tests comment formatting edge cases.
 func TestFormatComment_EdgeCases(t *testing.T) {
 	tests := []struct {
 		name    string

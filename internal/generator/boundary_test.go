@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-// TestGetOptionSpec_BoundaryConditions tests boundary conditions and stress scenarios
+// TestGetOptionSpec_BoundaryConditions tests boundary conditions and stress scenarios.
 func TestGetOptionSpec_BoundaryConditions(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -21,17 +21,22 @@ func TestGetOptionSpec_BoundaryConditions(t *testing.T) {
 		{
 			name: "struct with 100 fields",
 			sourceCode: func() string {
+				t.Helper()
+
 				var fields strings.Builder
 				fields.WriteString("package test\ntype Options struct {\n")
 				for i := 0; i < 100; i++ {
 					fields.WriteString(fmt.Sprintf("  Field%d string\n", i))
 				}
 				fields.WriteString("}")
+
 				return fields.String()
 			}(),
 			structName: "Options",
 			wantErr:    false,
 			validate: func(t *testing.T, res *GetOptionSpecRes) {
+				t.Helper()
+
 				if len(res.Spec.Options) != 100 {
 					t.Errorf("expected 100 fields, got %d", len(res.Spec.Options))
 				}
@@ -46,6 +51,8 @@ type Options struct {
 			structName: "Options",
 			wantErr:    false,
 			validate: func(t *testing.T, res *GetOptionSpecRes) {
+				t.Helper()
+
 				if len(res.Spec.Options) != 1 {
 					t.Errorf("expected 1 field, got %d", len(res.Spec.Options))
 				}
@@ -60,6 +67,8 @@ type Options struct {
 			structName: "Options",
 			wantErr:    false,
 			validate: func(t *testing.T, res *GetOptionSpecRes) {
+				t.Helper()
+
 				if len(res.Spec.Options) != 1 {
 					t.Errorf("expected 1 field, got %d", len(res.Spec.Options))
 				}
@@ -75,6 +84,8 @@ type Options struct {
 			structName: "Options",
 			wantErr:    false,
 			validate: func(t *testing.T, res *GetOptionSpecRes) {
+				t.Helper()
+
 				if len(res.Spec.Options) != 0 {
 					t.Errorf("expected 0 fields, got %d", len(res.Spec.Options))
 				}
@@ -93,6 +104,8 @@ type Options[T1, T2, T3, T4, T5 any] struct {
 			structName: "Options",
 			wantErr:    false,
 			validate: func(t *testing.T, res *GetOptionSpecRes) {
+				t.Helper()
+
 				if res.Spec.TypeParams == "" {
 					t.Error("expected type parameters to be captured")
 				}
@@ -109,6 +122,8 @@ type Options struct {
 			structName: "Options",
 			wantErr:    false,
 			validate: func(t *testing.T, res *GetOptionSpecRes) {
+				t.Helper()
+
 				if len(res.Spec.Options) != 0 {
 					t.Errorf("expected 0 fields, got %d", len(res.Spec.Options))
 				}
@@ -134,6 +149,8 @@ type Options struct {
 			structName: "Options",
 			wantErr:    false,
 			validate: func(t *testing.T, res *GetOptionSpecRes) {
+				t.Helper()
+
 				if len(res.Spec.Options) != 3 {
 					t.Errorf("expected 3 fields, got %d", len(res.Spec.Options))
 				}
@@ -150,6 +167,8 @@ type Options struct {
 			structName: "Options",
 			wantErr:    false,
 			validate: func(t *testing.T, res *GetOptionSpecRes) {
+				t.Helper()
+
 				if len(res.Spec.Options) != 3 {
 					t.Errorf("expected 3 fields, got %d", len(res.Spec.Options))
 				}
@@ -174,6 +193,7 @@ type Options struct {
 			res, err := GetOptionSpec(filePath, tt.structName, "default", false, nil)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetOptionSpec() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
 
@@ -184,7 +204,7 @@ type Options struct {
 	}
 }
 
-// TestRender_LargeOutput tests rendering with large number of options
+// TestRender_LargeOutput tests rendering with large number of options.
 func TestRender_LargeOutput(t *testing.T) {
 	const numFields = 200
 
@@ -224,12 +244,13 @@ func TestRender_LargeOutput(t *testing.T) {
 		setter := fmt.Sprintf("WithField%d", i)
 		if !strings.Contains(output, setter) {
 			t.Errorf("setter %s not found in output", setter)
+
 			break // Don't spam with errors
 		}
 	}
 }
 
-// TestExcludePatterns_Comprehensive tests exclude pattern matching edge cases
+// TestExcludePatterns_Comprehensive tests exclude pattern matching edge cases.
 func TestExcludePatterns_Comprehensive(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -315,7 +336,7 @@ func TestExcludePatterns_Comprehensive(t *testing.T) {
 	}
 }
 
-// TestParseTag_AllCombinations tests all possible tag combinations
+// TestParseTag_AllCombinations tests all possible tag combinations.
 func TestParseTag_AllCombinations(t *testing.T) {
 	tests := []struct {
 		name       string
@@ -409,7 +430,7 @@ func TestParseTag_AllCombinations(t *testing.T) {
 	}
 }
 
-// TestMemoryLeaks tests for potential memory leaks with repeated operations
+// TestMemoryLeaks tests for potential memory leaks with repeated operations.
 func TestMemoryLeaks(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping memory leak test in short mode")
@@ -439,7 +460,7 @@ type Options struct {
 	}
 }
 
-// TestRender_InvalidConfiguration tests Render with invalid configurations
+// TestRender_InvalidConfiguration tests Render with invalid configurations.
 func TestRender_InvalidConfiguration(t *testing.T) {
 	tests := []struct {
 		name    string
