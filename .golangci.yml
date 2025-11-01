@@ -70,6 +70,10 @@ linters:
       ignore-names:
         - err
         - i
+        - tt
+        - id
+        - wg
+        - _
   exclusions:
     generated: lax
     presets:

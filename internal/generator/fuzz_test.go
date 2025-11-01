@@ -1,0 +1,249 @@
+//nolint:testpackage
+package generator
+
+import (
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/kazhuravlev/options-gen/internal/ctype"
+	"github.com/stretchr/testify/require"
+)
+
+// FuzzCheckDefaultValue tests default value validation with random inputs.
+func FuzzCheckDefaultValue(f *testing.F) {
+	// Seed with valid examples
+	f.Add("int", "42")
+	f.Add("string", "hello")
+	f.Add("bool", "true")
+	f.Add("float64", "3.14")
+	f.Add("time.Duration", "5s")
+	f.Add("uint", "100")
+	f.Add("int64", "-9223372036854775808")
+	f.Add("uint64", "18446744073709551615")
+
+	// Seed with invalid examples
+	f.Add("int", "not a number")
+	f.Add("bool", "yes")
+	f.Add("float32", "infinity")
+	f.Add("time.Duration", "5 seconds")
+	f.Add("unknown", "value")
+
+	f.Fuzz(func(t *testing.T, fieldType string, defaultValue string) {
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("checkDefaultValue panicked with type=%q value=%q: %v",
+					fieldType, defaultValue, r)
+			}
+		}()
+
+		// Just ensure it doesn't crash
+		err := checkDefaultValue(fieldType, defaultValue)
+		_ = err // We're checking for panics, not correctness
+	})
+}
+
+// FuzzNormalizeTypeName tests type name normalization.
+func FuzzNormalizeTypeName(f *testing.F) {
+	f.Add("string")
+	f.Add("*string")
+	f.Add("[]string")
+	f.Add("*[]string")
+	f.Add("pkg.Type")
+	f.Add("*pkg.Type")
+	f.Add("[]pkg.Type")
+	f.Add("github.com/user/pkg.Type")
+	f.Add("*github.com/user/pkg/v2.Type")
+	f.Add("")
+	f.Add("...")
+	f.Add("[][][]Type")
+
+	f.Fuzz(func(t *testing.T, typeName string) {
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("normalizeTypeName panicked with input %q: %v", typeName, r)
+			}
+		}()
+
+		result := normalizeTypeName(typeName)
+		_ = result
+	})
+}
+
+// FuzzFormatComment tests comment formatting.
+func FuzzFormatComment(f *testing.F) {
+	f.Add("")
+	f.Add("Simple comment")
+	f.Add("Line 1\nLine 2")
+	f.Add("Line 1\nLine 2\nLine 3\n")
+	f.Add("\n\n\n")
+	f.Add("Comment with special chars: !@#$%^&*()")
+	f.Add("Unicode: 你好世界 🚀")
+
+	f.Fuzz(func(t *testing.T, comment string) {
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("formatComment panicked with input %q: %v", comment, r)
+			}
+		}()
+
+		result := formatComment(comment)
+		_ = result
+	})
+}
+
+// FuzzFindImportPath tests import path finding.
+func FuzzFindImportPath(f *testing.F) {
+	f.Add("fmt")
+	f.Add("strings")
+	f.Add("github.com/user/pkg")
+	f.Add("")
+	f.Add(".")
+
+	f.Fuzz(func(t *testing.T, pkgName string) {
+		defer func() {
+			if r := recover(); r != nil {
+				t.Errorf("findImportPath panicked with pkgName %q: %v", pkgName, r)
+			}
+		}()
+
+		// Test with empty imports slice
+		path, alias := findImportPath(nil, pkgName)
+		_, _ = path, alias
+	})
+}
+
+// TestGetOptionSpec_InvalidFiles tests GetOptionSpec with various invalid file scenarios.
+func TestGetOptionSpec_InvalidFiles(t *testing.T) {
+	tests := []struct {
+		name    string
+		setup   func(t *testing.T) string
+		wantErr bool
+	}{
+		{
+			name: "non-existent file",
+			setup: func(t *testing.T) string {
+				t.Helper()
+
+				return "/tmp/nonexistent_file_12345.go"
+			},
+			wantErr: true,
+		},
+		{
+			name: "empty file",
+			setup: func(t *testing.T) string {
+				t.Helper()
+
+				tmpDir := t.TempDir()
+				filePath := filepath.Join(tmpDir, "empty.go")
+				err := os.WriteFile(filePath, []byte(""), ctype.DefaultPermission)
+				require.NoError(t, err)
+
+				return filePath
+			},
+			wantErr: true,
+		},
+		{
+			name: "file with syntax errors",
+			setup: func(t *testing.T) string {
+				t.Helper()
+
+				tmpDir := t.TempDir()
+				filePath := filepath.Join(tmpDir, "bad.go")
+				err := os.WriteFile(filePath, []byte("package test\ntype Options struct { invalid syntax"), ctype.DefaultPermission)
+				require.NoError(t, err)
+
+				return filePath
+			},
+			wantErr: true,
+		},
+		{
+			name: "file without target struct",
+			setup: func(t *testing.T) string {
+				t.Helper()
+
+				tmpDir := t.TempDir()
+				filePath := filepath.Join(tmpDir, "nostruct.go")
+				err := os.WriteFile(filePath, []byte("package test\ntype Other struct{}"), ctype.DefaultPermission)
+				require.NoError(t, err)
+
+				return filePath
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			filePath := tt.setup(t)
+
+			_, err := GetOptionSpec(filePath, "Options", "default", false, nil)
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
+
+// TestDeleteByIndex_EdgeCases tests the deleteByIndex helper with edge cases
+// This test documents the current behavior, including bugs.
+func TestDeleteByIndex_EdgeCases(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []string
+		index    int
+		expected []string
+	}{
+		{
+			name:     "delete fr empty slice",
+			input:    []string{},
+			index:    0,
+			expected: []string{},
+		},
+		{
+			name:     "delete with index out of bounds",
+			input:    []string{"a", "b", "c"},
+			index:    10,
+			expected: []string{"a", "b", "c"},
+		},
+		{
+			name:     "delete first element",
+			input:    []string{"a", "b", "c"},
+			index:    0,
+			expected: []string{"b", "c"},
+		},
+		{
+			name:     "delete last element",
+			input:    []string{"a", "b", "c"},
+			index:    2,
+			expected: []string{"a", "b"},
+		},
+		{
+			name:     "delete middle element",
+			input:    []string{"a", "b", "c"},
+			index:    1,
+			expected: []string{"a", "c"},
+		},
+		{
+			name:     "negative index",
+			input:    []string{"a", "b", "c"},
+			index:    -1,
+			expected: []string{"a", "b", "c"},
+		},
+		{
+			name:     "index equals length",
+			input:    []string{"a", "b"},
+			index:    2,
+			expected: []string{"a", "b"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := deleteByIndex(tt.input, tt.index)
+			require.Equal(t, tt.expected, result)
+		})
+	}
+}

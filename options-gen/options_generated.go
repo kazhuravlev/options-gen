@@ -17,7 +17,21 @@ func NewOptions(
 ) Options {
 	var o Options
 
-	// Setting defaults from field tag (if present)
+	// Setting defaults from variable
+	o.version = defaultOptions.version
+	o.inFilename = defaultOptions.inFilename
+	o.outFilename = defaultOptions.outFilename
+	o.structName = defaultOptions.structName
+	o.packageName = defaultOptions.packageName
+	o.outPrefix = defaultOptions.outPrefix
+	o.defaults = defaultOptions.defaults
+	o.showWarnings = defaultOptions.showWarnings
+	o.withIsset = defaultOptions.withIsset
+	o.allVariadic = defaultOptions.allVariadic
+	o.constructorTypeRender = defaultOptions.constructorTypeRender
+	o.outOptionTypeName = defaultOptions.outOptionTypeName
+	o.exclude = defaultOptions.exclude
+	o.warningsHandler = defaultOptions.warningsHandler
 
 	for _, opt := range options {
 		opt(&o)
@@ -75,6 +89,10 @@ func WithOutOptionTypeName(opt string) OptOptionsSetter {
 
 func WithExclude(opt ...*regexp.Regexp) OptOptionsSetter {
 	return func(o *Options) { o.exclude = append(o.exclude, opt...) }
+}
+
+func WithWarningsHandler(opt func(string)) OptOptionsSetter {
+	return func(o *Options) { o.warningsHandler = opt }
 }
 
 func (o *Options) Validate() error {

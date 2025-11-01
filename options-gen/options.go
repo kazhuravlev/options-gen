@@ -1,8 +1,11 @@
 package optionsgen
 
-import "regexp"
+import (
+	"fmt"
+	"regexp"
+)
 
-//go:generate toolset run options-gen -from-struct=Options -all-variadic=true
+//go:generate toolset run options-gen -from-struct=Options -all-variadic=true -defaults-from=var
 type Options struct {
 	version               string `validate:"required"`
 	inFilename            string `validate:"required"`
@@ -17,4 +20,27 @@ type Options struct {
 	constructorTypeRender ConstructorTypeRender `validate:"required"`
 	outOptionTypeName     string
 	exclude               []*regexp.Regexp
+	warningsHandler       func(string)
+}
+
+var defaultOptions = Options{
+	version:     "",
+	inFilename:  "",
+	outFilename: "",
+	structName:  "",
+	packageName: "",
+	outPrefix:   "",
+	defaults: Defaults{
+		From:  DefaultsFromNone,
+		Param: "",
+	},
+	showWarnings:          false,
+	withIsset:             false,
+	allVariadic:           false,
+	constructorTypeRender: ConstructorPublicRender,
+	outOptionTypeName:     "",
+	exclude:               nil,
+	warningsHandler: func(msg string) {
+		fmt.Println(msg) //nolint:forbidigo
+	},
 }
