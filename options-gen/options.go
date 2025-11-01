@@ -37,7 +37,7 @@ var defaultOptions = Options{
 	showWarnings:          false,
 	withIsset:             false,
 	allVariadic:           false,
-	constructorTypeRender: "",
+	constructorTypeRender: ConstructorPublicRender,
 	outOptionTypeName:     "",
 	exclude:               nil,
 	warningsHandler: func(msg string) {
