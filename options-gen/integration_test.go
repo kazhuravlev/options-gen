@@ -164,6 +164,92 @@ type Options struct {
 	}, warnings)
 }
 
+// TestDefaultsFrom_AllModes tests all defaults modes
+func TestDefaultsFrom_AllModes(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name         string
+		defaultsFrom DefaultsFrom
+		param        string
+		sourceCode   string
+		wantErr      bool
+	}{
+		{
+			name:         "defaults from tag",
+			defaultsFrom: DefaultsFromTag,
+			param:        "default",
+			sourceCode: `package test
+type Options struct {
+	Field string ` + "`default:\"value\"`" + `
+}`,
+			wantErr: false,
+		},
+		{
+			name:         "defaults from var",
+			defaultsFrom: DefaultsFromVar,
+			param:        "defaultOpts",
+			sourceCode: `package test
+var defaultOpts = Options{}
+type Options struct {
+	Field string
+}`,
+			wantErr: false,
+		},
+		{
+			name:         "defaults from func",
+			defaultsFrom: DefaultsFromFunc,
+			param:        "getDefaults",
+			sourceCode: `package test
+func getDefaults() Options { return Options{} }
+type Options struct {
+	Field string
+}`,
+			wantErr: false,
+		},
+		{
+			name:         "defaults none",
+			defaultsFrom: DefaultsFromNone,
+			param:        "",
+			sourceCode: `package test
+type Options struct {
+	Field string
+}`,
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			tmpDir := t.TempDir()
+			inputFile := filepath.Join(tmpDir, "options.go")
+			outputFile := filepath.Join(tmpDir, "options_generated.go")
+
+			err := os.WriteFile(inputFile, []byte(tt.sourceCode), 0o644)
+			require.NoError(t, err)
+
+			opts := NewOptions(
+				WithVersion("test"),
+				WithPackageName("test"),
+				WithStructName("Options"),
+				WithInFilename(inputFile),
+				WithOutFilename(outputFile),
+				WithDefaults(Defaults{
+					From:  tt.defaultsFrom,
+					Param: tt.param,
+				}),
+			)
+			if err := Run(opts); tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
+
 // TestRun_OutputFilePermissions tests that output file has correct permissions
 func TestRun_OutputFilePermissions(t *testing.T) {
 	t.Parallel()
