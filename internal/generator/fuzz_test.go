@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/kazhuravlev/options-gen/internal/ctype"
 	"github.com/stretchr/testify/require"
 )
 
@@ -136,7 +137,7 @@ func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 
 				tmpDir := t.TempDir()
 				filePath := filepath.Join(tmpDir, "empty.go")
-				err := os.WriteFile(filePath, []byte(""), 0o644)
+				err := os.WriteFile(filePath, []byte(""), ctype.DefaultPermission)
 				require.NoError(t, err)
 
 				return filePath
@@ -150,7 +151,7 @@ func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 
 				tmpDir := t.TempDir()
 				filePath := filepath.Join(tmpDir, "bad.go")
-				err := os.WriteFile(filePath, []byte("package test\ntype Options struct { invalid syntax"), 0o644)
+				err := os.WriteFile(filePath, []byte("package test\ntype Options struct { invalid syntax"), ctype.DefaultPermission)
 				require.NoError(t, err)
 
 				return filePath
@@ -164,7 +165,7 @@ func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 
 				tmpDir := t.TempDir()
 				filePath := filepath.Join(tmpDir, "nostruct.go")
-				err := os.WriteFile(filePath, []byte("package test\ntype Other struct{}"), 0o644)
+				err := os.WriteFile(filePath, []byte("package test\ntype Other struct{}"), ctype.DefaultPermission)
 				require.NoError(t, err)
 
 				return filePath

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/kazhuravlev/options-gen/internal/ctype"
 	"github.com/stretchr/testify/require"
 )
 
@@ -95,7 +96,7 @@ type Options struct {
 			inputFile := filepath.Join(tmpDir, "options.go")
 			outputFile := filepath.Join(tmpDir, "options_generated.go")
 
-			err := os.WriteFile(inputFile, []byte(tt.sourceCode), 0o644)
+			err := os.WriteFile(inputFile, []byte(tt.sourceCode), ctype.DefaultPermission)
 			require.NoError(t, err)
 
 			tt.opts.inFilename = inputFile
@@ -128,7 +129,7 @@ type Options struct {
 	inputFile := filepath.Join(tmpDir, "options.go")
 	outputFile := filepath.Join(tmpDir, "options_generated.go")
 
-	err := os.WriteFile(inputFile, []byte(sourceCode), 0o644)
+	err := os.WriteFile(inputFile, []byte(sourceCode), ctype.DefaultPermission)
 	require.NoError(t, err)
 
 	var warnings []string
@@ -215,7 +216,7 @@ type Options struct {
 			inputFile := filepath.Join(tmpDir, "options.go")
 			outputFile := filepath.Join(tmpDir, "options_generated.go")
 
-			err := os.WriteFile(inputFile, []byte(tt.sourceCode), 0o644)
+			err := os.WriteFile(inputFile, []byte(tt.sourceCode), ctype.DefaultPermission)
 			require.NoError(t, err)
 
 			opts := NewOptions(
@@ -251,7 +252,7 @@ type Options struct {
 	inputFile := filepath.Join(tmpDir, "options.go")
 	outputFile := filepath.Join(tmpDir, "options_generated.go")
 
-	err := os.WriteFile(inputFile, []byte(sourceCode), 0o644)
+	err := os.WriteFile(inputFile, []byte(sourceCode), ctype.DefaultPermission) //nolint:gosec
 	require.NoError(t, err)
 
 	err2 := Run(NewOptions(
@@ -265,5 +266,5 @@ type Options struct {
 
 	info, err := os.Stat(outputFile)
 	require.NoError(t, err)
-	require.Equal(t, os.FileMode(0o644), info.Mode().Perm())
+	require.Equal(t, ctype.DefaultPermission, info.Mode().Perm())
 }

@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/kazhuravlev/options-gen/internal/ctype"
 	"github.com/kazhuravlev/options-gen/internal/generator"
 )
 
@@ -107,8 +108,7 @@ func Run(opts Options) error {
 		return fmt.Errorf("cannot renderOptions template: %w", err)
 	}
 
-	const perm = 0o644
-	if err := os.WriteFile(opts.outFilename, res, perm); err != nil {
+	if err := os.WriteFile(opts.outFilename, res, ctype.DefaultPermission); err != nil {
 		return fmt.Errorf("cannot write result: %w", err)
 	}
 

@@ -8,6 +8,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/kazhuravlev/options-gen/internal/ctype"
 	"github.com/stretchr/testify/require"
 )
 
@@ -36,7 +37,7 @@ type Options struct {
 			inputFile := filepath.Join(tmpDir, "options.go")
 			outputFile := filepath.Join(tmpDir, "options_generated.go")
 
-			if err := os.WriteFile(inputFile, []byte(sourceCode), 0o644); err != nil {
+			if err := os.WriteFile(inputFile, []byte(sourceCode), ctype.DefaultPermission); err != nil {
 				errors <- fmt.Errorf("goroutine %d: failed to write input: %w", id, err)
 
 				return

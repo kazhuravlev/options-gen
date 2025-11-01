@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/kazhuravlev/options-gen/internal/ctype"
 	"github.com/kazhuravlev/options-gen/internal/generator"
 	"github.com/stretchr/testify/require"
 )
@@ -189,7 +190,7 @@ type Options struct {
 			tmpDir := t.TempDir()
 			filePath := filepath.Join(tmpDir, "options.go")
 
-			if err := os.WriteFile(filePath, []byte(tt.sourceCode), 0o644); err != nil {
+			if err := os.WriteFile(filePath, []byte(tt.sourceCode), ctype.DefaultPermission); err != nil {
 				t.Fatalf("failed to write test file: %v", err)
 			}
 
@@ -443,7 +444,7 @@ type Options struct {
 	tmpDir := t.TempDir()
 	filePath := filepath.Join(tmpDir, "options.go")
 
-	if err := os.WriteFile(filePath, []byte(sourceCode), 0o644); err != nil {
+	if err := os.WriteFile(filePath, []byte(sourceCode), ctype.DefaultPermission); err != nil {
 		t.Fatalf("failed to write test file: %v", err)
 	}
 

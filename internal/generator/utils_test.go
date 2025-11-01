@@ -8,6 +8,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/kazhuravlev/options-gen/internal/ctype"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -126,8 +127,6 @@ func Test_normalizeTypeName(t *testing.T) {
 }
 
 func TestExtractSliceElemType(t *testing.T) {
-	const fPerm = 0o644
-
 	tempDir := t.TempDir()
 
 	somepkgDir := tempDir + "/somepkg"
@@ -145,16 +144,16 @@ type User struct {
 type CustomType struct{}
 type CustomSlice []CustomType
 `
-	require.NoError(t, os.WriteFile(somepkgDir+"/somepkg.go", []byte(somepkgContent), fPerm))
+	require.NoError(t, os.WriteFile(somepkgDir+"/somepkg.go", []byte(somepkgContent), ctype.DefaultPermission))
 
-	require.NoError(t, os.WriteFile(tempDir+"/go.mod", []byte("module xxx\ngo 1.18"), fPerm))
+	require.NoError(t, os.WriteFile(tempDir+"/go.mod", []byte("module xxx\ngo 1.18"), ctype.DefaultPermission))
 
 	mainContent := `package main
 
 import "./somepkg"
 `
 
-	require.NoError(t, os.WriteFile(tempDir+"/main.go", []byte(mainContent), fPerm))
+	require.NoError(t, os.WriteFile(tempDir+"/main.go", []byte(mainContent), ctype.DefaultPermission))
 
 	fset := token.NewFileSet()
 
