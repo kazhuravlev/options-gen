@@ -163,3 +163,33 @@ type Options struct {
 		"Warning: consider to make `PublicField` is private. This is will not allow to users to avoid constructor method.",
 	}, warnings)
 }
+
+// TestRun_OutputFilePermissions tests that output file has correct permissions
+func TestRun_OutputFilePermissions(t *testing.T) {
+	t.Parallel()
+
+	sourceCode := `package test
+type Options struct {
+	field string
+}`
+
+	tmpDir := t.TempDir()
+	inputFile := filepath.Join(tmpDir, "options.go")
+	outputFile := filepath.Join(tmpDir, "options_generated.go")
+
+	err := os.WriteFile(inputFile, []byte(sourceCode), 0o644)
+	require.NoError(t, err)
+
+	err2 := Run(NewOptions(
+		WithVersion("test"),
+		WithPackageName("test"),
+		WithStructName("Options"),
+		WithInFilename(inputFile),
+		WithOutFilename(outputFile),
+	))
+	require.NoError(t, err2)
+
+	info, err := os.Stat(outputFile)
+	require.NoError(t, err)
+	require.Equal(t, os.FileMode(0o644), info.Mode().Perm())
+}
