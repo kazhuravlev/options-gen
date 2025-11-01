@@ -1,0 +1,127 @@
+package optionsgen
+
+import (
+	"os"
+	"path/filepath"
+	"regexp"
+	"strings"
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
+
+
+// TestRun_ErrorCases tests error handling in various scenarios
+func TestRun_ErrorCases(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name       string
+		sourceCode string
+		opts       Options
+		wantErr    bool
+		errSubstr  string
+	}{
+		{
+			name: "mandatory field with default value",
+			sourceCode: `package test
+type Options struct {
+	Field string ` + "`option:\"mandatory\" default:\"value\"`" + `
+}`,
+			opts: Options{
+				version:     "test",
+				packageName: "test",
+				structName:  "Options",
+				defaults: Defaults{
+					From:  DefaultsFromTag,
+					Param: "default",
+				},
+				constructorTypeRender: ConstructorPublicRender,
+			},
+			wantErr:   true,
+			errSubstr: "mandatory option cannot have a default value",
+		},
+		{
+			name: "invalid default value type",
+			sourceCode: `package test
+type Options struct {
+	Field int ` + "`default:\"not_a_number\"`" + `
+}`,
+			opts: Options{
+				version:     "test",
+				packageName: "test",
+				structName:  "Options",
+				defaults: Defaults{
+					From:  DefaultsFromTag,
+					Param: "default",
+				},
+				constructorTypeRender: ConstructorPublicRender,
+			},
+			wantErr:   true,
+			errSubstr: "invalid",
+		},
+		{
+			name: "struct not found",
+			sourceCode: `package test
+type OtherStruct struct {
+	Field string
+}`,
+			opts: Options{
+				version:     "test",
+				packageName: "test",
+				structName:  "Options",
+				defaults: Defaults{
+					From: DefaultsFromNone,
+				},
+				constructorTypeRender: ConstructorPublicRender,
+			},
+			wantErr:   true,
+			errSubstr: "cannot find target struct",
+		},
+		{
+			name: "invalid option type name",
+			sourceCode: `package test
+type Options struct {
+	Field string
+}`,
+			opts: Options{
+				version:           "test",
+				packageName:       "test",
+				structName:        "Options",
+				outOptionTypeName: "Invalid-Name-123",
+				defaults: Defaults{
+					From: DefaultsFromNone,
+				},
+				constructorTypeRender: ConstructorPublicRender,
+			},
+			wantErr:   true,
+			errSubstr: "must be a valid type name",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			tmpDir := t.TempDir()
+			inputFile := filepath.Join(tmpDir, "options.go")
+			outputFile := filepath.Join(tmpDir, "options_generated.go")
+
+			err := os.WriteFile(inputFile, []byte(tt.sourceCode), 0o644)
+			require.NoError(t, err)
+
+			tt.opts.inFilename = inputFile
+			tt.opts.outFilename = outputFile
+
+			if err := Run(tt.opts); tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			if tt.wantErr && err != nil && tt.errSubstr != "" {
+				require.ErrorContains(t, err, tt.errSubstr)
+			}
+		})
+	}
+}
