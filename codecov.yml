@@ -1,3 +1,4 @@
 # Ignoring paths by glob patterns.
 ignore:
-  - "examples"
+  - "examples/**"
+  - "options-gen/testdata/**"

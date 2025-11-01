@@ -2,8 +2,8 @@ name: Go
 on:
   pull_request:
   push:
-    tags:
-      - '*'
+    tags: [ '*' ]
+    branches: [ 'main' ]
 
 jobs:
   golangci:
@@ -50,7 +50,9 @@ jobs:
           go build -v -o /dev/null ./cmd/options-gen
 
       - name: Test
-        run: go test -v -race -coverprofile=coverage.txt -covermode=atomic -count=1 ./...
+        run: go test -v -race -coverprofile coverage.txt -covermode atomic ./...
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
