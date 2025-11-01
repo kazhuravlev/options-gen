@@ -2,7 +2,6 @@ package optionsgen
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"regexp"
 
@@ -115,7 +114,7 @@ func Run(opts Options) error {
 
 	if opts.showWarnings {
 		for _, warning := range spec.Warnings {
-			log.Println(warning)
+			opts.warningsHandler(warning)
 		}
 	}
 
