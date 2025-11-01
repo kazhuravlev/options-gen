@@ -3,10 +3,9 @@ package main
 import (
 	"testing"
 
+	optionsgen "github.com/kazhuravlev/options-gen/options-gen"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	optionsgen "github.com/kazhuravlev/options-gen/options-gen"
 )
 
 func Test_parseDefaults(t *testing.T) {
