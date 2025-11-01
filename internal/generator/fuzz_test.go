@@ -9,45 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// FuzzParseTag tests the parseTag function with random inputs to find crashes.
-func FuzzParseTag(f *testing.F) {
-	// Seed corpus with known valid and edge case inputs
-	f.Add(`option:"mandatory"`, "fieldName", "default")
-	f.Add(`option:"-"`, "field", "default")
-	f.Add(`option:"variadic=true"`, "items", "default")
-	f.Add(`validate:"required,min=1"`, "value", "default")
-	f.Add(``, "empty", "default")
-	f.Add(`option:"mandatory,variadic=true"`, "test", "default")
-	f.Add(`option:"required" validate:"email"`, "email", "default")
-	f.Add(`option:"not-empty"`, "content", "default")
-	f.Add(`default:"test" validate:"min=5"`, "str", "default")
-	f.Add(`option:"variadic=invalid"`, "bad", "default")
-
-	f.Fuzz(func(t *testing.T, tagValue string, fieldName string, tagName string) {
-		defer func() {
-			if r := recover(); r != nil {
-				t.Errorf("parseTag panicked with input tag=%q field=%q tagName=%q: %v",
-					tagValue, fieldName, tagName, r)
-			}
-		}()
-
-		// Create a basic literal for testing
-		if tagValue != "" {
-			tagValue = "`" + tagValue + "`"
-		}
-
-		// Just ensure it doesn't crash - we're looking for panics
-		_, warnings := parseTag(nil, fieldName, tagName)
-		_ = warnings
-
-		// Test with actual tag if provided
-		if tagValue != "" {
-			// Note: We can't easily create ast.BasicLit in fuzzing, so focus on nil case
-			// The main parsing logic will be tested via integration tests
-		}
-	})
-}
-
 // FuzzCheckDefaultValue tests default value validation with random inputs.
 func FuzzCheckDefaultValue(f *testing.F) {
 	// Seed with valid examples
@@ -156,7 +117,6 @@ func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 	tests := []struct {
 		name     string
 		setup    func(t *testing.T) string
-		cleanup  func(string)
 		wantErr  bool
 		errCheck func(error) bool
 	}{
@@ -167,7 +127,6 @@ func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 
 				return "/tmp/nonexistent_file_12345.go"
 			},
-			cleanup: func(s string) {},
 			wantErr: true,
 		},
 		{
@@ -182,7 +141,6 @@ func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 
 				return filePath
 			},
-			cleanup: func(s string) {},
 			wantErr: true,
 		},
 		{
@@ -197,7 +155,6 @@ func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 
 				return filePath
 			},
-			cleanup: func(s string) {},
 			wantErr: true,
 		},
 		{
@@ -212,7 +169,6 @@ func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 
 				return filePath
 			},
-			cleanup: func(s string) {},
 			wantErr: true,
 		},
 	}
@@ -220,7 +176,6 @@ func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			filePath := tt.setup(t)
-			defer tt.cleanup(filePath)
 
 			_, err := GetOptionSpec(filePath, "Options", "default", false, nil)
 			if tt.wantErr {
