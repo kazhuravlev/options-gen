@@ -3,13 +3,10 @@ package optionsgen
 import (
 	"os"
 	"path/filepath"
-	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
-
 
 // TestRun_ErrorCases tests error handling in various scenarios
 func TestRun_ErrorCases(t *testing.T) {
