@@ -41,6 +41,6 @@ var defaultOptions = Options{
 	outOptionTypeName:     "",
 	exclude:               nil,
 	warningsHandler: func(msg string) {
-		fmt.Println(msg)
+		fmt.Println(msg) //nolint:forbidigo
 	},
 }

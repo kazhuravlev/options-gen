@@ -19,260 +19,379 @@ func TestRender_EdgeCases(t *testing.T) {
 	}{
 		{
 			name: "empty package name",
-			opts: Options{
-				version:     "test",
-				packageName: "",
-				spec: &OptionSpec{
-					Options: []OptionMeta{},
-				},
-			},
+			opts: NewOptions(
+				WithVersion("test"),
+				WithPackageName(""),
+				WithSpec(&OptionSpec{
+					TypeParamsSpec: "",
+					TypeParams:     "",
+					Options:        []OptionMeta{},
+				}),
+			),
 			wantErr: true, // Empty package name fails validation
+			errMsg:  "",
 		},
 		{
 			name: "very long option name",
-			opts: Options{
-				version:               "test",
-				packageName:           "test",
-				optionsStructName:     "Options",
-				optionTypeName:        "Option",
-				tagName:               "default",
-				constructorTypeRender: "public",
-				spec: &OptionSpec{
+			opts: NewOptions(
+				WithVersion("test"),
+				WithPackageName("test"),
+				WithOptionsStructName("Options"),
+				WithOptionTypeName("Option"),
+				WithTagName("default"),
+				WithConstructorTypeRender("public"),
+				WithSpec(&OptionSpec{
+					TypeParamsSpec: "",
+					TypeParams:     "",
 					Options: []OptionMeta{
 						{
-							Name:  strings.Repeat("A", 1000),
-							Field: strings.Repeat("a", 1000),
-							Type:  "string",
+							Name:      strings.Repeat("A", 1000),
+							Docstring: "",
+							Field:     strings.Repeat("a", 1000),
+							Type:      "string",
+							TagOption: TagOption{
+								IsRequired:    false,
+								GoValidator:   "",
+								Default:       "",
+								Variadic:      false,
+								VariadicIsSet: false,
+								Skip:          false,
+							},
 						},
 					},
-				},
-			},
+				}),
+			),
 			wantErr: false,
+			errMsg:  "",
 		},
 		{
 			name: "special characters in type",
-			opts: Options{
-				version:               "test",
-				packageName:           "test",
-				optionsStructName:     "Options",
-				optionTypeName:        "Option",
-				tagName:               "default",
-				constructorTypeRender: "public",
-				spec: &OptionSpec{
+			opts: NewOptions(
+				WithVersion("test"),
+				WithPackageName("test"),
+				WithOptionsStructName("Options"),
+				WithOptionTypeName("Option"),
+				WithTagName("default"),
+				WithConstructorTypeRender("public"),
+				WithSpec(&OptionSpec{
+					TypeParamsSpec: "",
+					TypeParams:     "",
 					Options: []OptionMeta{
 						{
-							Name:  "Field",
-							Field: "field",
-							Type:  "map[string][]interface{}",
+							Name:      "Field",
+							Docstring: "",
+							Field:     "field",
+							Type:      "map[string][]interface{}",
+							TagOption: TagOption{
+								IsRequired:    false,
+								GoValidator:   "",
+								Default:       "",
+								Variadic:      false,
+								VariadicIsSet: false,
+								Skip:          false,
+							},
 						},
 					},
-				},
-			},
+				}),
+			),
 			wantErr: false,
+			errMsg:  "",
 		},
 		{
 			name: "unicode in field names",
-			opts: Options{
-				version:               "test",
-				packageName:           "test",
-				optionsStructName:     "Options",
-				optionTypeName:        "Option",
-				tagName:               "default",
-				constructorTypeRender: "public",
-				spec: &OptionSpec{
+			opts: NewOptions(
+				WithVersion("test"),
+				WithPackageName("test"),
+				WithOptionsStructName("Options"),
+				WithOptionTypeName("Option"),
+				WithTagName("default"),
+				WithConstructorTypeRender("public"),
+				WithSpec(&OptionSpec{
+					TypeParamsSpec: "",
+					TypeParams:     "",
 					Options: []OptionMeta{
 						{
-							Name:  "Field世界",
-							Field: "field世界",
-							Type:  "string",
+							Name:      "Field世界",
+							Docstring: "",
+							Field:     "field世界",
+							Type:      "string",
+							TagOption: TagOption{
+								IsRequired:    false,
+								GoValidator:   "",
+								Default:       "",
+								Variadic:      false,
+								VariadicIsSet: false,
+								Skip:          false,
+							},
 						},
 					},
-				},
-			},
+				}),
+			),
 			wantErr: false,
+			errMsg:  "",
 		},
 		{
 			name: "deeply nested generic types",
-			opts: Options{
-				version:               "test",
-				packageName:           "test",
-				optionsStructName:     "Options",
-				optionTypeName:        "Option",
-				tagName:               "default",
-				constructorTypeRender: "public",
-				spec: &OptionSpec{
+			opts: NewOptions(
+				WithVersion("test"),
+				WithPackageName("test"),
+				WithOptionsStructName("Options"),
+				WithOptionTypeName("Option"),
+				WithTagName("default"),
+				WithConstructorTypeRender("public"),
+				WithSpec(&OptionSpec{
 					TypeParamsSpec: "[T any, U comparable, V interface{ Method() string }]",
 					TypeParams:     "[T, U, V]",
 					Options: []OptionMeta{
 						{
-							Name:  "NestedGeneric",
-							Field: "nestedGeneric",
-							Type:  "map[T][]map[U]V",
+							Name:      "NestedGeneric",
+							Docstring: "",
+							Field:     "nestedGeneric",
+							Type:      "map[T][]map[U]V",
+							TagOption: TagOption{
+								IsRequired:    false,
+								GoValidator:   "",
+								Default:       "",
+								Variadic:      false,
+								VariadicIsSet: false,
+								Skip:          false,
+							},
 						},
 					},
-				},
-			},
+				}),
+			),
 			wantErr: false,
+			errMsg:  "",
 		},
 		{
 			name: "all options mandatory",
-			opts: Options{
-				version:               "test",
-				packageName:           "test",
-				optionsStructName:     "Options",
-				optionTypeName:        "Option",
-				tagName:               "default",
-				constructorTypeRender: "public",
-				spec: &OptionSpec{
+			opts: NewOptions(
+				WithVersion("test"),
+				WithPackageName("test"),
+				WithOptionsStructName("Options"),
+				WithOptionTypeName("Option"),
+				WithTagName("default"),
+				WithConstructorTypeRender("public"),
+				WithSpec(&OptionSpec{
+					TypeParamsSpec: "",
+					TypeParams:     "",
 					Options: []OptionMeta{
 						{
-							Name:  "Field1",
-							Field: "field1",
-							Type:  "string",
+							Name:      "Field1",
+							Docstring: "",
+							Field:     "field1",
+							Type:      "string",
 							TagOption: TagOption{
-								IsRequired: true,
+								IsRequired:    true,
+								GoValidator:   "",
+								Default:       "",
+								Variadic:      false,
+								VariadicIsSet: false,
+								Skip:          false,
 							},
 						},
 						{
-							Name:  "Field2",
-							Field: "field2",
-							Type:  "int",
+							Name:      "Field2",
+							Docstring: "",
+							Field:     "field2",
+							Type:      "int",
 							TagOption: TagOption{
-								IsRequired: true,
+								IsRequired:    true,
+								GoValidator:   "",
+								Default:       "",
+								Variadic:      false,
+								VariadicIsSet: false,
+								Skip:          false,
 							},
 						},
 					},
-				},
-			},
+				}),
+			),
 			wantErr: false,
+			errMsg:  "",
 		},
 		{
 			name: "option with validation and default",
-			opts: Options{
-				version:               "test",
-				packageName:           "test",
-				optionsStructName:     "Options",
-				optionTypeName:        "Option",
-				tagName:               "default",
-				constructorTypeRender: "public",
-				spec: &OptionSpec{
+			opts: NewOptions(
+				WithVersion("test"),
+				WithPackageName("test"),
+				WithOptionsStructName("Options"),
+				WithOptionTypeName("Option"),
+				WithTagName("default"),
+				WithConstructorTypeRender("public"),
+				WithSpec(&OptionSpec{
+					TypeParamsSpec: "",
+					TypeParams:     "",
 					Options: []OptionMeta{
 						{
-							Name:  "Email",
-							Field: "email",
-							Type:  "string",
+							Name:      "Email",
+							Docstring: "",
+							Field:     "email",
+							Type:      "string",
 							TagOption: TagOption{
-								Default:     "test@example.com",
-								GoValidator: "email,required",
+								IsRequired:    false,
+								GoValidator:   "email,required",
+								Default:       "test@example.com",
+								Variadic:      false,
+								VariadicIsSet: false,
+								Skip:          false,
 							},
 						},
 					},
-				},
-			},
+				}),
+			),
 			wantErr: false,
+			errMsg:  "",
 		},
 		{
 			name: "variadic slice option",
-			opts: Options{
-				version:               "test",
-				packageName:           "test",
-				optionsStructName:     "Options",
-				optionTypeName:        "Option",
-				tagName:               "default",
-				constructorTypeRender: "public",
-				spec: &OptionSpec{
+			opts: NewOptions(
+				WithVersion("test"),
+				WithPackageName("test"),
+				WithOptionsStructName("Options"),
+				WithOptionTypeName("Option"),
+				WithTagName("default"),
+				WithConstructorTypeRender("public"),
+				WithSpec(&OptionSpec{
+					TypeParamsSpec: "",
+					TypeParams:     "",
 					Options: []OptionMeta{
 						{
-							Name:  "Items",
-							Field: "items",
-							Type:  "string",
+							Name:      "Items",
+							Docstring: "",
+							Field:     "items",
+							Type:      "string",
 							TagOption: TagOption{
-								Variadic: true,
+								IsRequired:    false,
+								GoValidator:   "",
+								Default:       "",
+								Variadic:      true,
+								VariadicIsSet: false,
+								Skip:          false,
 							},
 						},
 					},
-				},
-			},
+				}),
+			),
 			wantErr: false,
+			errMsg:  "",
 		},
 		{
 			name: "zero options",
-			opts: Options{
-				version:               "test",
-				packageName:           "test",
-				optionsStructName:     "Options",
-				optionTypeName:        "Option",
-				tagName:               "default",
-				constructorTypeRender: "public",
-				spec: &OptionSpec{
-					Options: []OptionMeta{},
-				},
-			},
+			opts: NewOptions(
+				WithVersion("test"),
+				WithPackageName("test"),
+				WithOptionsStructName("Options"),
+				WithOptionTypeName("Option"),
+				WithTagName("default"),
+				WithConstructorTypeRender("public"),
+				WithSpec(&OptionSpec{
+					TypeParamsSpec: "",
+					TypeParams:     "",
+					Options:        []OptionMeta{},
+				}),
+			),
 			wantErr: false,
+			errMsg:  "",
 		},
 		{
 			name: "with isset enabled",
-			opts: Options{
-				version:               "test",
-				packageName:           "test",
-				optionsStructName:     "Options",
-				optionTypeName:        "Option",
-				tagName:               "default",
-				constructorTypeRender: "public",
-				withIsset:             true,
-				spec: &OptionSpec{
+			opts: NewOptions(
+				WithVersion("test"),
+				WithPackageName("test"),
+				WithOptionsStructName("Options"),
+				WithOptionTypeName("Option"),
+				WithTagName("default"),
+				WithConstructorTypeRender("public"),
+				WithWithIsset(true),
+				WithSpec(&OptionSpec{
+					TypeParamsSpec: "",
+					TypeParams:     "",
 					Options: []OptionMeta{
 						{
-							Name:  "Field",
-							Field: "field",
-							Type:  "string",
+							Name:      "Field",
+							Docstring: "",
+							Field:     "field",
+							Type:      "string",
+							TagOption: TagOption{
+								IsRequired:    false,
+								GoValidator:   "",
+								Default:       "",
+								Variadic:      false,
+								VariadicIsSet: false,
+								Skip:          false,
+							},
 						},
 					},
-				},
-			},
+				}),
+			),
 			wantErr: false,
+			errMsg:  "",
 		},
 		{
 			name: "private constructor",
-			opts: Options{
-				version:               "test",
-				packageName:           "test",
-				optionsStructName:     "Options",
-				optionTypeName:        "Option",
-				tagName:               "default",
-				constructorTypeRender: "private",
-				spec: &OptionSpec{
+			opts: NewOptions(
+				WithVersion("test"),
+				WithPackageName("test"),
+				WithOptionsStructName("Options"),
+				WithOptionTypeName("Option"),
+				WithTagName("default"),
+				WithConstructorTypeRender("private"),
+				WithSpec(&OptionSpec{
+					TypeParamsSpec: "",
+					TypeParams:     "",
 					Options: []OptionMeta{
 						{
-							Name:  "Field",
-							Field: "field",
-							Type:  "string",
+							Name:      "Field",
+							Docstring: "",
+							Field:     "field",
+							Type:      "string",
+							TagOption: TagOption{
+								IsRequired:    false,
+								GoValidator:   "",
+								Default:       "",
+								Variadic:      false,
+								VariadicIsSet: false,
+								Skip:          false,
+							},
 						},
 					},
-				},
-			},
+				}),
+			),
 			wantErr: false,
+			errMsg:  "",
 		},
 		{
 			name: "no constructor",
-			opts: Options{
-				version:               "test",
-				packageName:           "test",
-				optionsStructName:     "Options",
-				optionTypeName:        "Option",
-				tagName:               "default",
-				constructorTypeRender: "no",
-				spec: &OptionSpec{
+			opts: NewOptions(
+				WithVersion("test"),
+				WithPackageName("test"),
+				WithOptionsStructName("Options"),
+				WithSpec(&OptionSpec{
+					TypeParamsSpec: "",
+					TypeParams:     "",
 					Options: []OptionMeta{
 						{
-							Name:  "Field",
-							Field: "field",
-							Type:  "string",
+							Name:      "Field",
+							Docstring: "",
+							Field:     "field",
+							Type:      "string",
+							TagOption: TagOption{
+								IsRequired:    false,
+								GoValidator:   "",
+								Default:       "",
+								Variadic:      false,
+								VariadicIsSet: false,
+								Skip:          false,
+							},
 						},
 					},
-				},
-			},
+				}),
+				WithOptionTypeName("Option"),
+				WithConstructorTypeRender("no"),
+			),
 			wantErr: false,
+			errMsg:  "",
 		},
 	}
 
@@ -300,19 +419,19 @@ func TestApplyExcludes_EdgeCases(t *testing.T) {
 	}{
 		{
 			name:     "nil excludes",
-			options:  []OptionMeta{{Name: "Field1"}, {Name: "Field2"}},
+			options:  []OptionMeta{{Name: "Field1"}, {Name: "Field2"}}, //nolint:exhaustruct
 			excludes: nil,
 			want:     2,
 		},
 		{
 			name:     "empty excludes",
-			options:  []OptionMeta{{Name: "Field1"}, {Name: "Field2"}},
+			options:  []OptionMeta{{Name: "Field1"}, {Name: "Field2"}}, //nolint:exhaustruct
 			excludes: []*regexp.Regexp{},
 			want:     2,
 		},
 		{
 			name:    "exclude all",
-			options: []OptionMeta{{Name: "Field1"}, {Name: "Field2"}},
+			options: []OptionMeta{{Name: "Field1"}, {Name: "Field2"}}, //nolint:exhaustruct
 			excludes: []*regexp.Regexp{
 				regexp.MustCompile(".*"),
 			},
@@ -320,7 +439,7 @@ func TestApplyExcludes_EdgeCases(t *testing.T) {
 		},
 		{
 			name:    "exclude none",
-			options: []OptionMeta{{Name: "Field1"}, {Name: "Field2"}},
+			options: []OptionMeta{{Name: "Field1"}, {Name: "Field2"}}, //nolint:exhaustruct
 			excludes: []*regexp.Regexp{
 				regexp.MustCompile("NonExistent"),
 			},
@@ -328,7 +447,7 @@ func TestApplyExcludes_EdgeCases(t *testing.T) {
 		},
 		{
 			name:    "multiple patterns",
-			options: []OptionMeta{{Name: "FieldA"}, {Name: "FieldB"}, {Name: "OtherC"}},
+			options: []OptionMeta{{Name: "FieldA"}, {Name: "FieldB"}, {Name: "OtherC"}}, //nolint:exhaustruct
 			excludes: []*regexp.Regexp{
 				regexp.MustCompile("^Field"),
 				regexp.MustCompile("C$"),
@@ -337,7 +456,7 @@ func TestApplyExcludes_EdgeCases(t *testing.T) {
 		},
 		{
 			name:    "case sensitive exclusion",
-			options: []OptionMeta{{Name: "field"}, {Name: "Field"}},
+			options: []OptionMeta{{Name: "field"}, {Name: "Field"}}, //nolint:exhaustruct
 			excludes: []*regexp.Regexp{
 				regexp.MustCompile("^field$"),
 			},

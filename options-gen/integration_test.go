@@ -27,15 +27,15 @@ func TestRun_ErrorCases(t *testing.T) {
 type Options struct {
 	Field string ` + "`option:\"mandatory\" default:\"value\"`" + `
 }`,
-			opts: Options{
-				version:     "test",
-				packageName: "test",
-				structName:  "Options",
-				defaults: Defaults{
+			opts: NewOptions(
+				WithVersion("test"),
+				WithPackageName("test"),
+				WithStructName("Options"),
+				WithDefaults(Defaults{
 					From:  DefaultsFromTag,
 					Param: "default",
-				},
-			},
+				}),
+			),
 			wantErr:   true,
 			errSubstr: "mandatory option cannot have a default value",
 		},
@@ -45,15 +45,15 @@ type Options struct {
 type Options struct {
 	Field int ` + "`default:\"not_a_number\"`" + `
 }`,
-			opts: Options{
-				version:     "test",
-				packageName: "test",
-				structName:  "Options",
-				defaults: Defaults{
+			opts: NewOptions(
+				WithVersion("test"),
+				WithPackageName("test"),
+				WithStructName("Options"),
+				WithDefaults(Defaults{
 					From:  DefaultsFromTag,
 					Param: "default",
-				},
-			},
+				}),
+			),
 			wantErr:   true,
 			errSubstr: "invalid",
 		},
@@ -63,11 +63,11 @@ type Options struct {
 type OtherStruct struct {
 	Field string
 }`,
-			opts: Options{
-				version:     "test",
-				packageName: "test",
-				structName:  "Options",
-			},
+			opts: NewOptions(
+				WithVersion("test"),
+				WithPackageName("test"),
+				WithStructName("Options"),
+			),
 			wantErr:   true,
 			errSubstr: "cannot find target struct",
 		},
@@ -77,12 +77,12 @@ type OtherStruct struct {
 type Options struct {
 	Field string
 }`,
-			opts: Options{
-				version:           "test",
-				packageName:       "test",
-				structName:        "Options",
-				outOptionTypeName: "Invalid-Name-123",
-			},
+			opts: NewOptions(
+				WithVersion("test"),
+				WithPackageName("test"),
+				WithStructName("Options"),
+				WithOutOptionTypeName("Invalid-Name-123"),
+			),
 			wantErr:   true,
 			errSubstr: "must be a valid type name",
 		},
@@ -252,7 +252,7 @@ type Options struct {
 	inputFile := filepath.Join(tmpDir, "options.go")
 	outputFile := filepath.Join(tmpDir, "options_generated.go")
 
-	err := os.WriteFile(inputFile, []byte(sourceCode), ctype.DefaultPermission) //nolint:gosec
+	err := os.WriteFile(inputFile, []byte(sourceCode), ctype.DefaultPermission)
 	require.NoError(t, err)
 
 	err2 := Run(NewOptions(

@@ -141,6 +141,7 @@ type Options struct {
 }`, strings.Repeat("required,", 100)),
 			structName: "Options",
 			wantErr:    false,
+			validate:   nil,
 		},
 		{
 			name: "unicode in all places",
@@ -215,9 +216,18 @@ func TestRender_LargeOutput(t *testing.T) {
 	options := make([]generator.OptionMeta, numFields)
 	for i := 0; i < numFields; i++ {
 		options[i] = generator.OptionMeta{
-			Name:  fmt.Sprintf("Field%d", i),
-			Field: fmt.Sprintf("field%d", i),
-			Type:  "string",
+			Name:      fmt.Sprintf("Field%d", i),
+			Docstring: "",
+			Field:     fmt.Sprintf("field%d", i),
+			Type:      "string",
+			TagOption: generator.TagOption{
+				IsRequired:    false,
+				GoValidator:   "",
+				Default:       "",
+				Variadic:      false,
+				VariadicIsSet: false,
+				Skip:          false,
+			},
 		}
 	}
 
@@ -230,7 +240,9 @@ func TestRender_LargeOutput(t *testing.T) {
 		generator.WithConstructorTypeRender("public"),
 		generator.WithSpec(
 			&generator.OptionSpec{
-				Options: options,
+				TypeParamsSpec: "",
+				TypeParams:     "",
+				Options:        options,
 			},
 		),
 	)
@@ -316,9 +328,18 @@ func TestExcludePatterns_Comprehensive(t *testing.T) {
 			options := make([]generator.OptionMeta, len(tt.fields))
 			for i, field := range tt.fields {
 				options[i] = generator.OptionMeta{
-					Name:  field,
-					Field: strings.ToLower(field),
-					Type:  "string",
+					Name:      field,
+					Docstring: "",
+					Field:     strings.ToLower(field),
+					Type:      "string",
+					TagOption: generator.TagOption{
+						IsRequired:    false,
+						GoValidator:   "",
+						Default:       "",
+						Variadic:      false,
+						VariadicIsSet: false,
+						Skip:          false,
+					},
 				}
 			}
 
@@ -391,7 +412,9 @@ func TestRender_InvalidConfiguration(t *testing.T) {
 				generator.WithOptionTypeName("Option"),
 				generator.WithConstructorTypeRender("public"),
 				generator.WithSpec(&generator.OptionSpec{
-					Options: []generator.OptionMeta{},
+					TypeParamsSpec: "",
+					TypeParams:     "",
+					Options:        []generator.OptionMeta{},
 				}),
 			),
 			wantErr: true,
@@ -405,7 +428,9 @@ func TestRender_InvalidConfiguration(t *testing.T) {
 				generator.WithOptionTypeName("Option"),
 				generator.WithConstructorTypeRender("invalid"), // invalid - but not validated by Render
 				generator.WithSpec(&generator.OptionSpec{
-					Options: []generator.OptionMeta{},
+					TypeParamsSpec: "",
+					TypeParams:     "",
+					Options:        []generator.OptionMeta{},
 				}),
 			),
 			wantErr: false, // Template doesn't validate constructor type

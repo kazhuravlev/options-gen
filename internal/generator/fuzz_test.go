@@ -116,10 +116,9 @@ func FuzzFindImportPath(f *testing.F) {
 // TestGetOptionSpec_InvalidFiles tests GetOptionSpec with various invalid file scenarios.
 func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 	tests := []struct {
-		name     string
-		setup    func(t *testing.T) string
-		wantErr  bool
-		errCheck func(error) bool
+		name    string
+		setup   func(t *testing.T) string
+		wantErr bool
 	}{
 		{
 			name: "non-existent file",
@@ -192,17 +191,16 @@ func TestGetOptionSpec_InvalidFiles(t *testing.T) {
 // This test documents the current behavior, including bugs.
 func TestDeleteByIndex_EdgeCases(t *testing.T) {
 	tests := []struct {
-		name      string
-		input     []string
-		index     int
-		expected  []string
-		expectErr bool // true if we expect a panic (bug in implementation)
+		name     string
+		input    []string
+		index    int
+		expected []string
 	}{
 		{
-			name:      "delete from empty slice",
-			input:     []string{},
-			index:     0,
-			expectErr: true, // BUG: panics on empty slice with index 0
+			name:     "delete fr empty slice",
+			input:    []string{},
+			index:    0,
+			expected: []string{},
 		},
 		{
 			name:     "delete with index out of bounds",
@@ -229,35 +227,23 @@ func TestDeleteByIndex_EdgeCases(t *testing.T) {
 			expected: []string{"a", "c"},
 		},
 		{
-			name:      "negative index",
-			input:     []string{"a", "b", "c"},
-			index:     -1,
-			expectErr: true, // BUG: panics on negative index
+			name:     "negative index",
+			input:    []string{"a", "b", "c"},
+			index:    -1,
+			expected: []string{"a", "b", "c"},
 		},
 		{
-			name:      "index equals length",
-			input:     []string{"a", "b"},
-			index:     2,
-			expectErr: true, // BUG: should return original slice but panics
+			name:     "index equals length",
+			input:    []string{"a", "b"},
+			index:    2,
+			expected: []string{"a", "b"},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if tt.expectErr {
-				// Test that documents current buggy behavior
-				defer func() {
-					if r := recover(); r == nil {
-						t.Errorf("deleteByIndex() should panic for this case (documenting bug), but didn't")
-					}
-				}()
-			}
-
 			result := deleteByIndex(tt.input, tt.index)
-
-			if !tt.expectErr {
-				require.Equal(t, tt.expected, result)
-			}
+			require.Equal(t, tt.expected, result)
 		})
 	}
 }

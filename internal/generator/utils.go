@@ -521,7 +521,11 @@ func typeParamsStr(params []*ast.Field) (string, string, error) {
 }
 
 func deleteByIndex[T any](input []T, index int) []T {
-	if len(input) < index {
+	if index < 0 {
+		return input
+	}
+
+	if len(input) <= index {
 		return input
 	}
 
