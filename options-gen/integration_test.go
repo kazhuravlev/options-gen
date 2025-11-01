@@ -125,3 +125,41 @@ type Options struct {
 		})
 	}
 }
+
+// TestRun_WarningGeneration tests that warnings are properly generated
+func TestRun_WarningGeneration(t *testing.T) {
+	t.Parallel()
+
+	// Public field should generate warning
+	sourceCode := `package test
+type Options struct {
+	PublicField string
+}`
+
+	tmpDir := t.TempDir()
+	inputFile := filepath.Join(tmpDir, "options.go")
+	outputFile := filepath.Join(tmpDir, "options_generated.go")
+
+	err := os.WriteFile(inputFile, []byte(sourceCode), 0o644)
+	require.NoError(t, err)
+
+	var warnings []string
+	handler := func(w string) {
+		warnings = append(warnings, w)
+	}
+
+	opts := NewOptions(
+		WithVersion("test"),
+		WithPackageName("test"),
+		WithStructName("Options"),
+		WithInFilename(inputFile),
+		WithOutFilename(outputFile),
+		WithShowWarnings(true),
+		WithWarningsHandler(handler),
+	)
+
+	require.NoError(t, Run(opts))
+	require.Equal(t, []string{
+		"Warning: consider to make `PublicField` is private. This is will not allow to users to avoid constructor method.",
+	}, warnings)
+}
