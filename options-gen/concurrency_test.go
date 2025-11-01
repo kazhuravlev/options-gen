@@ -46,10 +46,6 @@ type Options struct {
 				WithStructName("Options"),
 				WithInFilename(inputFile),
 				WithOutFilename(outputFile),
-				WithDefaults(Defaults{
-					From: DefaultsFromNone,
-				}),
-				WithConstructorTypeRender(ConstructorPublicRender),
 			)
 			if err := Run(opts); err != nil {
 				errors <- fmt.Errorf("goroutine %d: Run() failed: %w", id, err)
