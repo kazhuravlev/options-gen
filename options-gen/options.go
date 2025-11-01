@@ -17,7 +17,7 @@ type Options struct {
 	showWarnings          bool
 	withIsset             bool
 	allVariadic           bool
-	constructorTypeRender ConstructorTypeRender `validate:"required"`
+	constructorTypeRender ConstructorTypeRender `validate:"required,oneof=public private no"`
 	outOptionTypeName     string
 	exclude               []*regexp.Regexp
 	warningsHandler       func(string)

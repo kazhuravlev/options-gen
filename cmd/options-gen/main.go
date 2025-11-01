@@ -96,14 +96,6 @@ func main() {
 		return
 	}
 
-	if !constructorTypeRender.Valid() {
-		flag.Usage()
-		//nolint:forbidigo
-		fmt.Println("invalid value for constructor: " + constructorTypeRender)
-
-		return
-	}
-
 	defaults, err := parseDefaults(defaultsFrom)
 	if err != nil {
 		//nolint:forbidigo

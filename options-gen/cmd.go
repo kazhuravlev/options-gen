@@ -32,18 +32,6 @@ const (
 	ConstructorNoRender      ConstructorTypeRender = "no"
 )
 
-func (c ConstructorTypeRender) Valid() bool {
-	switch c {
-	case ConstructorPublicRender,
-		ConstructorPrivateRender,
-		ConstructorNoRender:
-	default:
-		return false
-	}
-
-	return true
-}
-
 func Run(opts Options) error {
 	if err := opts.Validate(); err != nil {
 		return fmt.Errorf("bad configuration: %w", err)

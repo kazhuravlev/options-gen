@@ -150,7 +150,7 @@ func _validate_Options_defaults(o *Options) error {
 }
 
 func _validate_Options_constructorTypeRender(o *Options) error {
-	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.constructorTypeRender, "required"); err != nil {
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.constructorTypeRender, "required,oneof=public private no"); err != nil {
 		return fmt461e464ebed9.Errorf("field `constructorTypeRender` did not pass the test: %w", err)
 	}
 	return nil
