@@ -1,10 +1,10 @@
 # options-gen
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/kazhuravlev/options-gen.svg)](https://pkg.go.dev/github.com/kazhuravlev/options-gen)
-[![License](https://img.shields.io/github/license/kazhuravlev/options-gen?color=blue)](https://github.com/kazhuravlev/options-gen/blob/master/LICENSE)
-[![Build Status](https://github.com/kazhuravlev/options-gen/actions/workflows/go.yml/badge.svg?branch=master)](https://github.com/kazhuravlev/options-gen/actions/workflows/go.yml?query=branch%3Amaster)
+[![License](https://img.shields.io/github/license/kazhuravlev/options-gen?color=blue)](https://github.com/kazhuravlev/options-gen/blob/main/LICENSE)
+[![Build Status](https://github.com/kazhuravlev/options-gen/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/kazhuravlev/options-gen/actions/workflows/go.yml?query=branch%3Amain)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kazhuravlev/options-gen)](https://goreportcard.com/report/github.com/kazhuravlev/options-gen)
-[![CodeCov](https://codecov.io/gh/kazhuravlev/options-gen/branch/master/graph/badge.svg?token=tNKcOjlxLo)](https://codecov.io/gh/kazhuravlev/options-gen)
+[![CodeCov](https://codecov.io/gh/kazhuravlev/options-gen/branch/main/graph/badge.svg?token=tNKcOjlxLo)](https://codecov.io/gh/kazhuravlev/options-gen)
 [![Mentioned in Awesome Go](https://awesome.re/mentioned-badge.svg)](https://github.com/avelino/awesome-go#go-generate-tools)
 
 **Eliminate boilerplate when implementing the functional options pattern in Go.**
