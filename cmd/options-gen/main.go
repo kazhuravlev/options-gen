@@ -7,26 +7,13 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"runtime/debug"
 	"strings"
 
+	"github.com/kazhuravlev/options-gen/internal/version"
 	optionsgen "github.com/kazhuravlev/options-gen/options-gen"
 )
 
-const versionUnknown = "unknown-local"
-
-var Version = versionUnknown
-
 func main() {
-	// In case if not - someone (task examples:update) explicitly set the value of Version.
-	if Version == versionUnknown {
-		if bi, ok := debug.ReadBuildInfo(); ok {
-			if bi.Main.Version != "" {
-				Version = bi.Main.Version
-			}
-		}
-	}
-
 	var (
 		inFilename            string
 		outFilename           string
@@ -114,7 +101,7 @@ func main() {
 
 	errRun := optionsgen.Run(
 		optionsgen.NewOptions(
-			optionsgen.WithVersion(Version),
+			optionsgen.WithVersion(version.GetVersion()),
 			optionsgen.WithInFilename(inFilename),
 			optionsgen.WithOutFilename(outFilename),
 			optionsgen.WithStructName(optionsStructName),

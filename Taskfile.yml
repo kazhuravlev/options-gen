@@ -59,7 +59,7 @@ tasks:
     desc: Update examples directory
     cmds:
       - echo "- Update examples"
-      - go install -ldflags "-X 'main.Version=qa-version'" ./cmd/options-gen
+      - go install -ldflags "-X 'github.com/kazhuravlev/options-gen/internal/version.version=qa-version'" ./cmd/options-gen
       - task: examples:update:go-generate
       - task: examples:update:go-generate-generics
       - task: examples:update:go-generate-2options-1pkg
