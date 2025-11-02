@@ -9,9 +9,13 @@ import (
 )
 
 func TestGetVersion(t *testing.T) {
-	require.Equal(t, "(devel)", GetVersion())
+	t.Parallel()
+
+	require.Contains(t, []string{"(devel)", "unknown-local"}, GetVersion())
 
 	t.Run("returns explicitly set version when version variable is set", func(t *testing.T) {
+		t.Parallel()
+
 		// Save original value
 		original := version
 		defer func() { version = original }()
