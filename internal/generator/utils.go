@@ -430,12 +430,12 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 		return tagOpt, nil
 	}
 
-	value := tag.Value
-	tagOpt.GoValidator = reflect.StructTag(strings.Trim(value, "`")).Get("validate")
-	tagOpt.Default = reflect.StructTag(strings.Trim(value, "`")).Get(tagName)
+	tagValue := reflect.StructTag(strings.Trim(tag.Value, "`"))
+	tagOpt.GoValidator = tagValue.Get("validate")
+	tagOpt.Default = tagValue.Get(tagName)
 
 	var warnings []string
-	optionTag := reflect.StructTag(strings.Trim(value, "`")).Get("option")
+	optionTag := tagValue.Get("option")
 	for _, opt := range strings.Split(optionTag, ",") {
 		optParts := strings.SplitN(opt, "=", keyValueSliceSize)
 		var optName, optValue string
