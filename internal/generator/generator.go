@@ -231,6 +231,7 @@ func ApplyExcludes(options []OptionMeta, excludes []*regexp.Regexp) []OptionMeta
 		for _, reg := range excludes {
 			if reg.MatchString(field.Name) {
 				excluded = true
+
 				break
 			}
 		}

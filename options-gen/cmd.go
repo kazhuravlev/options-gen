@@ -73,10 +73,8 @@ func Run(opts Options) error {
 	outOptionTypeName := opts.outOptionTypeName
 	if outOptionTypeName == "" {
 		outOptionTypeName = "Opt" + opts.structName + "Setter"
-	} else {
-		if !outOptionTypeNamePattern.MatchString(outOptionTypeName) {
-			return fmt.Errorf("outOptionTypeName must be a valid type name, contains only letters a-z or A-Z")
-		}
+	} else if !outOptionTypeNamePattern.MatchString(outOptionTypeName) {
+		return fmt.Errorf("outOptionTypeName must be a valid type name, contains only letters a-z or A-Z")
 	}
 
 	res, err := generator.Render(generator.NewOptions(
