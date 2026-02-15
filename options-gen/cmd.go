@@ -32,6 +32,8 @@ const (
 	ConstructorNoRender      ConstructorTypeRender = "no"
 )
 
+var outOptionTypeNamePattern = regexp.MustCompile(`^[a-zA-Z]+$`)
+
 func Run(opts Options) error {
 	if err := opts.Validate(); err != nil {
 		return fmt.Errorf("bad configuration: %w", err)
@@ -71,11 +73,8 @@ func Run(opts Options) error {
 	outOptionTypeName := opts.outOptionTypeName
 	if outOptionTypeName == "" {
 		outOptionTypeName = "Opt" + opts.structName + "Setter"
-	} else {
-		onlyLetters := regexp.MustCompile(`^[a-zA-Z]+$`)
-		if !onlyLetters.MatchString(outOptionTypeName) {
-			return fmt.Errorf("outOptionTypeName must be a valid type name, contains only letters a-z or A-Z")
-		}
+	} else if !outOptionTypeNamePattern.MatchString(outOptionTypeName) {
+		return fmt.Errorf("outOptionTypeName must be a valid type name, contains only letters a-z or A-Z")
 	}
 
 	res, err := generator.Render(generator.NewOptions(

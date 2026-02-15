@@ -221,19 +221,25 @@ func GetOptionSpec(
 }
 
 func ApplyExcludes(options []OptionMeta, excludes []*regexp.Regexp) []OptionMeta {
-	for _, reg := range excludes {
-		var toDel []int
-		for index, field := range options {
+	if len(options) == 0 || len(excludes) == 0 {
+		return options
+	}
+
+	filtered := make([]OptionMeta, 0, len(options))
+	for _, field := range options {
+		var excluded bool
+		for _, reg := range excludes {
 			if reg.MatchString(field.Name) {
-				toDel = append(toDel, index)
+				excluded = true
+
+				break
 			}
 		}
 
-		for i := len(toDel) - 1; i >= 0; i-- {
-			idx := toDel[i]
-			options = deleteByIndex(options, idx)
+		if !excluded {
+			filtered = append(filtered, field)
 		}
 	}
 
-	return options
+	return filtered
 }
