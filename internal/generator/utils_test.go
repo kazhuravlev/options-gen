@@ -22,6 +22,8 @@ var benchmarkFindImportPathPathSink string
 var benchmarkFindImportPathAliasSink string
 var benchmarkTypeParamsStrSpecSink string
 var benchmarkTypeParamsStrNamesSink string
+var benchmarkParseTagOptionSink TagOption
+var benchmarkParseTagWarningsSink []string
 
 func Test_checkDefaultValue_Negative(t *testing.T) {
 	cases := []struct {
@@ -510,6 +512,42 @@ func BenchmarkTypeParamsStr(b *testing.B) {
 			var err error
 			benchmarkTypeParamsStrSpecSink, benchmarkTypeParamsStrNamesSink, err = typeParamsStr(params)
 			require.NoError(b, err)
+		}
+	})
+}
+
+func BenchmarkParseTag(b *testing.B) {
+	b.Run("simple", func(b *testing.B) {
+		tag := &ast.BasicLit{Value: "`validate:\"required\" default:\"42\"`"}
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkParseTagOptionSink, benchmarkParseTagWarningsSink = parseTag(tag, "fieldName", "default")
+		}
+	})
+
+	b.Run("option_flags", func(b *testing.B) {
+		tag := &ast.BasicLit{Value: "`option:\"mandatory,variadic=true\" validate:\"min=10\" default:\"1m\"`"}
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkParseTagOptionSink, benchmarkParseTagWarningsSink = parseTag(tag, "fieldName", "default")
+		}
+	})
+
+	b.Run("deprecated_options", func(b *testing.B) {
+		tag := &ast.BasicLit{Value: "`option:\"required,not-empty,variadic=bad\" validate:\"email\"`"}
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkParseTagOptionSink, benchmarkParseTagWarningsSink = parseTag(tag, "fieldName", "default")
+		}
+	})
+
+	b.Run("nil_tag", func(b *testing.B) {
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkParseTagOptionSink, benchmarkParseTagWarningsSink = parseTag(nil, "fieldName", "default")
 		}
 	})
 }
