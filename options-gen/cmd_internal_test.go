@@ -19,56 +19,71 @@ func TestResolveDefaults(t *testing.T) {
 	}{
 		{
 			name:       "none",
-			defaults:   Defaults{From: DefaultsFromNone},
+			defaults:   Defaults{From: DefaultsFromNone, Param: ""},
 			structName: "Options",
+			wantTag:    "",
+			wantVar:    "",
+			wantFunc:   "",
 		},
 		{
 			name:       "tag_default",
-			defaults:   Defaults{From: DefaultsFromTag},
+			defaults:   Defaults{From: DefaultsFromTag, Param: ""},
 			structName: "Options",
 			wantTag:    defaultTagName,
+			wantVar:    "",
+			wantFunc:   "",
 		},
 		{
 			name:       "tag_custom",
 			defaults:   Defaults{From: DefaultsFromTag, Param: "cfg"},
 			structName: "Options",
 			wantTag:    "cfg",
+			wantVar:    "",
+			wantFunc:   "",
 		},
 		{
 			name:       "var_default",
-			defaults:   Defaults{From: DefaultsFromVar},
+			defaults:   Defaults{From: DefaultsFromVar, Param: ""},
 			structName: "Config",
+			wantTag:    "",
 			wantVar:    "defaultConfig",
+			wantFunc:   "",
 		},
 		{
 			name:       "var_custom",
 			defaults:   Defaults{From: DefaultsFromVar, Param: "defaults"},
 			structName: "Config",
+			wantTag:    "",
 			wantVar:    "defaults",
+			wantFunc:   "",
 		},
 		{
 			name:       "func_default",
-			defaults:   Defaults{From: DefaultsFromFunc},
+			defaults:   Defaults{From: DefaultsFromFunc, Param: ""},
 			structName: "Config",
+			wantTag:    "",
+			wantVar:    "",
 			wantFunc:   "getDefaultConfig",
 		},
 		{
 			name:       "func_custom",
 			defaults:   Defaults{From: DefaultsFromFunc, Param: "buildDefaults"},
 			structName: "Config",
+			wantTag:    "",
+			wantVar:    "",
 			wantFunc:   "buildDefaults",
 		},
 	}
 
-	for _, tc := range testCases {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
+	for _, testCase := range testCases {
+		testCase := testCase
+		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
 
-			gotTag, gotVar, gotFunc := resolveDefaults(tc.defaults, tc.structName)
-			require.Equal(t, tc.wantTag, gotTag)
-			require.Equal(t, tc.wantVar, gotVar)
-			require.Equal(t, tc.wantFunc, gotFunc)
+			gotTag, gotVar, gotFunc := resolveDefaults(testCase.defaults, testCase.structName)
+			require.Equal(t, testCase.wantTag, gotTag)
+			require.Equal(t, testCase.wantVar, gotVar)
+			require.Equal(t, testCase.wantFunc, gotFunc)
 		})
 	}
 }
