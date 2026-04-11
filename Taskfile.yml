@@ -55,6 +55,12 @@ tasks:
       - echo "- Tests"
       - go test ./...
 
+  bench:
+    desc: Run benchmarks
+    cmds:
+      - echo "- Benchmarks"
+      - go test -run '^$' -bench . -benchmem ./internal/generator
+
   examples:update:
     desc: Update examples directory
     cmds:

@@ -6,12 +6,15 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/kazhuravlev/options-gen/internal/ctype"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+var benchmarkFormatCommentSink string
 
 func Test_checkDefaultValue_Negative(t *testing.T) {
 	cases := []struct {
@@ -124,6 +127,45 @@ func Test_normalizeTypeName(t *testing.T) {
 			assert.Equal(t, tt.expected, normalizeTypeName(tt.val))
 		})
 	}
+}
+
+func BenchmarkFormatComment(b *testing.B) {
+	b.Run("short", func(b *testing.B) {
+		comment := "short comment"
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkFormatCommentSink = formatComment(comment)
+		}
+	})
+
+	b.Run("multiline", func(b *testing.B) {
+		comment := strings.Join([]string{
+			"client config comment",
+			"another line with details",
+			"",
+			"last line",
+		}, "\n")
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkFormatCommentSink = formatComment(comment)
+		}
+	})
+
+	b.Run("large", func(b *testing.B) {
+		lines := make([]string, 64)
+		for i := range lines {
+			lines[i] = "benchmark line for comment formatting"
+		}
+
+		comment := strings.Join(lines, "\n")
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkFormatCommentSink = formatComment(comment)
+		}
+	})
 }
 
 func TestExtractSliceElemType(t *testing.T) {
