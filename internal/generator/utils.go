@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -541,13 +542,9 @@ func typeParamsStr(params []*ast.Field) (string, string, error) {
 }
 
 func deleteByIndex[T any](input []T, index int) []T {
-	if index < 0 {
+	if index < 0 || index >= len(input) {
 		return input
 	}
 
-	if len(input) <= index {
-		return input
-	}
-
-	return append(input[:index], input[index+1:]...)
+	return slices.Delete(input, index, index+1)
 }
