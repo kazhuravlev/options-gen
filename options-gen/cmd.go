@@ -92,6 +92,7 @@ func Run(opts Options) error {
 
 func resolveDefaults(defaults Defaults, structName string) (tagName, varName, funcName string) {
 	switch defaults.From {
+	case DefaultsFromNone:
 	case DefaultsFromTag:
 		tagName = defaults.Param
 		if tagName == "" {

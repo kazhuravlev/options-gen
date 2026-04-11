@@ -23,8 +23,6 @@ var templates embed.FS
 
 var tmpl = template.Must(template.ParseFS(templates, "templates/options.go.tpl"))
 
-const keyValueSliceSize = 2
-
 // Render will render file and out it's content.
 func Render(opts Options) ([]byte, error) {
 	if err := opts.Validate(); err != nil {
