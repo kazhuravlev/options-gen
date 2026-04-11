@@ -216,6 +216,106 @@ func Test_typeParamsStr(t *testing.T) {
 	}
 }
 
+func Test_parseTag(t *testing.T) {
+	testCases := []struct {
+		name         string
+		tag          *ast.BasicLit
+		fieldName    string
+		tagName      string
+		wantOption   TagOption
+		wantWarnings []string
+	}{
+		{
+			name:      "nil_tag",
+			tag:       nil,
+			fieldName: "fieldName",
+			tagName:   "default",
+			wantOption: TagOption{
+				IsRequired:    false,
+				GoValidator:   "",
+				Default:       "",
+				Variadic:      false,
+				VariadicIsSet: false,
+				Skip:          false,
+			},
+			wantWarnings: nil,
+		},
+		{
+			name:      "validate_and_default",
+			tag:       &ast.BasicLit{Value: "`validate:\"required,email\" default:\"42\"`"},
+			fieldName: "fieldName",
+			tagName:   "default",
+			wantOption: TagOption{
+				IsRequired:    false,
+				GoValidator:   "required,email",
+				Default:       "42",
+				Variadic:      false,
+				VariadicIsSet: false,
+				Skip:          false,
+			},
+			wantWarnings: nil,
+		},
+		{
+			name:      "mandatory_variadic_and_skip",
+			tag:       &ast.BasicLit{Value: "`option:\"mandatory,variadic=true,-\"`"},
+			fieldName: "fieldName",
+			tagName:   "default",
+			wantOption: TagOption{
+				IsRequired:    true,
+				GoValidator:   "",
+				Default:       "",
+				Variadic:      true,
+				VariadicIsSet: true,
+				Skip:          true,
+			},
+			wantWarnings: nil,
+		},
+		{
+			name:      "deprecated_required_and_not_empty",
+			tag:       &ast.BasicLit{Value: "`option:\"required,not-empty\" validate:\"min=10\"`"},
+			fieldName: "fieldName",
+			tagName:   "default",
+			wantOption: TagOption{
+				IsRequired:    true,
+				GoValidator:   "min=10,required",
+				Default:       "",
+				Variadic:      false,
+				VariadicIsSet: false,
+				Skip:          false,
+			},
+			wantWarnings: []string{
+				"Deprecated: use `option:\"mandatory\"` instead for field `fieldName` to force the passing option in the constructor argument\n",
+				"Deprecated: use github.com/go-playground/validator `validate` tag to check the field `fieldName` content\n",
+			},
+		},
+		{
+			name:      "invalid_variadic_value",
+			tag:       &ast.BasicLit{Value: "`option:\"variadic=bad\"`"},
+			fieldName: "fieldName",
+			tagName:   "default",
+			wantOption: TagOption{
+				IsRequired:    false,
+				GoValidator:   "",
+				Default:       "",
+				Variadic:      false,
+				VariadicIsSet: true,
+				Skip:          false,
+			},
+			wantWarnings: []string{
+				"Error: parse variadic for the field fieldName failed: strconv.ParseBool: parsing \"bad\": invalid syntax\n",
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			gotOption, gotWarnings := parseTag(tc.tag, tc.fieldName, tc.tagName)
+			assert.Equal(t, tc.wantOption, gotOption)
+			assert.Equal(t, tc.wantWarnings, gotWarnings)
+		})
+	}
+}
+
 func BenchmarkFormatComment(b *testing.B) {
 	b.Run("short", func(b *testing.B) {
 		comment := "short comment"
