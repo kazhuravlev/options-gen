@@ -305,8 +305,6 @@ func normalizeTypeName(typeName string) string {
 
 // extractSliceElemType will find the element type for given slice.
 func extractSliceElemType(
-	workDir string,
-	fset *token.FileSet,
 	curFile *ast.File,
 	expr ast.Expr,
 	packageStore *PackageStore,
@@ -366,7 +364,7 @@ func extractSliceElemType(
 		default:
 			return "", errors.New("unsupported ident expression")
 		case *ast.TypeSpec:
-			return extractSliceElemType(workDir, fset, curFile, expr.Type, packageStore)
+			return extractSliceElemType(curFile, expr.Type, packageStore)
 		}
 	}
 }

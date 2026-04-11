@@ -813,14 +813,14 @@ import "./somepkg"
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := extractSliceElemType(tempDir, fset, mainFile, tt.expr, NewPackageStore(fset, tempDir))
+			got, err := extractSliceElemType(mainFile, tt.expr, NewPackageStore(fset, tempDir))
 			require.NoError(t, err)
 			require.Equal(t, tt.want, got)
 		})
 	}
 
 	t.Run("not_a_slice", func(t *testing.T) {
-		res, err := extractSliceElemType(tempDir, fset, mainFile, &ast.Ident{Name: "string"}, NewPackageStore(fset, tempDir)) //nolint:exhaustruct
+		res, err := extractSliceElemType(mainFile, &ast.Ident{Name: "string"}, NewPackageStore(fset, tempDir)) //nolint:exhaustruct
 		require.Error(t, err)
 		require.Equal(t, "", res)
 	})

@@ -168,7 +168,7 @@ func GetOptionSpec(
 				continue
 			}
 
-			elementType, err := extractSliceElemType(workDir, fset, file, field.Type, packageStore)
+			elementType, err := extractSliceElemType(file, field.Type, packageStore)
 			if err != nil {
 				if errors.Is(err, errIsNotSlice) && !optMeta.TagOption.Variadic {
 					options = append(options, optMeta)
