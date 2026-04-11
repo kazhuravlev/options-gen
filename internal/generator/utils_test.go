@@ -6,6 +6,8 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -15,6 +17,7 @@ import (
 )
 
 var benchmarkFormatCommentSink string
+var benchmarkApplyExcludesSink []OptionMeta
 
 func Test_checkDefaultValue_Negative(t *testing.T) {
 	cases := []struct {
@@ -164,6 +167,60 @@ func BenchmarkFormatComment(b *testing.B) {
 		b.ReportAllocs()
 		for b.Loop() {
 			benchmarkFormatCommentSink = formatComment(comment)
+		}
+	})
+}
+
+func BenchmarkApplyExcludes(b *testing.B) {
+	buildOptions := func(n int) []OptionMeta {
+		options := make([]OptionMeta, n)
+		for i := range options {
+			options[i] = OptionMeta{
+				Name:  "Field" + strconv.Itoa(i),
+				Field: "field" + strconv.Itoa(i),
+				Type:  "string",
+			}
+		}
+
+		return options
+	}
+
+	buildPatterns := func(patterns ...string) []*regexp.Regexp {
+		res := make([]*regexp.Regexp, len(patterns))
+		for i, pattern := range patterns {
+			res[i] = regexp.MustCompile(pattern)
+		}
+
+		return res
+	}
+
+	b.Run("small", func(b *testing.B) {
+		options := buildOptions(32)
+		excludes := buildPatterns("^Field1$", "^Field2$", "^Field3$")
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkApplyExcludesSink = ApplyExcludes(options, excludes)
+		}
+	})
+
+	b.Run("medium", func(b *testing.B) {
+		options := buildOptions(256)
+		excludes := buildPatterns("^Field1[0-9]$", "^Field2[0-9]$", "^Field3[0-9]$", "^Field4[0-9]$")
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkApplyExcludesSink = ApplyExcludes(options, excludes)
+		}
+	})
+
+	b.Run("large", func(b *testing.B) {
+		options := buildOptions(1024)
+		excludes := buildPatterns("^Field1[0-9]{2}$", "^Field2[0-9]{2}$", "^Field3[0-9]{2}$", "^Field4[0-9]{2}$", "^Field5[0-9]{2}$")
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkApplyExcludesSink = ApplyExcludes(options, excludes)
 		}
 	})
 }
