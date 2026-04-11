@@ -23,8 +23,6 @@ var templates embed.FS
 
 var tmpl = template.Must(template.ParseFS(templates, "templates/options.go.tpl"))
 
-const keyValueSliceSize = 2
-
 // Render will render file and out it's content.
 func Render(opts Options) ([]byte, error) {
 	if err := opts.Validate(); err != nil {
@@ -111,6 +109,7 @@ func GetOptionSpec(
 	}
 
 	options := make([]OptionMeta, 0, len(fields))
+	packageStore := NewPackageStore(fset, workDir)
 
 	var warnings []string
 	for idx := range fields {
@@ -167,7 +166,7 @@ func GetOptionSpec(
 				continue
 			}
 
-			elementType, err := extractSliceElemType(workDir, fset, file, field.Type)
+			elementType, err := extractSliceElemType(file, field.Type, packageStore)
 			if err != nil {
 				if errors.Is(err, errIsNotSlice) && !optMeta.TagOption.Variadic {
 					options = append(options, optMeta)

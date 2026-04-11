@@ -34,30 +34,14 @@ const (
 
 var outOptionTypeNamePattern = regexp.MustCompile(`^[a-zA-Z]+$`)
 
+const defaultTagName = "default"
+
 func Run(opts Options) error {
 	if err := opts.Validate(); err != nil {
 		return fmt.Errorf("bad configuration: %w", err)
 	}
 
-	var tagName, varName, funcName string
-	switch opts.defaults.From {
-	case DefaultsFromNone:
-	case DefaultsFromTag:
-		tagName = opts.defaults.Param
-		if tagName == "" {
-			tagName = "default"
-		}
-	case DefaultsFromVar:
-		varName = opts.defaults.Param
-		if varName == "" {
-			varName = fmt.Sprintf("default%s", opts.structName)
-		}
-	case DefaultsFromFunc:
-		funcName = opts.defaults.Param
-		if funcName == "" {
-			funcName = fmt.Sprintf("getDefault%s", opts.structName)
-		}
-	}
+	tagName, varName, funcName := resolveDefaults(opts.defaults, opts.structName)
 
 	spec, err := generator.GetOptionSpec(
 		opts.inFilename,
@@ -70,11 +54,9 @@ func Run(opts Options) error {
 		return fmt.Errorf("cannot get options spec: %w", err)
 	}
 
-	outOptionTypeName := opts.outOptionTypeName
-	if outOptionTypeName == "" {
-		outOptionTypeName = "Opt" + opts.structName + "Setter"
-	} else if !outOptionTypeNamePattern.MatchString(outOptionTypeName) {
-		return fmt.Errorf("outOptionTypeName must be a valid type name, contains only letters a-z or A-Z")
+	outOptionTypeName, err := resolveOutOptionTypeName(opts.structName, opts.outOptionTypeName)
+	if err != nil {
+		return err
 	}
 
 	res, err := generator.Render(generator.NewOptions(
@@ -106,4 +88,39 @@ func Run(opts Options) error {
 	}
 
 	return nil
+}
+
+func resolveDefaults(defaults Defaults, structName string) (tagName, varName, funcName string) {
+	switch defaults.From {
+	case DefaultsFromNone:
+	case DefaultsFromTag:
+		tagName = defaults.Param
+		if tagName == "" {
+			tagName = defaultTagName
+		}
+	case DefaultsFromVar:
+		varName = defaults.Param
+		if varName == "" {
+			varName = fmt.Sprintf("default%s", structName)
+		}
+	case DefaultsFromFunc:
+		funcName = defaults.Param
+		if funcName == "" {
+			funcName = fmt.Sprintf("getDefault%s", structName)
+		}
+	}
+
+	return tagName, varName, funcName
+}
+
+func resolveOutOptionTypeName(structName, outOptionTypeName string) (string, error) {
+	if outOptionTypeName == "" {
+		return "Opt" + structName + "Setter", nil
+	}
+
+	if !outOptionTypeNamePattern.MatchString(outOptionTypeName) {
+		return "", fmt.Errorf("outOptionTypeName must be a valid type name, contains only letters a-z or A-Z")
+	}
+
+	return outOptionTypeName, nil
 }

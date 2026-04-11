@@ -17,6 +17,7 @@ tasks:
       - task: fmt
       - task: lint
       - task: tests
+      - task: bench
       - task: examples:update
 
   generate:
@@ -54,6 +55,21 @@ tasks:
     cmds:
       - echo "- Tests"
       - go test ./...
+
+  bench:
+    desc: Run benchmarks
+    cmds:
+      - echo "- Benchmarks"
+      - go test -run '^$' -bench . -benchmem ./internal/generator
+
+  fuzz:
+    desc: Run fuzz tests
+    cmds:
+      - echo "- Fuzz tests"
+      - go test -run '^$' -fuzz '^FuzzCheckDefaultValue$' -fuzztime=10s -timeout=30s ./internal/generator
+      - go test -run '^$' -fuzz '^FuzzNormalizeTypeName$' -fuzztime=10s -timeout=30s ./internal/generator
+      - go test -run '^$' -fuzz '^FuzzFormatComment$' -fuzztime=10s -timeout=30s ./internal/generator
+      - go test -run '^$' -fuzz '^FuzzFindImportPath$' -fuzztime=10s -timeout=30s ./internal/generator
 
   examples:update:
     desc: Update examples directory

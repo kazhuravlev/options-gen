@@ -646,6 +646,11 @@ func TestFormatComment_EdgeCases(t *testing.T) {
 			want:    "// Line 1\n// Line 2",
 		},
 		{
+			name:    "multiple lines with blank line",
+			comment: "Line 1\n\nLine 3",
+			want:    "// Line 1\n// \n// Line 3",
+		},
+		{
 			name:    "trailing newline",
 			comment: "Comment\n",
 			want:    "// Comment",
@@ -659,6 +664,16 @@ func TestFormatComment_EdgeCases(t *testing.T) {
 			name:    "only newlines",
 			comment: "\n\n",
 			want:    "// \n// ",
+		},
+		{
+			name:    "single newline",
+			comment: "\n",
+			want:    "// ",
+		},
+		{
+			name:    "single line with spaces",
+			comment: " comment with spaces ",
+			want:    "//  comment with spaces ",
 		},
 		{
 			name:    "special characters",

@@ -1,7 +1,6 @@
 package generator
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"go/ast"
@@ -11,7 +10,7 @@ import (
 	"os"
 	"path"
 	"reflect"
-	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -23,41 +22,41 @@ import (
 
 var errIsNotSlice = errors.New("it is not slice")
 
-// Named Capture Group support since Go 1.22.
-// When we remove support for Go versions below 1.22, we will be able to use code like
-//
-// var (
-//	importPackageMask             = regexp.MustCompile(`(?<pkgName>[\w_\-\.\d]+)(\/v\d+)?$`)
-//	importPackageMaskPkgNameIndex = importPackageMask.SubexpIndex("pkgName")
-// )
-
-var importPackageMask = regexp.MustCompile(`([\w_\-\.\d]+)(\/v\d+)?$`)
-
-const importPackageMaskPkgNameIndex = 1
-
 func formatComment(comment string) string {
 	if comment == "" {
 		return ""
 	}
 
-	buf := bytes.NewBuffer(nil)
+	if !strings.Contains(comment, "\n") {
+		return "// " + comment
+	}
 
-	lines := strings.Split(comment, "\n")
-	for i := range lines {
-		// Last line contains an empty string.
-		if lines[i] == "" && i == len(lines)-1 {
+	buf := make([]byte, 0, len(comment)+strings.Count(comment, "\n")*3)
+	lineStart := 0
+	lineIndex := 0
+
+	for i := 0; i <= len(comment); i++ {
+		if i < len(comment) && comment[i] != '\n' {
 			continue
 		}
 
-		if i != 0 {
-			buf.WriteString("\n")
+		// Last line contains an empty string.
+		if i == len(comment) && lineStart == i {
+			break
 		}
 
-		buf.WriteString("// ")
-		buf.WriteString(lines[i])
+		if lineIndex != 0 {
+			buf = append(buf, '\n')
+		}
+
+		buf = append(buf, '/', '/', ' ')
+		buf = append(buf, comment[lineStart:i]...)
+
+		lineIndex++
+		lineStart = i + 1
 	}
 
-	return buf.String()
+	return string(buf)
 }
 
 func findStructTypeParamsAndFields(fset *token.FileSet, filePath, typeName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll
@@ -306,10 +305,9 @@ func normalizeTypeName(typeName string) string {
 
 // extractSliceElemType will find the element type for given slice.
 func extractSliceElemType(
-	workDir string,
-	fset *token.FileSet,
 	curFile *ast.File,
 	expr ast.Expr,
+	packageStore *PackageStore,
 ) (string, error) {
 	switch expr := expr.(type) {
 	default:
@@ -329,7 +327,7 @@ func extractSliceElemType(
 			return "", errors.New("import path not found")
 		}
 
-		pkg, err := loadPkg(fset, importPath, workDir)
+		pkg, err := packageStore.Load(importPath)
 		if err != nil {
 			return "", errors.New("unable to load package")
 		}
@@ -356,7 +354,7 @@ func extractSliceElemType(
 
 		return "", errors.New("lookup type not found")
 	case *ast.ArrayType:
-		return types.ExprString(expr.Elt), nil
+		return renderExprString(expr.Elt), nil
 	case *ast.Ident:
 		if expr.Obj == nil {
 			return "", errIsNotSlice
@@ -366,9 +364,41 @@ func extractSliceElemType(
 		default:
 			return "", errors.New("unsupported ident expression")
 		case *ast.TypeSpec:
-			return extractSliceElemType(workDir, fset, curFile, expr.Type)
+			return extractSliceElemType(curFile, expr.Type, packageStore)
 		}
 	}
+}
+
+func renderExprString(expr ast.Expr) string {
+	switch casted := expr.(type) {
+	case *ast.Ident:
+		return casted.Name
+	case *ast.SelectorExpr:
+		if pkgIdent, ok := casted.X.(*ast.Ident); ok {
+			return pkgIdent.Name + "." + casted.Sel.Name
+		}
+	case *ast.StarExpr:
+		return "*" + renderExprString(casted.X)
+	case *ast.ArrayType:
+		return "[]" + renderExprString(casted.Elt)
+	case *ast.MapType:
+		return "map[" + renderExprString(casted.Key) + "]" + renderExprString(casted.Value)
+	case *ast.ChanType:
+		switch casted.Dir {
+		case ast.SEND:
+			return "chan<- " + renderExprString(casted.Value)
+		case ast.RECV:
+			return "<-chan " + renderExprString(casted.Value)
+		default:
+			return "chan " + renderExprString(casted.Value)
+		}
+	case *ast.InterfaceType:
+		if casted.Methods == nil || len(casted.Methods.List) == 0 {
+			return "interface{}"
+		}
+	}
+
+	return types.ExprString(expr)
 }
 
 // findImportPath return full package name and alias if presented.
@@ -379,49 +409,52 @@ func findImportPath(imports []*ast.ImportSpec, pkgName string) (string, string) 
 			continue
 		}
 
-		// If the import has an alias, check that
-		//nolint:nestif // too many checks
 		if imp.Name != nil {
-			aliasName := imp.Name.Name
-			if strings.HasPrefix(aliasName, `"`) {
-				if a, err := strconv.Unquote(imp.Name.Name); err == nil {
-					aliasName = a
-				}
-			}
-
-			if aliasName == pkgName {
-				return importPath, aliasName
-			}
-		} else {
-			// Otherwise, check if the base package name matches
-			match := importPackageMask.FindStringSubmatch(importPath)
-			if len(match) > 0 && match[importPackageMaskPkgNameIndex] == pkgName {
+			if imp.Name.Name == pkgName {
 				return importPath, pkgName
 			}
+
+			continue
+		}
+
+		if importPathBase(importPath) == pkgName {
+			return importPath, pkgName
 		}
 	}
 
 	return "", ""
 }
 
-// loadPkg loads a package by full import path.
-func loadPkg(fset *token.FileSet, pkgName, dirPath string) (*packages.Package, error) {
-	cfg := &packages.Config{ //nolint:exhaustruct
-		Mode: packages.NeedTypes | packages.NeedDeps,
-		Dir:  dirPath,
-		Fset: fset,
+func importPathBase(importPath string) string {
+	slashIdx := strings.LastIndexByte(importPath, '/')
+	base := importPath
+	if slashIdx >= 0 {
+		base = importPath[slashIdx+1:]
 	}
 
-	pkgs, err := packages.Load(cfg, pkgName)
-	if err != nil {
-		return nil, fmt.Errorf("loading package: %w", err)
+	// Module major version suffixes like /v2 should map to the preceding path element.
+	if len(base) > 1 && base[0] == 'v' {
+		isVersion := true
+		for i := 1; i < len(base); i++ {
+			if base[i] < '0' || base[i] > '9' {
+				isVersion = false
+
+				break
+			}
+		}
+
+		if isVersion && slashIdx > 0 {
+			prev := importPath[:slashIdx]
+			prevSlashIdx := strings.LastIndexByte(prev, '/')
+			if prevSlashIdx >= 0 {
+				return prev[prevSlashIdx+1:]
+			}
+
+			return prev
+		}
 	}
 
-	if len(pkgs) == 0 {
-		return nil, fmt.Errorf("no packages found")
-	}
-
-	return pkgs[0], nil
+	return base
 }
 
 func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, []string) {
@@ -436,14 +469,17 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 
 	var warnings []string
 	optionTag := tagValue.Get("option")
-	for _, opt := range strings.Split(optionTag, ",") {
-		optParts := strings.SplitN(opt, "=", keyValueSliceSize)
-		var optName, optValue string
-		optName = optParts[0]
-
-		if len(optParts) > 1 {
-			optValue = optParts[1]
+	for len(optionTag) > 0 {
+		nextComma := strings.IndexByte(optionTag, ',')
+		opt := optionTag
+		if nextComma >= 0 {
+			opt = optionTag[:nextComma]
+			optionTag = optionTag[nextComma+1:]
+		} else {
+			optionTag = ""
 		}
+
+		optName, optValue, _ := strings.Cut(opt, "=")
 
 		switch optName {
 		case "mandatory":
@@ -451,19 +487,13 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 
 		case "required":
 			// NOTE: remove the tag.
-			warnings = append(warnings, fmt.Sprintf(
-				"Deprecated: use `option:\"mandatory\"` "+
-					"instead for field `%s` to force the passing "+
-					"option in the constructor argument\n", fieldName))
+			warnings = append(warnings, deprecatedRequiredWarning(fieldName))
 
 			tagOpt.IsRequired = true
 
 		case "not-empty":
 			// NOTE: remove the tag.
-			warnings = append(warnings, fmt.Sprintf(
-				"Deprecated: use "+
-					"github.com/go-playground/validator `validate` tag to check "+
-					"the field `%s` content\n", fieldName))
+			warnings = append(warnings, deprecatedNotEmptyWarning(fieldName))
 
 			if !strings.Contains(tagOpt.GoValidator, "required") {
 				if tagOpt.GoValidator == "" {
@@ -476,8 +506,7 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 		case "variadic":
 			val, err := strconv.ParseBool(optValue)
 			if err != nil {
-				warnings = append(warnings, fmt.Sprintf("Error: parse variadic for the field %s failed: %s\n",
-					fieldName, err.Error()))
+				warnings = append(warnings, parseVariadicWarning(fieldName, err))
 			}
 
 			tagOpt.Variadic = val
@@ -491,43 +520,71 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 	return tagOpt, warnings
 }
 
+func deprecatedRequiredWarning(fieldName string) string {
+	return "Deprecated: use `option:\"mandatory\"` instead for field `" + fieldName +
+		"` to force the passing option in the constructor argument\n"
+}
+
+func deprecatedNotEmptyWarning(fieldName string) string {
+	return "Deprecated: use github.com/go-playground/validator `validate` tag to check the field `" +
+		fieldName + "` content\n"
+}
+
+func parseVariadicWarning(fieldName string, err error) string {
+	return "Error: parse variadic for the field " + fieldName + " failed: " + err.Error() + "\n"
+}
+
 func typeParamsStr(params []*ast.Field) (string, string, error) {
 	if len(params) == 0 {
 		return "", "", nil
 	}
 
-	paramNames := make([]string, 0, len(params))
-	paramNamesWithTypes := make([]string, len(params))
-	for i, param := range params {
+	var namesBuilder strings.Builder
+	var specBuilder strings.Builder
+	namesBuilder.WriteByte('[')
+	specBuilder.WriteByte('[')
+
+	firstName := true
+	firstField := true
+
+	for _, param := range params {
 		if len(param.Names) == 0 {
 			return "", "", fmt.Errorf("unnamed param %s", param.Type)
 		}
 
-		names := make([]string, len(param.Names))
-		for i := range param.Names {
-			names[i] = param.Names[i].Name
+		if !firstField {
+			specBuilder.WriteString(", ")
 		}
 
-		paramNames = append(paramNames, names...)
+		for idx, name := range param.Names {
+			if !firstName {
+				namesBuilder.WriteString(", ")
+			}
+			if idx != 0 {
+				specBuilder.WriteString(", ")
+			}
 
-		typeName := types.ExprString(param.Type)
-		paramNamesWithTypes[i] = fmt.Sprintf("%s %s", strings.Join(names, ", "), typeName)
+			namesBuilder.WriteString(name.Name)
+			specBuilder.WriteString(name.Name)
+
+			firstName = false
+		}
+
+		specBuilder.WriteByte(' ')
+		specBuilder.WriteString(types.ExprString(param.Type))
+		firstField = false
 	}
 
-	paramNamesStr := fmt.Sprintf("[%s]", strings.Join(paramNames, ", "))
-	paramExprStr := fmt.Sprintf("[%s]", strings.Join(paramNamesWithTypes, ", "))
+	namesBuilder.WriteByte(']')
+	specBuilder.WriteByte(']')
 
-	return paramExprStr, paramNamesStr, nil
+	return specBuilder.String(), namesBuilder.String(), nil
 }
 
 func deleteByIndex[T any](input []T, index int) []T {
-	if index < 0 {
+	if index < 0 || index >= len(input) {
 		return input
 	}
 
-	if len(input) <= index {
-		return input
-	}
-
-	return append(input[:index], input[index+1:]...)
+	return slices.Delete(input, index, index+1)
 }

@@ -21,7 +21,7 @@ jobs:
           install-mode: 'goinstall'
 
   build:
-    name: Build on golang ${{ matrix.go_version }} and ${{ matrix.os }}
+    name: Test on golang ${{ matrix.go_version }} and ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -50,10 +50,39 @@ jobs:
         run: |
           go build -v -o /dev/null ./cmd/options-gen
 
-      - name: Test
+      - name: Run tests
         run: go test -v -race -coverprofile coverage.txt -covermode atomic ./...
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  bench-and-fuzz:
+    name: Bench and fuzz on golang 1.26
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+
+      - name: Get dependencies
+        run: go mod download
+
+      - name: Run benchmarks
+        run: go test -run '^$' -bench . -benchmem ./internal/generator
+
+      - name: Fuzz check default values
+        run: go test -run '^$' -fuzz '^FuzzCheckDefaultValue$' -fuzztime=10s -timeout=30s ./internal/generator
+
+      - name: Fuzz normalize type name
+        run: go test -run '^$' -fuzz '^FuzzNormalizeTypeName$' -fuzztime=10s -timeout=30s ./internal/generator
+
+      - name: Fuzz format comment
+        run: go test -run '^$' -fuzz '^FuzzFormatComment$' -fuzztime=10s -timeout=30s ./internal/generator
+
+      - name: Fuzz find import path
+        run: go test -run '^$' -fuzz '^FuzzFindImportPath$' -fuzztime=10s -timeout=30s ./internal/generator
