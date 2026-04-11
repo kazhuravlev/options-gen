@@ -454,19 +454,13 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 
 		case "required":
 			// NOTE: remove the tag.
-			warnings = append(warnings, fmt.Sprintf(
-				"Deprecated: use `option:\"mandatory\"` "+
-					"instead for field `%s` to force the passing "+
-					"option in the constructor argument\n", fieldName))
+			warnings = append(warnings, deprecatedRequiredWarning(fieldName))
 
 			tagOpt.IsRequired = true
 
 		case "not-empty":
 			// NOTE: remove the tag.
-			warnings = append(warnings, fmt.Sprintf(
-				"Deprecated: use "+
-					"github.com/go-playground/validator `validate` tag to check "+
-					"the field `%s` content\n", fieldName))
+			warnings = append(warnings, deprecatedNotEmptyWarning(fieldName))
 
 			if !strings.Contains(tagOpt.GoValidator, "required") {
 				if tagOpt.GoValidator == "" {
@@ -479,8 +473,7 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 		case "variadic":
 			val, err := strconv.ParseBool(optValue)
 			if err != nil {
-				warnings = append(warnings, fmt.Sprintf("Error: parse variadic for the field %s failed: %s\n",
-					fieldName, err.Error()))
+				warnings = append(warnings, parseVariadicWarning(fieldName, err))
 			}
 
 			tagOpt.Variadic = val
@@ -492,6 +485,20 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 	}
 
 	return tagOpt, warnings
+}
+
+func deprecatedRequiredWarning(fieldName string) string {
+	return "Deprecated: use `option:\"mandatory\"` instead for field `" + fieldName +
+		"` to force the passing option in the constructor argument\n"
+}
+
+func deprecatedNotEmptyWarning(fieldName string) string {
+	return "Deprecated: use github.com/go-playground/validator `validate` tag to check the field `" +
+		fieldName + "` content\n"
+}
+
+func parseVariadicWarning(fieldName string, err error) string {
+	return "Error: parse variadic for the field " + fieldName + " failed: " + err.Error() + "\n"
 }
 
 func typeParamsStr(params []*ast.Field) (string, string, error) {
