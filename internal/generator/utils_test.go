@@ -134,6 +134,84 @@ func Test_normalizeTypeName(t *testing.T) {
 	}
 }
 
+func Test_typeParamsStr(t *testing.T) {
+	testCases := []struct {
+		name       string
+		params     []*ast.Field
+		wantSpec   string
+		wantParams string
+		wantErr    string
+	}{
+		{
+			name:       "empty",
+			params:     nil,
+			wantSpec:   "",
+			wantParams: "",
+		},
+		{
+			name: "single_param",
+			params: []*ast.Field{
+				{
+					Names: []*ast.Ident{{Name: "T"}},
+					Type:  &ast.Ident{Name: "any"},
+				},
+			},
+			wantSpec:   "[T any]",
+			wantParams: "[T]",
+		},
+		{
+			name: "multiple_params",
+			params: []*ast.Field{
+				{
+					Names: []*ast.Ident{{Name: "T"}},
+					Type:  &ast.Ident{Name: "any"},
+				},
+				{
+					Names: []*ast.Ident{{Name: "K"}},
+					Type:  &ast.Ident{Name: "comparable"},
+				},
+			},
+			wantSpec:   "[T any, K comparable]",
+			wantParams: "[T, K]",
+		},
+		{
+			name: "multiple_names_in_one_field",
+			params: []*ast.Field{
+				{
+					Names: []*ast.Ident{{Name: "T"}, {Name: "K"}},
+					Type:  &ast.Ident{Name: "comparable"},
+				},
+			},
+			wantSpec:   "[T, K comparable]",
+			wantParams: "[T, K]",
+		},
+		{
+			name: "unnamed_param",
+			params: []*ast.Field{
+				{
+					Type: &ast.Ident{Name: "any"},
+				},
+			},
+			wantErr: "unnamed param any",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			gotSpec, gotParams, err := typeParamsStr(tc.params)
+			if tc.wantErr != "" {
+				require.EqualError(t, err, tc.wantErr)
+
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Equal(t, tc.wantSpec, gotSpec)
+			assert.Equal(t, tc.wantParams, gotParams)
+		})
+	}
+}
+
 func BenchmarkFormatComment(b *testing.B) {
 	b.Run("short", func(b *testing.B) {
 		comment := "short comment"
