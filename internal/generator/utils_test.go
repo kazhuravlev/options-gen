@@ -18,6 +18,8 @@ import (
 
 var benchmarkFormatCommentSink string
 var benchmarkApplyExcludesSink []OptionMeta
+var benchmarkFindImportPathPathSink string
+var benchmarkFindImportPathAliasSink string
 
 func Test_checkDefaultValue_Negative(t *testing.T) {
 	cases := []struct {
@@ -221,6 +223,161 @@ func BenchmarkApplyExcludes(b *testing.B) {
 		b.ReportAllocs()
 		for b.Loop() {
 			benchmarkApplyExcludesSink = ApplyExcludes(options, excludes)
+		}
+	})
+}
+
+func Test_findImportPath(t *testing.T) {
+	imports := []*ast.ImportSpec{
+		{
+			Path: &ast.BasicLit{Value: `"fmt"`},
+		},
+		{
+			Name: &ast.Ident{Name: "aliaspkg"},
+			Path: &ast.BasicLit{Value: `"github.com/example/project/pkg"`},
+		},
+		{
+			Path: &ast.BasicLit{Value: `"github.com/org/lib/v2"`},
+		},
+		{
+			Path: &ast.BasicLit{Value: `"github.com/company/service/internal/transport/httpapi"`},
+		},
+		{
+			Path: &ast.BasicLit{Value: `broken`},
+		},
+	}
+
+	testCases := []struct {
+		name      string
+		pkgName   string
+		wantPath  string
+		wantAlias string
+	}{
+		{
+			name:      "standard_library_package",
+			pkgName:   "fmt",
+			wantPath:  "fmt",
+			wantAlias: "fmt",
+		},
+		{
+			name:      "aliased_import",
+			pkgName:   "aliaspkg",
+			wantPath:  "github.com/example/project/pkg",
+			wantAlias: "aliaspkg",
+		},
+		{
+			name:      "versioned_import_uses_previous_path_segment",
+			pkgName:   "lib",
+			wantPath:  "github.com/org/lib/v2",
+			wantAlias: "lib",
+		},
+		{
+			name:      "late_match",
+			pkgName:   "httpapi",
+			wantPath:  "github.com/company/service/internal/transport/httpapi",
+			wantAlias: "httpapi",
+		},
+		{
+			name:      "not_found",
+			pkgName:   "missingpkg",
+			wantPath:  "",
+			wantAlias: "",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			gotPath, gotAlias := findImportPath(imports, tc.pkgName)
+			assert.Equal(t, tc.wantPath, gotPath)
+			assert.Equal(t, tc.wantAlias, gotAlias)
+		})
+	}
+}
+
+func Test_importPathBase(t *testing.T) {
+	testCases := []struct {
+		name       string
+		importPath string
+		want       string
+	}{
+		{
+			name:       "single_segment",
+			importPath: "fmt",
+			want:       "fmt",
+		},
+		{
+			name:       "multi_segment",
+			importPath: "github.com/company/project/pkg",
+			want:       "pkg",
+		},
+		{
+			name:       "version_suffix",
+			importPath: "github.com/org/lib/v2",
+			want:       "lib",
+		},
+		{
+			name:       "non_version_v_prefix",
+			importPath: "github.com/org/value",
+			want:       "value",
+		},
+		{
+			name:       "root_version_segment",
+			importPath: "v2",
+			want:       "v2",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.want, importPathBase(tc.importPath))
+		})
+	}
+}
+
+func BenchmarkFindImportPath(b *testing.B) {
+	imports := []*ast.ImportSpec{
+		{
+			Path: &ast.BasicLit{Value: `"fmt"`},
+		},
+		{
+			Path: &ast.BasicLit{Value: `"strings"`},
+		},
+		{
+			Name: &ast.Ident{Name: "aliaspkg"},
+			Path: &ast.BasicLit{Value: `"github.com/example/project/pkg"`},
+		},
+		{
+			Path: &ast.BasicLit{Value: `"github.com/org/lib/v2"`},
+		},
+		{
+			Path: &ast.BasicLit{Value: `"github.com/company/service/internal/domain"`},
+		},
+		{
+			Path: &ast.BasicLit{Value: `"github.com/company/service/internal/repository"`},
+		},
+		{
+			Path: &ast.BasicLit{Value: `"github.com/company/service/internal/transport/httpapi"`},
+		},
+	}
+
+	b.Run("base_package_match_late", func(b *testing.B) {
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkFindImportPathPathSink, benchmarkFindImportPathAliasSink = findImportPath(imports, "httpapi")
+		}
+	})
+
+	b.Run("alias_match", func(b *testing.B) {
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkFindImportPathPathSink, benchmarkFindImportPathAliasSink = findImportPath(imports, "aliaspkg")
+		}
+	})
+
+	b.Run("not_found", func(b *testing.B) {
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkFindImportPathPathSink, benchmarkFindImportPathAliasSink = findImportPath(imports, "missingpkg")
 		}
 	})
 }
