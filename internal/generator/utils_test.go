@@ -16,16 +16,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var benchmarkFormatCommentSink string
-var benchmarkApplyExcludesSink []OptionMeta
-var benchmarkFindImportPathPathSink string
-var benchmarkFindImportPathAliasSink string
-var benchmarkTypeParamsStrSpecSink string
-var benchmarkTypeParamsStrNamesSink string
-var benchmarkParseTagOptionSink TagOption
-var benchmarkParseTagWarningsSink []string
-var benchmarkImportPathBaseSink string
-var benchmarkExtractSliceElemTypeSink string
+var (
+	benchmarkFormatCommentSink        string
+	benchmarkApplyExcludesSink        []OptionMeta
+	benchmarkFindImportPathPathSink   string
+	benchmarkFindImportPathAliasSink  string
+	benchmarkTypeParamsStrSpecSink    string
+	benchmarkTypeParamsStrNamesSink   string
+	benchmarkParseTagOptionSink       TagOption
+	benchmarkParseTagWarningsSink     []string
+	benchmarkImportPathBaseSink       string
+	benchmarkExtractSliceElemTypeSink string
+)
 
 func Test_checkDefaultValue_Negative(t *testing.T) {
 	cases := []struct {
