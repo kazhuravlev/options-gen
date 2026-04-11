@@ -10,7 +10,6 @@ import (
 	"os"
 	"path"
 	"reflect"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -21,18 +20,6 @@ import (
 )
 
 var errIsNotSlice = errors.New("it is not slice")
-
-// Named Capture Group support since Go 1.22.
-// When we remove support for Go versions below 1.22, we will be able to use code like
-//
-// var (
-//	importPackageMask             = regexp.MustCompile(`(?<pkgName>[\w_\-\.\d]+)(\/v\d+)?$`)
-//	importPackageMaskPkgNameIndex = importPackageMask.SubexpIndex("pkgName")
-// )
-
-var importPackageMask = regexp.MustCompile(`([\w_\-\.\d]+)(\/v\d+)?$`)
-
-const importPackageMaskPkgNameIndex = 1
 
 func formatComment(comment string) string {
 	if comment == "" {
@@ -391,29 +378,52 @@ func findImportPath(imports []*ast.ImportSpec, pkgName string) (string, string) 
 			continue
 		}
 
-		// If the import has an alias, check that
-		//nolint:nestif // too many checks
 		if imp.Name != nil {
-			aliasName := imp.Name.Name
-			if strings.HasPrefix(aliasName, `"`) {
-				if a, err := strconv.Unquote(imp.Name.Name); err == nil {
-					aliasName = a
-				}
-			}
-
-			if aliasName == pkgName {
-				return importPath, aliasName
-			}
-		} else {
-			// Otherwise, check if the base package name matches
-			match := importPackageMask.FindStringSubmatch(importPath)
-			if len(match) > 0 && match[importPackageMaskPkgNameIndex] == pkgName {
+			if imp.Name.Name == pkgName {
 				return importPath, pkgName
 			}
+
+			continue
+		}
+
+		if importPathBase(importPath) == pkgName {
+			return importPath, pkgName
 		}
 	}
 
 	return "", ""
+}
+
+func importPathBase(importPath string) string {
+	slashIdx := strings.LastIndexByte(importPath, '/')
+	base := importPath
+	if slashIdx >= 0 {
+		base = importPath[slashIdx+1:]
+	}
+
+	// Module major version suffixes like /v2 should map to the preceding path element.
+	if len(base) > 1 && base[0] == 'v' {
+		isVersion := true
+		for i := 1; i < len(base); i++ {
+			if base[i] < '0' || base[i] > '9' {
+				isVersion = false
+
+				break
+			}
+		}
+
+		if isVersion && slashIdx > 0 {
+			prev := importPath[:slashIdx]
+			prevSlashIdx := strings.LastIndexByte(prev, '/')
+			if prevSlashIdx >= 0 {
+				return prev[prevSlashIdx+1:]
+			}
+
+			return prev
+		}
+	}
+
+	return base
 }
 
 func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, []string) {
