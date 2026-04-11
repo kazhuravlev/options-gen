@@ -498,28 +498,46 @@ func typeParamsStr(params []*ast.Field) (string, string, error) {
 		return "", "", nil
 	}
 
-	paramNames := make([]string, 0, len(params))
-	paramNamesWithTypes := make([]string, len(params))
-	for i, param := range params {
+	var namesBuilder strings.Builder
+	var specBuilder strings.Builder
+	namesBuilder.WriteByte('[')
+	specBuilder.WriteByte('[')
+
+	firstName := true
+	firstField := true
+
+	for _, param := range params {
 		if len(param.Names) == 0 {
 			return "", "", fmt.Errorf("unnamed param %s", param.Type)
 		}
 
-		names := make([]string, len(param.Names))
-		for i := range param.Names {
-			names[i] = param.Names[i].Name
+		if !firstField {
+			specBuilder.WriteString(", ")
 		}
 
-		paramNames = append(paramNames, names...)
+		for idx, name := range param.Names {
+			if !firstName {
+				namesBuilder.WriteString(", ")
+			}
+			if idx != 0 {
+				specBuilder.WriteString(", ")
+			}
 
-		typeName := types.ExprString(param.Type)
-		paramNamesWithTypes[i] = fmt.Sprintf("%s %s", strings.Join(names, ", "), typeName)
+			namesBuilder.WriteString(name.Name)
+			specBuilder.WriteString(name.Name)
+
+			firstName = false
+		}
+
+		specBuilder.WriteByte(' ')
+		specBuilder.WriteString(types.ExprString(param.Type))
+		firstField = false
 	}
 
-	paramNamesStr := fmt.Sprintf("[%s]", strings.Join(paramNames, ", "))
-	paramExprStr := fmt.Sprintf("[%s]", strings.Join(paramNamesWithTypes, ", "))
+	namesBuilder.WriteByte(']')
+	specBuilder.WriteByte(']')
 
-	return paramExprStr, paramNamesStr, nil
+	return specBuilder.String(), namesBuilder.String(), nil
 }
 
 func deleteByIndex[T any](input []T, index int) []T {
