@@ -24,6 +24,7 @@ var benchmarkTypeParamsStrSpecSink string
 var benchmarkTypeParamsStrNamesSink string
 var benchmarkParseTagOptionSink TagOption
 var benchmarkParseTagWarningsSink []string
+var benchmarkImportPathBaseSink string
 
 func Test_checkDefaultValue_Negative(t *testing.T) {
 	cases := []struct {
@@ -648,6 +649,44 @@ func BenchmarkParseTag(b *testing.B) {
 		b.ReportAllocs()
 		for b.Loop() {
 			benchmarkParseTagOptionSink, benchmarkParseTagWarningsSink = parseTag(nil, "fieldName", "default")
+		}
+	})
+}
+
+func BenchmarkImportPathBase(b *testing.B) {
+	b.Run("single_segment", func(b *testing.B) {
+		importPath := "fmt"
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkImportPathBaseSink = importPathBase(importPath)
+		}
+	})
+
+	b.Run("deep_path", func(b *testing.B) {
+		importPath := "github.com/company/service/internal/transport/httpapi"
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkImportPathBaseSink = importPathBase(importPath)
+		}
+	})
+
+	b.Run("version_suffix", func(b *testing.B) {
+		importPath := "github.com/org/lib/v2"
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkImportPathBaseSink = importPathBase(importPath)
+		}
+	})
+
+	b.Run("non_version_v_prefix", func(b *testing.B) {
+		importPath := "github.com/org/value"
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkImportPathBaseSink = importPathBase(importPath)
 		}
 	})
 }
