@@ -204,18 +204,18 @@ func Test_typeParamsStr(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			gotSpec, gotParams, err := typeParamsStr(tc.params)
-			if tc.wantErr != "" {
-				require.EqualError(t, err, tc.wantErr)
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			gotSpec, gotParams, err := typeParamsStr(testCase.params)
+			if testCase.wantErr != "" {
+				require.EqualError(t, err, testCase.wantErr)
 
 				return
 			}
 
 			require.NoError(t, err)
-			assert.Equal(t, tc.wantSpec, gotSpec)
-			assert.Equal(t, tc.wantParams, gotParams)
+			assert.Equal(t, testCase.wantSpec, gotSpec)
+			assert.Equal(t, testCase.wantParams, gotParams)
 		})
 	}
 }
@@ -288,7 +288,8 @@ func Test_parseTag(t *testing.T) {
 				Skip:          false,
 			},
 			wantWarnings: []string{
-				"Deprecated: use `option:\"mandatory\"` instead for field `fieldName` to force the passing option in the constructor argument\n",
+				"Deprecated: use `option:\"mandatory\"` instead for field `fieldName` " +
+					"to force the passing option in the constructor argument\n",
 				"Deprecated: use github.com/go-playground/validator `validate` tag to check the field `fieldName` content\n",
 			},
 		},
@@ -404,7 +405,13 @@ func BenchmarkApplyExcludes(b *testing.B) {
 
 	b.Run("large", func(b *testing.B) {
 		options := buildOptions(1024)
-		excludes := buildPatterns("^Field1[0-9]{2}$", "^Field2[0-9]{2}$", "^Field3[0-9]{2}$", "^Field4[0-9]{2}$", "^Field5[0-9]{2}$")
+		excludes := buildPatterns(
+			"^Field1[0-9]{2}$",
+			"^Field2[0-9]{2}$",
+			"^Field3[0-9]{2}$",
+			"^Field4[0-9]{2}$",
+			"^Field5[0-9]{2}$",
+		)
 
 		b.ReportAllocs()
 		for b.Loop() {
@@ -709,7 +716,14 @@ type User struct {
 `
 	require.NoError(b, os.WriteFile(somepkgDir+"/somepkg.go", []byte(somepkgContent), ctype.DefaultPermission))
 	require.NoError(b, os.WriteFile(tempDir+"/go.mod", []byte("module xxx\ngo 1.18"), ctype.DefaultPermission))
-	require.NoError(b, os.WriteFile(tempDir+"/main.go", []byte("package main\n\nimport \"./somepkg\"\n"), ctype.DefaultPermission))
+	require.NoError(
+		b,
+		os.WriteFile(
+			tempDir+"/main.go",
+			[]byte("package main\n\nimport \"./somepkg\"\n"),
+			ctype.DefaultPermission,
+		),
+	)
 
 	fset := token.NewFileSet()
 	mainFile, err := parser.ParseFile(fset, tempDir+"/main.go", nil, parser.ParseComments)
@@ -888,7 +902,11 @@ import "./somepkg"
 	}
 
 	t.Run("not_a_slice", func(t *testing.T) {
-		res, err := extractSliceElemType(mainFile, &ast.Ident{Name: "string"}, NewPackageStore(fset, tempDir)) //nolint:exhaustruct
+		res, err := extractSliceElemType(
+			mainFile,
+			&ast.Ident{Name: "string"}, //nolint:exhaustruct
+			NewPackageStore(fset, tempDir),
+		)
 		require.Error(t, err)
 		require.Equal(t, "", res)
 	})
