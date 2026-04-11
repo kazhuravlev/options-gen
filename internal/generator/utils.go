@@ -354,7 +354,7 @@ func extractSliceElemType(
 
 		return "", errors.New("lookup type not found")
 	case *ast.ArrayType:
-		return types.ExprString(expr.Elt), nil
+		return renderExprString(expr.Elt), nil
 	case *ast.Ident:
 		if expr.Obj == nil {
 			return "", errIsNotSlice
@@ -367,6 +367,38 @@ func extractSliceElemType(
 			return extractSliceElemType(curFile, expr.Type, packageStore)
 		}
 	}
+}
+
+func renderExprString(expr ast.Expr) string {
+	switch casted := expr.(type) {
+	case *ast.Ident:
+		return casted.Name
+	case *ast.SelectorExpr:
+		if pkgIdent, ok := casted.X.(*ast.Ident); ok {
+			return pkgIdent.Name + "." + casted.Sel.Name
+		}
+	case *ast.StarExpr:
+		return "*" + renderExprString(casted.X)
+	case *ast.ArrayType:
+		return "[]" + renderExprString(casted.Elt)
+	case *ast.MapType:
+		return "map[" + renderExprString(casted.Key) + "]" + renderExprString(casted.Value)
+	case *ast.ChanType:
+		switch casted.Dir {
+		case ast.SEND:
+			return "chan<- " + renderExprString(casted.Value)
+		case ast.RECV:
+			return "<-chan " + renderExprString(casted.Value)
+		default:
+			return "chan " + renderExprString(casted.Value)
+		}
+	case *ast.InterfaceType:
+		if casted.Methods == nil || len(casted.Methods.List) == 0 {
+			return "interface{}"
+		}
+	}
+
+	return types.ExprString(expr)
 }
 
 // findImportPath return full package name and alias if presented.
