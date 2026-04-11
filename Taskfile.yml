@@ -17,6 +17,7 @@ tasks:
       - task: fmt
       - task: lint
       - task: tests
+      - task: bench
       - task: examples:update
 
   generate:

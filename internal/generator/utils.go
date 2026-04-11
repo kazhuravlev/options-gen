@@ -1,7 +1,6 @@
 package generator
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"go/ast"
@@ -40,24 +39,36 @@ func formatComment(comment string) string {
 		return ""
 	}
 
-	buf := bytes.NewBuffer(nil)
+	if !strings.Contains(comment, "\n") {
+		return "// " + comment
+	}
 
-	lines := strings.Split(comment, "\n")
-	for i := range lines {
-		// Last line contains an empty string.
-		if lines[i] == "" && i == len(lines)-1 {
+	buf := make([]byte, 0, len(comment)+strings.Count(comment, "\n")*3)
+	lineStart := 0
+	lineIndex := 0
+
+	for i := 0; i <= len(comment); i++ {
+		if i < len(comment) && comment[i] != '\n' {
 			continue
 		}
 
-		if i != 0 {
-			buf.WriteString("\n")
+		// Last line contains an empty string.
+		if i == len(comment) && lineStart == i {
+			break
 		}
 
-		buf.WriteString("// ")
-		buf.WriteString(lines[i])
+		if lineIndex != 0 {
+			buf = append(buf, '\n')
+		}
+
+		buf = append(buf, '/', '/', ' ')
+		buf = append(buf, comment[lineStart:i]...)
+
+		lineIndex++
+		lineStart = i + 1
 	}
 
-	return buf.String()
+	return string(buf)
 }
 
 func findStructTypeParamsAndFields(fset *token.FileSet, filePath, typeName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll
