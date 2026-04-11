@@ -310,6 +310,7 @@ func extractSliceElemType(
 	fset *token.FileSet,
 	curFile *ast.File,
 	expr ast.Expr,
+	loadedPkgs map[string]*packages.Package,
 ) (string, error) {
 	switch expr := expr.(type) {
 	default:
@@ -329,7 +330,7 @@ func extractSliceElemType(
 			return "", errors.New("import path not found")
 		}
 
-		pkg, err := loadPkg(fset, importPath, workDir)
+		pkg, err := loadPkg(fset, importPath, workDir, loadedPkgs)
 		if err != nil {
 			return "", errors.New("unable to load package")
 		}
@@ -366,7 +367,7 @@ func extractSliceElemType(
 		default:
 			return "", errors.New("unsupported ident expression")
 		case *ast.TypeSpec:
-			return extractSliceElemType(workDir, fset, curFile, expr.Type)
+			return extractSliceElemType(workDir, fset, curFile, expr.Type, loadedPkgs)
 		}
 	}
 }
@@ -405,7 +406,15 @@ func findImportPath(imports []*ast.ImportSpec, pkgName string) (string, string) 
 }
 
 // loadPkg loads a package by full import path.
-func loadPkg(fset *token.FileSet, pkgName, dirPath string) (*packages.Package, error) {
+func loadPkg(
+	fset *token.FileSet,
+	pkgName, dirPath string,
+	loadedPkgs map[string]*packages.Package,
+) (*packages.Package, error) {
+	if pkg, ok := loadedPkgs[pkgName]; ok {
+		return pkg, nil
+	}
+
 	cfg := &packages.Config{ //nolint:exhaustruct
 		Mode: packages.NeedTypes | packages.NeedDeps,
 		Dir:  dirPath,
@@ -420,6 +429,8 @@ func loadPkg(fset *token.FileSet, pkgName, dirPath string) (*packages.Package, e
 	if len(pkgs) == 0 {
 		return nil, fmt.Errorf("no packages found")
 	}
+
+	loadedPkgs[pkgName] = pkgs[0]
 
 	return pkgs[0], nil
 }

@@ -15,6 +15,7 @@ import (
 
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
+	"golang.org/x/tools/go/packages"
 	"golang.org/x/tools/imports"
 )
 
@@ -111,6 +112,7 @@ func GetOptionSpec(
 	}
 
 	options := make([]OptionMeta, 0, len(fields))
+	loadedPkgs := make(map[string]*packages.Package)
 
 	var warnings []string
 	for idx := range fields {
@@ -167,7 +169,7 @@ func GetOptionSpec(
 				continue
 			}
 
-			elementType, err := extractSliceElemType(workDir, fset, file, field.Type)
+			elementType, err := extractSliceElemType(workDir, fset, file, field.Type, loadedPkgs)
 			if err != nil {
 				if errors.Is(err, errIsNotSlice) && !optMeta.TagOption.Variadic {
 					options = append(options, optMeta)
