@@ -439,14 +439,17 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 
 	var warnings []string
 	optionTag := tagValue.Get("option")
-	for _, opt := range strings.Split(optionTag, ",") {
-		optParts := strings.SplitN(opt, "=", keyValueSliceSize)
-		var optName, optValue string
-		optName = optParts[0]
-
-		if len(optParts) > 1 {
-			optValue = optParts[1]
+	for len(optionTag) > 0 {
+		nextComma := strings.IndexByte(optionTag, ',')
+		opt := optionTag
+		if nextComma >= 0 {
+			opt = optionTag[:nextComma]
+			optionTag = optionTag[nextComma+1:]
+		} else {
+			optionTag = ""
 		}
+
+		optName, optValue, _ := strings.Cut(opt, "=")
 
 		switch optName {
 		case "mandatory":
