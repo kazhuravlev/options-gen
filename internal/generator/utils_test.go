@@ -20,6 +20,8 @@ var benchmarkFormatCommentSink string
 var benchmarkApplyExcludesSink []OptionMeta
 var benchmarkFindImportPathPathSink string
 var benchmarkFindImportPathAliasSink string
+var benchmarkTypeParamsStrSpecSink string
+var benchmarkTypeParamsStrNamesSink string
 
 func Test_checkDefaultValue_Negative(t *testing.T) {
 	cases := []struct {
@@ -456,6 +458,58 @@ func BenchmarkFindImportPath(b *testing.B) {
 		b.ReportAllocs()
 		for b.Loop() {
 			benchmarkFindImportPathPathSink, benchmarkFindImportPathAliasSink = findImportPath(imports, "missingpkg")
+		}
+	})
+}
+
+func BenchmarkTypeParamsStr(b *testing.B) {
+	buildParams := func(paramsCount, namesPerParam int) []*ast.Field {
+		params := make([]*ast.Field, paramsCount)
+		for i := range params {
+			names := make([]*ast.Ident, namesPerParam)
+			for j := range names {
+				names[j] = &ast.Ident{Name: "T" + strconv.Itoa(i) + "_" + strconv.Itoa(j)}
+			}
+
+			params[i] = &ast.Field{
+				Names: names,
+				Type:  &ast.Ident{Name: "any"},
+			}
+		}
+
+		return params
+	}
+
+	b.Run("small", func(b *testing.B) {
+		params := buildParams(3, 1)
+
+		b.ReportAllocs()
+		for b.Loop() {
+			var err error
+			benchmarkTypeParamsStrSpecSink, benchmarkTypeParamsStrNamesSink, err = typeParamsStr(params)
+			require.NoError(b, err)
+		}
+	})
+
+	b.Run("multi_name_fields", func(b *testing.B) {
+		params := buildParams(4, 3)
+
+		b.ReportAllocs()
+		for b.Loop() {
+			var err error
+			benchmarkTypeParamsStrSpecSink, benchmarkTypeParamsStrNamesSink, err = typeParamsStr(params)
+			require.NoError(b, err)
+		}
+	})
+
+	b.Run("large", func(b *testing.B) {
+		params := buildParams(32, 2)
+
+		b.ReportAllocs()
+		for b.Loop() {
+			var err error
+			benchmarkTypeParamsStrSpecSink, benchmarkTypeParamsStrNamesSink, err = typeParamsStr(params)
+			require.NoError(b, err)
 		}
 	})
 }
