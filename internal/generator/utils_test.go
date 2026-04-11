@@ -25,6 +25,7 @@ var benchmarkTypeParamsStrNamesSink string
 var benchmarkParseTagOptionSink TagOption
 var benchmarkParseTagWarningsSink []string
 var benchmarkImportPathBaseSink string
+var benchmarkExtractSliceElemTypeSink string
 
 func Test_checkDefaultValue_Negative(t *testing.T) {
 	cases := []struct {
@@ -687,6 +688,71 @@ func BenchmarkImportPathBase(b *testing.B) {
 		b.ReportAllocs()
 		for b.Loop() {
 			benchmarkImportPathBaseSink = importPathBase(importPath)
+		}
+	})
+}
+
+func BenchmarkExtractSliceElemType(b *testing.B) {
+	tempDir := b.TempDir()
+
+	somepkgDir := tempDir + "/somepkg"
+	require.NoError(b, os.MkdirAll(somepkgDir, 0o755))
+
+	somepkgContent := `package somepkg
+
+type SliceInt []int
+type User struct {
+	ID string
+}
+`
+	require.NoError(b, os.WriteFile(somepkgDir+"/somepkg.go", []byte(somepkgContent), ctype.DefaultPermission))
+	require.NoError(b, os.WriteFile(tempDir+"/go.mod", []byte("module xxx\ngo 1.18"), ctype.DefaultPermission))
+	require.NoError(b, os.WriteFile(tempDir+"/main.go", []byte("package main\n\nimport \"./somepkg\"\n"), ctype.DefaultPermission))
+
+	fset := token.NewFileSet()
+	mainFile, err := parser.ParseFile(fset, tempDir+"/main.go", nil, parser.ParseComments)
+	require.NoError(b, err)
+
+	b.Run("local_slice", func(b *testing.B) {
+		expr := &ast.ArrayType{
+			Elt: &ast.Ident{Name: "int"},
+		}
+		store := NewPackageStore(fset, tempDir)
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkExtractSliceElemTypeSink, err = extractSliceElemType(mainFile, expr, store)
+			require.NoError(b, err)
+		}
+	})
+
+	b.Run("imported_named_slice", func(b *testing.B) {
+		expr := &ast.SelectorExpr{
+			X:   &ast.Ident{Name: "somepkg"},
+			Sel: &ast.Ident{Name: "SliceInt"},
+		}
+		store := NewPackageStore(fset, tempDir)
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkExtractSliceElemTypeSink, err = extractSliceElemType(mainFile, expr, store)
+			require.NoError(b, err)
+		}
+	})
+
+	b.Run("imported_named_type", func(b *testing.B) {
+		expr := &ast.ArrayType{
+			Elt: &ast.SelectorExpr{
+				X:   &ast.Ident{Name: "somepkg"},
+				Sel: &ast.Ident{Name: "User"},
+			},
+		}
+		store := NewPackageStore(fset, tempDir)
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkExtractSliceElemTypeSink, err = extractSliceElemType(mainFile, expr, store)
+			require.NoError(b, err)
 		}
 	})
 }
