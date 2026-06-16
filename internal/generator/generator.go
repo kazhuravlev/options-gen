@@ -37,12 +37,13 @@ func Render(opts Options) ([]byte, error) {
 		optionsStructInstanceType += opts.spec.TypeParams
 	}
 
+	options := makeTemplateOptions(opts.spec.Options)
 	tplContext := map[string]interface{}{
 		"version":       opts.version,
 		"packageName":   opts.packageName,
 		"imports":       opts.fileImports,
-		"options":       opts.spec.Options,
-		"optionsLen":    len(opts.spec.Options),
+		"options":       options,
+		"optionsLen":    len(options),
 		"hasValidation": opts.spec.HasValidation(),
 
 		"optionsTypeParamsSpec": opts.spec.TypeParamsSpec,
@@ -76,6 +77,32 @@ func Render(opts Options) ([]byte, error) {
 	}
 
 	return formatted, nil
+}
+
+type templateOptionMeta struct {
+	OptionMeta
+	TargetName  string
+	TargetField string
+}
+
+func makeTemplateOptions(options []OptionMeta) []templateOptionMeta {
+	res := make([]templateOptionMeta, 0, len(options))
+	for _, opt := range options {
+		targetName := opt.Name
+		targetField := opt.Field
+		if opt.TagOption.Name != "" {
+			targetName = opt.TagOption.Name
+			targetField = opt.TagOption.Name
+		}
+
+		res = append(res, templateOptionMeta{
+			OptionMeta:  opt,
+			TargetName:  targetName,
+			TargetField: targetField,
+		})
+	}
+
+	return res
 }
 
 type GetOptionSpecRes struct {
