@@ -30,7 +30,7 @@ func TestGetOptionSpec_BoundaryConditions(t *testing.T) {
 				var fields strings.Builder
 				fields.WriteString("package test\ntype Options struct {\n")
 				for i := 0; i < 100; i++ {
-					fields.WriteString(fmt.Sprintf("  Field%d string\n", i))
+					fmt.Fprintf(&fields, "  Field%d string\n", i)
 				}
 				fields.WriteString("}")
 
@@ -227,6 +227,7 @@ func TestRender_LargeOutput(t *testing.T) {
 				Variadic:      false,
 				VariadicIsSet: false,
 				Skip:          false,
+				Name:          "",
 			},
 		}
 	}
@@ -339,6 +340,7 @@ func TestExcludePatterns_Comprehensive(t *testing.T) {
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				}
 			}

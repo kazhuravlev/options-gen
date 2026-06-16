@@ -31,4 +31,5 @@ type TagOption struct {
 	Variadic      bool
 	VariadicIsSet bool
 	Skip          bool
+	Name          string
 }

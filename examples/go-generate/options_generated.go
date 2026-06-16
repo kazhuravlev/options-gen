@@ -32,6 +32,10 @@ func NewOptions(
 	return o
 }
 
+func WithTLS(opt string) OptOptionsSetter {
+	return func(o *Options) { o.tls = opt }
+}
+
 // Address that will be used for each request to the remote server.
 //
 // By default, it will be set to 127.0.0.1:8000

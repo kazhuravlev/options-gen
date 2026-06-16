@@ -193,11 +193,13 @@ func main() {
 
 ### Understanding Tags
 
-| Tag                  | Purpose                                      | Effect                                                                                                                 |
-|----------------------|----------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
-| `option:"mandatory"` | Makes field a required constructor parameter | Field must be provided when calling `NewOptions()`                                                                     |
-| `validate:"rules"`   | Adds validation rules                        | Checked when `Validate()` is called (use [go-playground/validator](https://github.com/go-playground/validator) syntax) |
-| `default:"value"`    | Sets default value                           | Applied if field not explicitly set via setter                                                                         |
+| Tag                   | Purpose                                      | Effect                                                                                                                 |
+|-----------------------|----------------------------------------------|------------------------------------------------------------------------------------------------------------------------|
+| `option:"mandatory"`  | Makes field a required constructor parameter | Field must be provided when calling `NewOptions()`                                                                     |
+| `validate:"rules"`    | Adds validation rules                        | Checked when `Validate()` is called (use [go-playground/validator](https://github.com/go-playground/validator) syntax) |
+| `default:"value"`     | Sets default value                           | Applied if field not explicitly set via setter                                                                         |
+| `option:"name=Value"` | Sets the name of the generated function for the field without taking into account the `With` prefix |
+For example, the option `option: "name=VaLuE"` for the field field will generate a function named `WithVaLuE' instead of `WithField`. |
 
 **Key difference:**
 
@@ -227,6 +229,7 @@ And just `go generate ./...`.
 type Options struct {
   httpClient  *http.Client  `option:"mandatory"`
   baseURL     string        `option:"mandatory" validate:"required,url"`
+  tls         string        `option:"name=TLS"`
   token       string        `validate:"required"`
   timeout     time.Duration `default:"30s" validate:"min=1s,max=5m"`
   maxRetries  int           `default:"3" validate:"min=0,max=10"`

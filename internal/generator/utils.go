@@ -482,6 +482,8 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 		optName, optValue, _ := strings.Cut(opt, "=")
 
 		switch optName {
+		case "name":
+			tagOpt.Name = optValue
 		case "mandatory":
 			tagOpt.IsRequired = true
 

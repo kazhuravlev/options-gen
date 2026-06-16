@@ -46,6 +46,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -60,6 +61,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -74,6 +76,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -87,6 +90,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -100,6 +104,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -114,6 +119,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -128,6 +134,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -142,6 +149,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -156,6 +164,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 						Variadic:      true,
 						VariadicIsSet: true,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -170,6 +179,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -184,6 +194,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -198,6 +209,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -212,6 +224,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -226,6 +239,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -239,6 +253,7 @@ func TestGetOptionSpec(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 			},
@@ -282,6 +297,7 @@ func TestGetOptionSpec_Generics(t *testing.T) {
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -296,6 +312,7 @@ func TestGetOptionSpec_Generics(t *testing.T) {
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -310,6 +327,7 @@ func TestGetOptionSpec_Generics(t *testing.T) {
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -324,6 +342,7 @@ func TestGetOptionSpec_Generics(t *testing.T) {
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 			},
@@ -431,6 +450,7 @@ func TestGetOptionSpecInline(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 			},
@@ -471,6 +491,7 @@ func TestGetOptionSpecInlinePtr(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 			},
@@ -511,6 +532,7 @@ func TestGetOptionSpecEmbed(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 			},
@@ -551,6 +573,7 @@ func TestGetOptionSpecEmbedPtr(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 			},
@@ -591,6 +614,7 @@ func TestGetOptionSpecEmbedAnotherPkg(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 			},
@@ -631,6 +655,7 @@ func TestGetOptionSpecEmbedAnotherPkgPtr(t *testing.T) { //nolint:funlen
 						Variadic:      false,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 			},
@@ -689,6 +714,7 @@ func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
 						Variadic:      true,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -703,6 +729,7 @@ func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
 						Variadic:      true,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -717,6 +744,7 @@ func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
 						Variadic:      true,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -731,6 +759,7 @@ func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
 						Variadic:      true,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -745,6 +774,7 @@ func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
 						Variadic:      true,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -759,6 +789,7 @@ func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
 						Variadic:      true,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -773,6 +804,7 @@ func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
 						Variadic:      true,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 				{
@@ -787,6 +819,7 @@ func TestGetOptionSpecSliceAlice(t *testing.T) { //nolint:funlen
 						Variadic:      true,
 						VariadicIsSet: false,
 						Skip:          false,
+						Name:          "",
 					},
 				},
 			},
