@@ -310,6 +310,21 @@ func Test_parseTag(t *testing.T) {
 				"Error: parse variadic for the field fieldName failed: strconv.ParseBool: parsing \"bad\": invalid syntax\n",
 			},
 		},
+		{
+			name:      "name replace",
+			tag:       &ast.BasicLit{Value: "`option:\"name=Some\"`"},
+			fieldName: "fieldName",
+			tagName:   "default",
+			wantOption: TagOption{
+				IsRequired:    false,
+				GoValidator:   "",
+				Default:       "",
+				Variadic:      false,
+				VariadicIsSet: false,
+				Skip:          false,
+				Name:          "Some",
+			},
+		},
 	}
 
 	for _, tc := range testCases {
