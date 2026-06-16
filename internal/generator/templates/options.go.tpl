@@ -28,7 +28,7 @@ type {{$.optionsTypeName}}{{ $.optionsTypeParamsSpec }} func(o *{{ .optionsStruc
 func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsStructType }}(
 	{{ range .options -}}
 		{{ if .TagOption.IsRequired -}}
-			{{ .Field }} {{ .Type }},
+			{{ if eq "" .TagOption.Name }}{{ .Field }}{{else}}{{.TagOption.Name}}{{end}} {{ .Type }},
 		{{ end }}
 	{{- end -}}
 	options ...{{$.optionsTypeName}}{{ $.optionsTypeParams }},
@@ -80,7 +80,7 @@ func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsS
 
 	{{ range .options }}
 	    {{- if .TagOption.IsRequired -}}
-	        o.{{ .Field }} = {{ .Field }}
+	        o.{{ .Field }} = {{ if eq "" .TagOption.Name }}{{ .Field }}{{else}}{{.TagOption.Name}}{{end}}
           {{- if $.withIsset }}
 		        opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
           {{- end }}
