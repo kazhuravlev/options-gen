@@ -28,7 +28,7 @@ type {{$.optionsTypeName}}{{ $.optionsTypeParamsSpec }} func(o *{{ .optionsStruc
 func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsStructType }}(
 	{{ range .options -}}
 		{{ if .TagOption.IsRequired -}}
-			{{ if eq "" .TagOption.Name }}{{ .Field }}{{else}}{{.TagOption.Name}}{{end}} {{ .Type }},
+			{{ .TargetField }} {{ .Type }},
 		{{ end }}
 	{{- end -}}
 	options ...{{$.optionsTypeName}}{{ $.optionsTypeParams }},
@@ -80,7 +80,7 @@ func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsS
 
 	{{ range .options }}
 	    {{- if .TagOption.IsRequired -}}
-	        o.{{ .Field }} = {{ if eq "" .TagOption.Name }}{{ .Field }}{{else}}{{.TagOption.Name}}{{end}}
+	        o.{{ .Field }} = {{ .TargetField }}
           {{- if $.withIsset }}
 		        opt{{$.optionsPrefix}}IsSet[Field{{$.optionsPrefix}}{{ .Field }}] = true
           {{- end }}
@@ -99,7 +99,7 @@ func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsS
 		{{- if ne .Docstring "" -}}
 			{{ .Docstring }}
 		{{- end }}
-		func With{{$.optionsPrefix}}{{if eq "" .TagOption.Name}}{{ .Name }}{{else}}{{.TagOption.Name}}{{end}}{{ $.optionsTypeParamsSpec }}(opt {{if .TagOption.Variadic}}...{{end}}{{ .Type }}) {{$.optionsTypeName}}{{ $.optionsTypeParams }} {
+		func With{{$.optionsPrefix}}{{ .TargetName }}{{ $.optionsTypeParamsSpec }}(opt {{if .TagOption.Variadic}}...{{end}}{{ .Type }}) {{$.optionsTypeName}}{{ $.optionsTypeParams }} {
 			return func(o *{{ $.optionsStructInstanceType }}) {
 				{{- if .TagOption.Variadic -}}
 					o.{{ .Field }} = append(o.{{ .Field }}, opt...)
