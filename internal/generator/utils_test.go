@@ -6,6 +6,8 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -218,6 +220,268 @@ func Test_typeParamsStr(t *testing.T) {
 			assert.Equal(t, testCase.wantParams, gotParams)
 		})
 	}
+}
+
+func Test_optimizeGeneratedSource_PrunesOnlyUnusedNamedImports(t *testing.T) {
+	src := []byte(`package testcase
+
+import (
+	"fmt"
+	"io"
+	. "math"
+	_ "net/http/pprof"
+	alias "strings"
+)
+
+var _ = fmt.Sprintf
+var _ = alias.Builder{}
+var _ = Pi
+`)
+
+	got, err := optimizeGeneratedSource(src)
+	require.NoError(t, err)
+
+	gotStr := string(got)
+	require.Contains(t, gotStr, `"fmt"`)
+	require.Contains(t, gotStr, `alias "strings"`)
+	require.Contains(t, gotStr, `. "math"`)
+	require.Contains(t, gotStr, `_ "net/http/pprof"`)
+	require.NotContains(t, gotStr, `"io"`)
+}
+
+func Test_parseModulePath(t *testing.T) {
+	tests := []struct {
+		name    string
+		goMod   string
+		want    string
+		wantErr string
+	}{
+		{
+			name: "plain",
+			goMod: `module example.com/project
+
+go 1.26
+`,
+			want: "example.com/project",
+		},
+		{
+			name: "trailing_comment",
+			goMod: `// leading comment
+module example.com/project // human note
+
+go 1.26
+`,
+			want: "example.com/project",
+		},
+		{
+			name:    "missing",
+			goMod:   "go 1.26\n",
+			wantErr: "module path not found",
+		},
+		{
+			name:    "empty",
+			goMod:   "module \n",
+			wantErr: "module path not found",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := parseModulePath(tt.goMod)
+			if tt.wantErr != "" {
+				require.EqualError(t, err, tt.wantErr)
+
+				return
+			}
+
+			require.NoError(t, err)
+			require.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestGetOptionSpec_LocalAliasStructMergesCallerImportsAndCompiles(t *testing.T) {
+	tmpDir := t.TempDir()
+	writeTestFile(t, filepath.Join(tmpDir, "go.mod"), `module example.com/safety // valid trailing comment
+
+go 1.26
+`)
+	writeTestFile(t, filepath.Join(tmpDir, "optionspkg", "options.go"), `package optionspkg
+
+type Local struct{}
+
+type Options struct {
+	Required string `+"`option:\"mandatory\"`"+`
+	Optional Local
+	Ptr *Local
+	Values []Local
+	Mapping map[string]Local
+	Callback func(Local) *Local
+	private string
+}
+`)
+	consumerDir := filepath.Join(tmpDir, "consumer")
+	inFilename := filepath.Join(consumerDir, "options.go")
+	writeTestFile(t, inFilename, `package consumer
+
+import alias "example.com/safety/optionspkg"
+
+type Options alias.Options
+`)
+
+	spec, err := GetOptionSpec(inFilename, "Options", "default", false, nil)
+	require.NoError(t, err)
+	require.Len(t, spec.Spec.Options, 6)
+	require.Contains(t, spec.Imports, Import{
+		Path: `"example.com/safety/optionspkg"`,
+		Alias: func() *string {
+			alias := "alias"
+
+			return &alias
+		}(),
+	})
+
+	rendered, err := Render(NewOptions(
+		WithVersion("test"),
+		WithPackageName("consumer"),
+		WithOptionsStructName("Options"),
+		WithFileImports(spec.Imports),
+		WithSpec(&spec.Spec),
+		WithTagName("default"),
+		WithConstructorTypeRender("public"),
+		WithOptionTypeName("OptOptionsSetter"),
+	))
+	require.NoError(t, err)
+
+	renderedStr := string(rendered)
+	require.Contains(t, renderedStr, `alias "example.com/safety/optionspkg"`)
+	require.Contains(t, renderedStr, `func WithOptional(opt alias.Local) OptOptionsSetter`)
+	require.Contains(t, renderedStr, `func WithPtr(opt *alias.Local) OptOptionsSetter`)
+	require.Contains(t, renderedStr, `func WithValues(opt []alias.Local) OptOptionsSetter`)
+	require.Contains(t, renderedStr, `func WithMapping(opt map[string]alias.Local) OptOptionsSetter`)
+	require.Contains(t, renderedStr, `func WithCallback(opt func(alias.Local) *alias.Local) OptOptionsSetter`)
+	require.NotContains(t, renderedStr, "private")
+
+	writeTestFile(t, filepath.Join(consumerDir, "options_generated.go"), renderedStr)
+	cmd := exec.Command("go", "test", "./consumer")
+	cmd.Dir = tmpDir
+	cmd.Env = append(os.Environ(), "GOCACHE="+filepath.Join(tmpDir, "gocache"))
+	out, err := cmd.CombinedOutput()
+	require.NoError(t, err, string(out))
+}
+
+func Test_findLocalStructTypeParamsAndFields(t *testing.T) {
+	tmpDir := t.TempDir()
+	writeTestFile(t, filepath.Join(tmpDir, "go.mod"), `module example.com/local
+
+go 1.26
+`)
+	writeTestFile(t, filepath.Join(tmpDir, "pkg", "options.go"), `package pkg
+
+type Local struct{}
+
+type Options[T any] struct {
+	Required string `+"`option:\"mandatory\"`"+`
+	Optional Local
+	Nested map[string][]*Local
+	private string
+}
+`)
+
+	file, typeParams, fields, err := findLocalStructTypeParamsAndFields(
+		token.NewFileSet(),
+		"example.com/local/pkg",
+		"Options",
+		filepath.Join(tmpDir, "consumer"),
+		"alias",
+	)
+	require.NoError(t, err)
+	require.Equal(t, "pkg", file.Name.Name)
+
+	typeParamsSpec, typeParamsNames, err := typeParamsStr(typeParams)
+	require.NoError(t, err)
+	require.Equal(t, "[T any]", typeParamsSpec)
+	require.Equal(t, "[T]", typeParamsNames)
+
+	require.Len(t, fields, 3)
+	require.Equal(t, "Required", fields[0].Names[0].Name)
+	require.Equal(t, "string", renderExprString(fields[0].Type))
+	require.Equal(t, "Optional", fields[1].Names[0].Name)
+	require.Equal(t, "alias.Local", renderExprString(fields[1].Type))
+	require.Equal(t, "Nested", fields[2].Names[0].Name)
+	require.Equal(t, "map[string][]*alias.Local", renderExprString(fields[2].Type))
+}
+
+func Test_findLocalStructTypeParamsAndFields_RejectsOutsideModuleImport(t *testing.T) {
+	tmpDir := t.TempDir()
+	writeTestFile(t, filepath.Join(tmpDir, "go.mod"), `module example.com/local
+
+go 1.26
+`)
+
+	_, _, _, err := findLocalStructTypeParamsAndFields(
+		token.NewFileSet(),
+		"example.com/other/pkg",
+		"Options",
+		filepath.Join(tmpDir, "consumer"),
+		"other",
+	)
+	require.EqualError(t, err, "import is outside current module")
+}
+
+func Test_findStructTypeParamsAndFields2_FallbackPackagesLoad(t *testing.T) {
+	tmpDir := t.TempDir()
+	pkgFile := filepath.Join(tmpDir, "external.go")
+	writeTestFile(t, pkgFile, `package external
+
+type Local struct{}
+
+type Options[T any] struct {
+	Required string `+"`option:\"mandatory\"`"+`
+	Optional Local
+	Ptr *Local
+	Values []Local
+	Mapping map[string]Local
+	Callback func(Local) *Local
+	private string
+}
+`)
+
+	file, typeParams, fields, err := findStructTypeParamsAndFields2(
+		token.NewFileSet(),
+		pkgFile,
+		"Options",
+		tmpDir,
+		"external",
+	)
+	require.NoError(t, err)
+	require.Equal(t, "external", file.Name.Name)
+
+	typeParamsSpec, typeParamsNames, err := typeParamsStr(typeParams)
+	require.NoError(t, err)
+	require.Equal(t, "[T any]", typeParamsSpec)
+	require.Equal(t, "[T]", typeParamsNames)
+
+	require.Len(t, fields, 6)
+	require.Equal(t, "Required", fields[0].Names[0].Name)
+	require.Equal(t, "string", renderExprString(fields[0].Type))
+	require.Equal(t, "Optional", fields[1].Names[0].Name)
+	require.Equal(t, "external.Local", renderExprString(fields[1].Type))
+	require.Equal(t, "Ptr", fields[2].Names[0].Name)
+	require.Equal(t, "*external.Local", renderExprString(fields[2].Type))
+	require.Equal(t, "Values", fields[3].Names[0].Name)
+	require.Equal(t, "[]external.Local", renderExprString(fields[3].Type))
+	require.Equal(t, "Mapping", fields[4].Names[0].Name)
+	require.Equal(t, "map[string]external.Local", renderExprString(fields[4].Type))
+	require.Equal(t, "Callback", fields[5].Names[0].Name)
+	require.Equal(t, "func(external.Local) *external.Local", renderExprString(fields[5].Type))
+}
+
+func writeTestFile(t *testing.T, filename, content string) {
+	t.Helper()
+
+	require.NoError(t, os.MkdirAll(filepath.Dir(filename), 0o755))
+	require.NoError(t, os.WriteFile(filename, []byte(content), ctype.DefaultPermission))
 }
 
 func Test_parseTag(t *testing.T) {
