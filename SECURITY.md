@@ -6,7 +6,9 @@ Security updates are provided for the latest released version of `options-gen`.
 
 ## Reporting a Vulnerability
 
-Please report suspected security vulnerabilities privately by using GitHub's private vulnerability reporting for this repository.
+Please report suspected security vulnerabilities privately by using GitHub's private vulnerability reporting for this repository:
+
+https://github.com/kazhuravlev/options-gen/security/advisories/new
 
 If private vulnerability reporting is unavailable, email the repository maintainer listed on the GitHub project. Do not open a public issue for suspected vulnerabilities.
 
