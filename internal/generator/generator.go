@@ -5,11 +5,15 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"go/ast"
+	"go/format"
+	"go/parser"
 	"go/token"
 	"go/types"
 	"os"
 	"path"
 	"regexp"
+	"strconv"
 	"syscall"
 	"text/template"
 
@@ -68,15 +72,105 @@ func Render(opts Options) ([]byte, error) {
 		return nil, fmt.Errorf("cannot render template: %w", err)
 	}
 
-	// reformat, remove unused and duplicate imports, sort them
-	formatted, err := imports.Process("", buf.Bytes(), nil)
+	formatted, err := optimizeGeneratedSource(buf.Bytes())
 	if err != nil {
 		_, _ = os.Stdout.Write(buf.Bytes()) // For issues debug.
 
-		return nil, fmt.Errorf("cannot optimize imports: %w", err)
+		return nil, fmt.Errorf("cannot optimize generated source: %w", err)
 	}
 
 	return formatted, nil
+}
+
+func optimizeGeneratedSource(src []byte) ([]byte, error) {
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "", src, parser.ParseComments)
+	if err != nil {
+		return nil, fmt.Errorf("parse generated source: %w", err)
+	}
+
+	pruneUnusedImports(file)
+	ast.SortImports(fset, file)
+
+	var buf bytes.Buffer
+	if err := format.Node(&buf, fset, file); err != nil {
+		return nil, fmt.Errorf("format generated source: %w", err)
+	}
+
+	formatted, err := imports.Process("", buf.Bytes(), &imports.Options{
+		Comments:   true,
+		TabIndent:  true,
+		TabWidth:   8,
+		FormatOnly: true,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("sort generated imports: %w", err)
+	}
+
+	return formatted, nil
+}
+
+func pruneUnusedImports(file *ast.File) {
+	usedSelectors := make(map[string]struct{})
+	ast.Inspect(file, func(node ast.Node) bool {
+		switch node := node.(type) {
+		case *ast.ImportSpec:
+			return false
+		case *ast.SelectorExpr:
+			if ident, ok := node.X.(*ast.Ident); ok {
+				usedSelectors[ident.Name] = struct{}{}
+			}
+		}
+
+		return true
+	})
+
+	importDecls := file.Decls[:0]
+	for _, decl := range file.Decls {
+		genDecl, ok := decl.(*ast.GenDecl)
+		if !ok || genDecl.Tok != token.IMPORT {
+			importDecls = append(importDecls, decl)
+
+			continue
+		}
+
+		importSpecs := genDecl.Specs[:0]
+		for _, spec := range genDecl.Specs {
+			imp := spec.(*ast.ImportSpec)
+			importName := importSpecName(imp)
+			if importName == "_" || importName == "." {
+				importSpecs = append(importSpecs, spec)
+
+				continue
+			}
+
+			if _, ok := usedSelectors[importName]; ok {
+				importSpecs = append(importSpecs, spec)
+			}
+		}
+
+		if len(importSpecs) == 0 {
+			continue
+		}
+
+		genDecl.Specs = importSpecs
+		importDecls = append(importDecls, genDecl)
+	}
+
+	file.Decls = importDecls
+}
+
+func importSpecName(imp *ast.ImportSpec) string {
+	if imp.Name != nil {
+		return imp.Name.Name
+	}
+
+	importPath, err := strconv.Unquote(imp.Path.Value)
+	if err != nil {
+		return ""
+	}
+
+	return importPathBase(importPath)
 }
 
 type templateOptionMeta struct {
