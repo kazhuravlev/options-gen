@@ -42,7 +42,7 @@ jobs:
           languages: go
 
       - name: Build
-        run: go build -v ./cmd/options-gen
+        run: go build -v -o /tmp/options-gen-codeql ./cmd/options-gen
 
       - uses: github/codeql-action/analyze@b0c4fd77f6c559021d78430ec4d0d169ae74a4eb # v3
 
