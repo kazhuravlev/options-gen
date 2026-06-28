@@ -27,6 +27,8 @@ var templates embed.FS
 
 var tmpl = template.Must(template.ParseFS(templates, "templates/options.go.tpl"))
 
+const generatedFormatTabWidth = 8
+
 // Render will render file and out it's content.
 func Render(opts Options) ([]byte, error) {
 	if err := opts.Validate(); err != nil {
@@ -98,9 +100,11 @@ func optimizeGeneratedSource(src []byte) ([]byte, error) {
 	}
 
 	formatted, err := imports.Process("", buf.Bytes(), &imports.Options{
+		Fragment:   false,
+		AllErrors:  false,
 		Comments:   true,
 		TabIndent:  true,
-		TabWidth:   8,
+		TabWidth:   generatedFormatTabWidth,
 		FormatOnly: true,
 	})
 	if err != nil {

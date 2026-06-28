@@ -2,6 +2,7 @@
 package generator //nolint:testpackage
 
 import (
+	"context"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -12,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/kazhuravlev/options-gen/internal/ctype"
 	"github.com/stretchr/testify/assert"
@@ -30,6 +32,8 @@ var (
 	benchmarkImportPathBaseSink       string
 	benchmarkExtractSliceElemTypeSink string
 )
+
+const compileGeneratedPackageTimeout = 30 * time.Second
 
 func Test_checkDefaultValue_Negative(t *testing.T) {
 	cases := []struct {
@@ -363,7 +367,10 @@ type Options alias.Options
 	require.NotContains(t, renderedStr, "private")
 
 	writeTestFile(t, filepath.Join(consumerDir, "options_generated.go"), renderedStr)
-	cmd := exec.Command("go", "test", "./consumer")
+	ctx, cancel := context.WithTimeout(t.Context(), compileGeneratedPackageTimeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, "go", "test", "./consumer")
 	cmd.Dir = tmpDir
 	cmd.Env = append(os.Environ(), "GOCACHE="+filepath.Join(tmpDir, "gocache"))
 	out, err := cmd.CombinedOutput()

@@ -1,3 +1,4 @@
+//nolint:testpackage,varnamelen
 package optionsgen
 
 import (
@@ -14,29 +15,42 @@ func BenchmarkRunCriticalPath(b *testing.B) {
 		withIsset   bool
 	}{
 		{
-			name:    "builtin_fields",
-			caseDir: filepath.Join("testdata", "case-02-builtin-types"),
+			name:        "builtin_fields",
+			caseDir:     filepath.Join("testdata", "case-02-builtin-types"),
+			defaults:    Defaults{From: DefaultsFromNone, Param: ""},
+			allVariadic: false,
+			withIsset:   false,
 		},
 		{
 			name:        "all_variadic",
 			caseDir:     filepath.Join("testdata", "case-02.1-builtin-types-all-variadic"),
+			defaults:    Defaults{From: DefaultsFromNone, Param: ""},
 			allVariadic: true,
+			withIsset:   false,
 		},
 		{
-			name:    "generics",
-			caseDir: filepath.Join("testdata", "case-05-generics-01"),
+			name:        "generics",
+			caseDir:     filepath.Join("testdata", "case-05-generics-01"),
+			defaults:    Defaults{From: DefaultsFromNone, Param: ""},
+			allVariadic: false,
+			withIsset:   false,
 		},
 		{
 			name:    "defaults_from_tag",
 			caseDir: filepath.Join("testdata", "case-12-defaults-tag-02"),
 			defaults: Defaults{
-				From: DefaultsFromTag,
+				From:  DefaultsFromTag,
+				Param: "",
 			},
+			allVariadic: false,
+			withIsset:   false,
 		},
 		{
-			name:      "with_isset",
-			caseDir:   filepath.Join("testdata", "case-20-isset"),
-			withIsset: true,
+			name:        "with_isset",
+			caseDir:     filepath.Join("testdata", "case-20-isset"),
+			defaults:    Defaults{From: DefaultsFromNone, Param: ""},
+			allVariadic: false,
+			withIsset:   true,
 		},
 	}
 

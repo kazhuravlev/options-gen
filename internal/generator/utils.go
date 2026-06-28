@@ -269,8 +269,8 @@ func findLocalStructTypeParamsAndFields(
 				}
 
 				for _, spec := range genDecl.Specs {
-					typeSpec, ok := spec.(*ast.TypeSpec)
-					if !ok || typeSpec.Name.Name != optStructName {
+					typeSpec, isTypeSpec := spec.(*ast.TypeSpec)
+					if !isTypeSpec || typeSpec.Name.Name != optStructName {
 						continue
 					}
 
@@ -341,7 +341,7 @@ func parseModulePath(goMod string) (string, error) {
 	return "", errors.New("module path not found")
 }
 
-func packageTypeNames(pkgObj *ast.Package) map[string]struct{} {
+func packageTypeNames(pkgObj *ast.Package) map[string]struct{} { //nolint:staticcheck
 	typeNames := make(map[string]struct{})
 	for _, fileObj := range pkgObj.Files {
 		for _, decl := range fileObj.Decls {
@@ -390,7 +390,9 @@ func addPackageToLocalType(inExpr ast.Expr, pkgName string, localTypes map[strin
 			inExpr = &ast.SelectorExpr{
 				Sel: casted,
 				X: &ast.Ident{
-					Name: pkgName,
+					NamePos: token.NoPos,
+					Name:    pkgName,
+					Obj:     nil,
 				},
 			}
 		}

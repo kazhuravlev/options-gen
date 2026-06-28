@@ -1,3 +1,4 @@
+//nolint:testpackage,varnamelen
 package generator
 
 import (
@@ -20,35 +21,41 @@ func BenchmarkGetOptionSpecCriticalPath(b *testing.B) {
 		allVariadic bool
 	}{
 		{
-			name:       "builtin_fields",
-			filePath:   filepath.Join("..", "..", "options-gen", "testdata", "case-02-builtin-types", "options.go"),
-			structName: "Options",
-			tagName:    "default",
+			name:        "builtin_fields",
+			filePath:    filepath.Join("..", "..", "options-gen", "testdata", "case-02-builtin-types", "options.go"),
+			structName:  "Options",
+			tagName:     "default",
+			allVariadic: false,
 		},
 		{
-			name:       "generics",
-			filePath:   filepath.Join("..", "..", "options-gen", "testdata", "case-05-generics-01", "options.go"),
-			structName: "Options",
-			tagName:    "default",
+			name:        "generics",
+			filePath:    filepath.Join("..", "..", "options-gen", "testdata", "case-05-generics-01", "options.go"),
+			structName:  "Options",
+			tagName:     "default",
+			allVariadic: false,
 		},
 		{
-			name:        "all_variadic",
-			filePath:    filepath.Join("..", "..", "options-gen", "testdata", "case-02.1-builtin-types-all-variadic", "options.go"),
+			name: "all_variadic",
+			filePath: filepath.Join(
+				"..", "..", "options-gen", "testdata", "case-02.1-builtin-types-all-variadic", "options.go",
+			),
 			structName:  "Options",
 			tagName:     "default",
 			allVariadic: true,
 		},
 		{
-			name:       "imported_alias_struct",
-			filePath:   filepath.Join("..", "..", "options-gen", "testdata", "case-05.2-generics-01-alias", "options.go"),
-			structName: "Options",
-			tagName:    "default",
+			name:        "imported_alias_struct",
+			filePath:    filepath.Join("..", "..", "options-gen", "testdata", "case-05.2-generics-01-alias", "options.go"),
+			structName:  "Options",
+			tagName:     "default",
+			allVariadic: false,
 		},
 		{
-			name:       "defaults_duration",
-			filePath:   filepath.Join("..", "..", "options-gen", "testdata", "case-12-defaults-tag-02", "options.go"),
-			structName: "Options",
-			tagName:    "default",
+			name:        "defaults_duration",
+			filePath:    filepath.Join("..", "..", "options-gen", "testdata", "case-12-defaults-tag-02", "options.go"),
+			structName:  "Options",
+			tagName:     "default",
+			allVariadic: false,
 		},
 	}
 
@@ -134,7 +141,13 @@ func benchmarkOptionSpec(optionCount int) *OptionSpec {
 			Field:     field,
 			Type:      "string",
 			TagOption: TagOption{
-				GoValidator: "required",
+				IsRequired:    false,
+				GoValidator:   "required",
+				Default:       "",
+				Variadic:      false,
+				VariadicIsSet: false,
+				Skip:          false,
+				Name:          "",
 			},
 		}
 		if i%4 == 0 {
@@ -144,6 +157,8 @@ func benchmarkOptionSpec(optionCount int) *OptionSpec {
 	}
 
 	return &OptionSpec{
-		Options: options,
+		TypeParamsSpec: "",
+		TypeParams:     "",
+		Options:        options,
 	}
 }
