@@ -9,6 +9,7 @@ import (
 	"go/types"
 	"os"
 	"path"
+	"path/filepath"
 	"reflect"
 	"slices"
 	"strconv"
@@ -99,7 +100,20 @@ func findStructTypeParamsAndFields(fset *token.FileSet, filePath, typeName strin
 							continue
 						}
 
-						return findStructTypeParamsAndFields2(fset, importPath, castedType.Sel.Name, workDir, pkgIdent.Name)
+						file, typeParams, fields, err := findStructTypeParamsAndFields2(
+							fset,
+							importPath,
+							castedType.Sel.Name,
+							workDir,
+							pkgIdent.Name,
+						)
+						if err != nil {
+							return nil, nil, nil, err
+						}
+
+						file.Imports = mergeImportSpecs(fileObj.Imports, file.Imports)
+
+						return file, typeParams, fields, nil
 					}
 				}
 			}
@@ -115,6 +129,16 @@ func findStructTypeParamsAndFields2(
 ) (*ast.File, []*ast.Field, []*ast.Field, error) {
 	if workDir == "" {
 		workDir = path.Dir(importPath)
+	}
+
+	if file, typeParams, fields, err := findLocalStructTypeParamsAndFields(
+		fset,
+		importPath,
+		optStructName,
+		workDir,
+		pkgName,
+	); err == nil {
+		return file, typeParams, fields, nil
 	}
 
 	// Configure the loader to use types package instead of ParseDir
@@ -200,6 +224,228 @@ func findStructTypeParamsAndFields2(
 	}
 
 	return nil, nil, nil, errors.New("cannot find target struct")
+}
+
+func findLocalStructTypeParamsAndFields(
+	fset *token.FileSet,
+	importPath, optStructName, workDir, pkgName string,
+) (*ast.File, []*ast.Field, []*ast.Field, error) {
+	moduleRoot, modulePath, err := findModule(workDir)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	relPath, ok := strings.CutPrefix(importPath, modulePath+"/")
+	if !ok {
+		if importPath != modulePath {
+			return nil, nil, nil, errors.New("import is outside current module")
+		}
+
+		relPath = ""
+	}
+
+	dirPath := filepath.Join(moduleRoot, filepath.FromSlash(relPath))
+	stat, err := os.Stat(dirPath)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	if !stat.IsDir() {
+		return nil, nil, nil, errors.New("local import is not a directory")
+	}
+
+	pkgs, err := parser.ParseDir(fset, dirPath, nil, parser.ParseComments)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("cannot parse local package: %w", err)
+	}
+
+	for _, pkgObj := range pkgs {
+		localTypes := packageTypeNames(pkgObj)
+		for _, fileObj := range pkgObj.Files {
+			for _, decl := range fileObj.Decls {
+				genDecl, ok := decl.(*ast.GenDecl)
+				if !ok {
+					continue
+				}
+
+				for _, spec := range genDecl.Specs {
+					typeSpec, ok := spec.(*ast.TypeSpec)
+					if !ok || typeSpec.Name.Name != optStructName {
+						continue
+					}
+
+					structType, ok := typeSpec.Type.(*ast.StructType)
+					if !ok {
+						continue
+					}
+
+					fields := filterImportedFields(extractFields(structType.Fields), pkgName, localTypes)
+
+					return fileObj, extractFields(typeSpec.TypeParams), fields, nil
+				}
+			}
+		}
+	}
+
+	return nil, nil, nil, errors.New("cannot find target struct")
+}
+
+func findModule(workDir string) (root, modulePath string, err error) {
+	dir, err := filepath.Abs(workDir)
+	if err != nil {
+		return "", "", err
+	}
+
+	for {
+		goModPath := filepath.Join(dir, "go.mod")
+		data, err := os.ReadFile(goModPath)
+		if err == nil {
+			modulePath, err := parseModulePath(string(data))
+			if err != nil {
+				return "", "", err
+			}
+
+			return dir, modulePath, nil
+		}
+
+		if !errors.Is(err, os.ErrNotExist) {
+			return "", "", err
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return "", "", errors.New("go.mod not found")
+		}
+
+		dir = parent
+	}
+}
+
+func parseModulePath(goMod string) (string, error) {
+	for _, line := range strings.Split(goMod, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "//") {
+			continue
+		}
+
+		if modulePath, ok := strings.CutPrefix(line, "module "); ok {
+			fields := strings.Fields(modulePath)
+			if len(fields) == 0 {
+				return "", errors.New("empty module path")
+			}
+
+			return fields[0], nil
+		}
+	}
+
+	return "", errors.New("module path not found")
+}
+
+func packageTypeNames(pkgObj *ast.Package) map[string]struct{} {
+	typeNames := make(map[string]struct{})
+	for _, fileObj := range pkgObj.Files {
+		for _, decl := range fileObj.Decls {
+			genDecl, ok := decl.(*ast.GenDecl)
+			if !ok || genDecl.Tok != token.TYPE {
+				continue
+			}
+
+			for _, spec := range genDecl.Specs {
+				typeSpec, ok := spec.(*ast.TypeSpec)
+				if !ok {
+					continue
+				}
+
+				typeNames[typeSpec.Name.Name] = struct{}{}
+			}
+		}
+	}
+
+	return typeNames
+}
+
+func filterImportedFields(fields []*ast.Field, pkgName string, localTypes map[string]struct{}) []*ast.Field {
+	filtered := make([]*ast.Field, 0, len(fields))
+	for _, field := range fields {
+		public := true
+		for _, name := range field.Names {
+			public = public && isPublic(name.Name)
+		}
+
+		if !public {
+			continue
+		}
+
+		field.Type = addPackageToLocalType(field.Type, pkgName, localTypes)
+		filtered = append(filtered, field)
+	}
+
+	return filtered
+}
+
+func addPackageToLocalType(inExpr ast.Expr, pkgName string, localTypes map[string]struct{}) ast.Expr {
+	switch casted := inExpr.(type) {
+	case *ast.Ident:
+		if _, ok := localTypes[casted.Name]; ok {
+			inExpr = &ast.SelectorExpr{
+				Sel: casted,
+				X: &ast.Ident{
+					Name: pkgName,
+				},
+			}
+		}
+	case *ast.StarExpr:
+		casted.X = addPackageToLocalType(casted.X, pkgName, localTypes)
+	case *ast.MapType:
+		casted.Key = addPackageToLocalType(casted.Key, pkgName, localTypes)
+		casted.Value = addPackageToLocalType(casted.Value, pkgName, localTypes)
+	case *ast.SliceExpr:
+		casted.X = addPackageToLocalType(casted.X, pkgName, localTypes)
+	case *ast.ArrayType:
+		casted.Elt = addPackageToLocalType(casted.Elt, pkgName, localTypes)
+	case *ast.ChanType:
+		casted.Value = addPackageToLocalType(casted.Value, pkgName, localTypes)
+	case *ast.FuncType:
+		for i := range extractFields(casted.Params) {
+			casted.Params.List[i].Type = addPackageToLocalType(casted.Params.List[i].Type, pkgName, localTypes)
+		}
+
+		for i := range extractFields(casted.Results) {
+			casted.Results.List[i].Type = addPackageToLocalType(casted.Results.List[i].Type, pkgName, localTypes)
+		}
+	case *ast.InterfaceType:
+		for i := range extractFields(casted.Methods) {
+			casted.Methods.List[i].Type = addPackageToLocalType(casted.Methods.List[i].Type, pkgName, localTypes)
+		}
+	case *ast.StructType:
+		for i := range extractFields(casted.Fields) {
+			casted.Fields.List[i].Type = addPackageToLocalType(casted.Fields.List[i].Type, pkgName, localTypes)
+		}
+	}
+
+	return inExpr
+}
+
+func mergeImportSpecs(imports ...[]*ast.ImportSpec) []*ast.ImportSpec {
+	seen := make(map[string]struct{})
+	res := make([]*ast.ImportSpec, 0)
+	for _, importGroup := range imports {
+		for _, imp := range importGroup {
+			key := imp.Path.Value
+			if imp.Name != nil {
+				key = imp.Name.Name + " " + key
+			}
+
+			if _, ok := seen[key]; ok {
+				continue
+			}
+
+			seen[key] = struct{}{}
+			res = append(res, imp)
+		}
+	}
+
+	return res
 }
 
 func addPackageToType(inExpr ast.Expr, pkgName string, scope *types.Scope) ast.Expr {
