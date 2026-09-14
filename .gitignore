@@ -148,3 +148,4 @@ fabric.properties
 bin/
 
 .vscode/
+.aider*
