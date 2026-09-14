@@ -308,7 +308,7 @@ func TestGetOptionSpec_LocalAliasStructMergesCallerImportsAndCompiles(t *testing
 	tmpDir := t.TempDir()
 	writeTestFile(t, filepath.Join(tmpDir, "go.mod"), `module example.com/safety // valid trailing comment
 
-go 1.26
+go 1.24
 `)
 	writeTestFile(t, filepath.Join(tmpDir, "optionspkg", "options.go"), `package optionspkg
 
