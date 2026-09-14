@@ -1,4 +1,4 @@
-//nolint:testpackage,varnamelen
+//nolint:testpackage
 package optionsgen
 
 import (
@@ -7,7 +7,7 @@ import (
 
 var benchOptionsSink Options
 
-// BenchmarkNewOptions benchmarks creating Options with various configurations
+// BenchmarkNewOptions benchmarks creating Options with various configurations.
 func BenchmarkNewOptions(b *testing.B) {
 	b.Run("minimal_options", func(b *testing.B) {
 		b.ReportAllocs()
@@ -35,7 +35,7 @@ func BenchmarkNewOptions(b *testing.B) {
 				WithOutFilename("out.go"),
 				WithStructName("Options"),
 				WithPackageName("pkg"),
-				WithDefaults(Defaults{From: DefaultsFromNone}),
+				WithDefaults(Defaults{From: DefaultsFromNone, Param: ""}),
 				WithAllVariadic(false),
 				WithWithIsset(false),
 				WithConstructorTypeRender(ConstructorPublicRender),
@@ -46,7 +46,7 @@ func BenchmarkNewOptions(b *testing.B) {
 	})
 }
 
-// BenchmarkOptionsValidation benchmarks Options.Validate() method
+// BenchmarkOptionsValidation benchmarks Options.Validate() method.
 func BenchmarkOptionsValidation(b *testing.B) {
 	opts := NewOptions(
 		WithVersion("test"),
@@ -54,7 +54,7 @@ func BenchmarkOptionsValidation(b *testing.B) {
 		WithOutFilename("out.go"),
 		WithStructName("Options"),
 		WithPackageName("pkg"),
-		WithDefaults(Defaults{From: DefaultsFromNone}),
+		WithDefaults(Defaults{From: DefaultsFromNone, Param: ""}),
 		WithConstructorTypeRender(ConstructorPublicRender),
 	)
 
@@ -66,7 +66,7 @@ func BenchmarkOptionsValidation(b *testing.B) {
 	}
 }
 
-// BenchmarkWithOptionals benchmarks chaining optional parameters
+// BenchmarkWithOptionals benchmarks chaining optional parameters.
 func BenchmarkWithOptionals(b *testing.B) {
 	b.Run("10_options", func(b *testing.B) {
 		b.ReportAllocs()
@@ -79,7 +79,7 @@ func BenchmarkWithOptionals(b *testing.B) {
 				WithOutFilename("out.go"),
 				WithStructName("Opts"),
 				WithPackageName("pkg"),
-				WithDefaults(Defaults{From: DefaultsFromNone}),
+				WithDefaults(Defaults{From: DefaultsFromNone, Param: ""}),
 				WithAllVariadic(false),
 				WithWithIsset(false),
 				WithConstructorTypeRender(ConstructorPublicRender),

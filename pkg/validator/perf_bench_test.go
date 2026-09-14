@@ -9,7 +9,7 @@ import (
 
 var benchValidatorSink *goplvalidator.Validate
 
-// BenchmarkGetValidatorForNil benchmarks getting default validator with nil input
+// BenchmarkGetValidatorForNil benchmarks getting default validator with nil input.
 func BenchmarkGetValidatorForNil(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -19,7 +19,7 @@ func BenchmarkGetValidatorForNil(b *testing.B) {
 	}
 }
 
-// BenchmarkGetValidatorForCustom benchmarks getting custom validator from options
+// BenchmarkGetValidatorForCustom benchmarks getting custom validator from options.
 func BenchmarkGetValidatorForCustom(b *testing.B) {
 	customOpts := &validatorProvider{}
 
@@ -31,11 +31,11 @@ func BenchmarkGetValidatorForCustom(b *testing.B) {
 	}
 }
 
-// BenchmarkGetValidatorForWithoutProvider benchmarks getting default validator from non-provider struct
+// BenchmarkGetValidatorForWithoutProvider benchmarks getting default validator from non-provider struct.
 func BenchmarkGetValidatorForWithoutProvider(b *testing.B) {
 	opts := &struct {
 		field string
-	}{}
+	}{field: ""}
 
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -45,16 +45,16 @@ func BenchmarkGetValidatorForWithoutProvider(b *testing.B) {
 	}
 }
 
-// BenchmarkValidatorSet benchmarks setting a new global validator
+// BenchmarkValidatorSet benchmarks setting a new global validator.
 func BenchmarkValidatorSet(b *testing.B) {
-	v := goplvalidator.New()
+	newValidator := goplvalidator.New()
 	originalValidator := validator.GetValidatorFor(nil)
 
 	b.ReportAllocs()
 	b.ResetTimer()
 
 	for b.Loop() {
-		validator.Set(v)
+		validator.Set(newValidator)
 	}
 
 	// Restore original validator after test

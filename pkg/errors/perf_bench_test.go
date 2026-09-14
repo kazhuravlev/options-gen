@@ -9,11 +9,11 @@ import (
 )
 
 var (
-	benchValidationErrorSink error
-	benchValidationErrorsSink error
+	errBenchValidationSink  error
+	errBenchValidationsSink error
 )
 
-// BenchmarkNewValidationError benchmarks creating a single validation error
+// BenchmarkNewValidationError benchmarks creating a single validation error.
 func BenchmarkNewValidationError(b *testing.B) {
 	err := io.EOF
 
@@ -21,21 +21,21 @@ func BenchmarkNewValidationError(b *testing.B) {
 	b.ResetTimer()
 
 	for b.Loop() {
-		benchValidationErrorSink = errors.NewValidationError("fieldName", err)
+		errBenchValidationSink = errors.NewValidationError("fieldName", err)
 	}
 }
 
-// BenchmarkNewValidationErrorNil benchmarks creating a validation error with nil error
+// BenchmarkNewValidationErrorNil benchmarks creating a validation error with nil error.
 func BenchmarkNewValidationErrorNil(b *testing.B) {
 	b.ReportAllocs()
 	b.ResetTimer()
 
 	for b.Loop() {
-		benchValidationErrorSink = errors.NewValidationError("fieldName", nil)
+		errBenchValidationSink = errors.NewValidationError("fieldName", nil)
 	}
 }
 
-// BenchmarkValidationErrorError benchmarks error string generation
+// BenchmarkValidationErrorError benchmarks error string generation.
 func BenchmarkValidationErrorError(b *testing.B) {
 	err := errors.NewValidationError("fieldName", io.EOF)
 
@@ -47,7 +47,7 @@ func BenchmarkValidationErrorError(b *testing.B) {
 	}
 }
 
-// BenchmarkValidationErrorIs benchmarks error checking
+// BenchmarkValidationErrorIs benchmarks error checking.
 func BenchmarkValidationErrorIs(b *testing.B) {
 	err := errors.NewValidationError("fieldName", io.EOF)
 
@@ -59,7 +59,7 @@ func BenchmarkValidationErrorIs(b *testing.B) {
 	}
 }
 
-// BenchmarkValidationErrorsAdd benchmarks adding errors to collection
+// BenchmarkValidationErrorsAdd benchmarks adding errors to collection.
 func BenchmarkValidationErrorsAdd(b *testing.B) {
 	b.Run("small_collection", func(b *testing.B) {
 		b.ReportAllocs()
@@ -107,7 +107,7 @@ func BenchmarkValidationErrorsAdd(b *testing.B) {
 	})
 }
 
-// BenchmarkValidationErrorsError benchmarks generating error string from collection
+// BenchmarkValidationErrorsError benchmarks generating error string from collection.
 func BenchmarkValidationErrorsError(b *testing.B) {
 	errs := new(errors.ValidationErrors)
 	for i := range 10 {
@@ -125,7 +125,7 @@ func BenchmarkValidationErrorsError(b *testing.B) {
 	}
 }
 
-// BenchmarkValidationErrorsAsError benchmarks converting to error interface
+// BenchmarkValidationErrorsAsError benchmarks converting to error interface.
 func BenchmarkValidationErrorsAsError(b *testing.B) {
 	errs := new(errors.ValidationErrors)
 	for i := range 10 {
@@ -143,7 +143,7 @@ func BenchmarkValidationErrorsAsError(b *testing.B) {
 	}
 }
 
-// BenchmarkValidationErrorsErrors benchmarks getting error list copy
+// BenchmarkValidationErrorsErrors benchmarks getting error list copy.
 func BenchmarkValidationErrorsErrors(b *testing.B) {
 	errs := new(errors.ValidationErrors)
 	for i := range 20 {
@@ -157,11 +157,11 @@ func BenchmarkValidationErrorsErrors(b *testing.B) {
 	b.ResetTimer()
 
 	for b.Loop() {
-		benchValidationErrorsSink = errs.AsError()
+		errBenchValidationsSink = errs.AsError()
 	}
 }
 
-// BenchmarkValidationErrorsEmptyError benchmarks empty collection error string
+// BenchmarkValidationErrorsEmptyError benchmarks empty collection error string.
 func BenchmarkValidationErrorsEmptyError(b *testing.B) {
 	errs := new(errors.ValidationErrors)
 
@@ -173,7 +173,7 @@ func BenchmarkValidationErrorsEmptyError(b *testing.B) {
 	}
 }
 
-// BenchmarkValidationErrorsEmptyAsError benchmarks empty collection as error
+// BenchmarkValidationErrorsEmptyAsError benchmarks empty collection as error.
 func BenchmarkValidationErrorsEmptyAsError(b *testing.B) {
 	errs := new(errors.ValidationErrors)
 
@@ -181,6 +181,6 @@ func BenchmarkValidationErrorsEmptyAsError(b *testing.B) {
 	b.ResetTimer()
 
 	for b.Loop() {
-		benchValidationErrorsSink = errs.AsError()
+		errBenchValidationsSink = errs.AsError()
 	}
 }

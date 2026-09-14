@@ -1,4 +1,4 @@
-//nolint:testpackage,varnamelen
+//nolint:testpackage
 package generator
 
 import (
@@ -12,16 +12,15 @@ import (
 )
 
 var (
-	benchPruneUnusedImportsSink []byte
-	benchOptimizeSourceSink     []byte
-	benchNormalizeSink          string
-	benchRenderExprSink         string
-	benchIsPublicSink           bool
-	benchCheckDefaultSink       error
-	benchDeleteByIndexSink      []string
+	benchOptimizeSourceSink  []byte
+	benchNormalizeSink       string
+	benchRenderExprSink      string
+	benchIsPublicSink        bool
+	errBenchCheckDefaultSink error
+	benchDeleteByIndexSink   []string
 )
 
-// BenchmarkOptimizeGeneratedSource benchmarks the optimization of generated source code
+// BenchmarkOptimizeGeneratedSource benchmarks the optimization of generated source code.
 func BenchmarkOptimizeGeneratedSource(b *testing.B) {
 	// Prepare a typical generated source with unused imports
 	testSource := []byte(`package testcase
@@ -61,7 +60,7 @@ func WithField1(v string) OptOptionsSetter {
 	}
 }
 
-// BenchmarkPruneUnusedImports benchmarks the import pruning logic
+// BenchmarkPruneUnusedImports benchmarks the import pruning logic.
 func BenchmarkPruneUnusedImports(b *testing.B) {
 	fset := token.NewFileSet()
 
@@ -94,7 +93,7 @@ func Test() string {
 	}
 }
 
-// BenchmarkNormalizeTypeName benchmarks type name normalization
+// BenchmarkNormalizeTypeName benchmarks type name normalization.
 func BenchmarkNormalizeTypeName(b *testing.B) {
 	testCases := []string{
 		"int",
@@ -117,7 +116,7 @@ func BenchmarkNormalizeTypeName(b *testing.B) {
 	}
 }
 
-// BenchmarkRenderExprString benchmarks AST expression rendering
+// BenchmarkRenderExprString benchmarks AST expression rendering.
 func BenchmarkRenderExprString(b *testing.B) {
 	fset := token.NewFileSet()
 
@@ -160,7 +159,7 @@ var y []string`
 	}
 }
 
-// BenchmarkIsPublic benchmarks the public/private field name check
+// BenchmarkIsPublic benchmarks the public/private field name check.
 func BenchmarkIsPublic(b *testing.B) {
 	testCases := []string{
 		"Field",
@@ -187,7 +186,7 @@ func BenchmarkIsPublic(b *testing.B) {
 	}
 }
 
-// BenchmarkCheckDefaultValue benchmarks default value validation
+// BenchmarkCheckDefaultValue benchmarks default value validation.
 func BenchmarkCheckDefaultValue(b *testing.B) {
 	testCases := []struct {
 		fieldType string
@@ -210,12 +209,12 @@ func BenchmarkCheckDefaultValue(b *testing.B) {
 
 	for b.Loop() {
 		for _, tc := range testCases {
-			benchCheckDefaultSink = checkDefaultValue(tc.fieldType, tc.value)
+			errBenchCheckDefaultSink = checkDefaultValue(tc.fieldType, tc.value)
 		}
 	}
 }
 
-// BenchmarkDeleteByIndex benchmarks slice element deletion
+// BenchmarkDeleteByIndex benchmarks slice element deletion.
 func BenchmarkDeleteByIndex(b *testing.B) {
 	b.Run("small_slice", func(b *testing.B) {
 		b.ReportAllocs()
@@ -254,7 +253,7 @@ func BenchmarkDeleteByIndex(b *testing.B) {
 	})
 }
 
-// BenchmarkMergeImportSpecs benchmarks import spec merging
+// BenchmarkMergeImportSpecs benchmarks import spec merging.
 func BenchmarkMergeImportSpecs(b *testing.B) {
 	fset := token.NewFileSet()
 	source1 := `package test; import ("fmt"; "strings"; "bytes")`
@@ -287,15 +286,25 @@ func BenchmarkMergeImportSpecs(b *testing.B) {
 	}
 }
 
-// BenchmarkApplyExcludesWithRegex benchmarks regex-based option exclusion
+// BenchmarkApplyExcludesWithRegex benchmarks regex-based option exclusion.
 func BenchmarkApplyExcludesWithRegex(b *testing.B) {
 	specSize := 50
 	options := make([]OptionMeta, specSize)
 	for i := range specSize {
 		options[i] = OptionMeta{
-			Name:  fmt.Sprintf("Option%d", i),
-			Field: fmt.Sprintf("option%d", i),
-			Type:  "string",
+			Name:      fmt.Sprintf("Option%d", i),
+			Docstring: "",
+			Field:     fmt.Sprintf("option%d", i),
+			Type:      "string",
+			TagOption: TagOption{
+				IsRequired:    false,
+				GoValidator:   "",
+				Default:       "",
+				Variadic:      false,
+				VariadicIsSet: false,
+				Skip:          false,
+				Name:          "",
+			},
 		}
 	}
 
@@ -312,7 +321,7 @@ func BenchmarkApplyExcludesWithRegex(b *testing.B) {
 	}
 }
 
-// BenchmarkImportSpecName benchmarks import spec name extraction
+// BenchmarkImportSpecName benchmarks import spec name extraction.
 func BenchmarkImportSpecName(b *testing.B) {
 	fset := token.NewFileSet()
 	source := `package test
@@ -345,7 +354,7 @@ import (
 	}
 }
 
-// BenchmarkMakeTemplateOptions benchmarks template option preparation
+// BenchmarkMakeTemplateOptions benchmarks template option preparation.
 func BenchmarkMakeTemplateOptions(b *testing.B) {
 	options := make([]OptionMeta, 0, 50)
 	for i := range 50 {
@@ -355,8 +364,13 @@ func BenchmarkMakeTemplateOptions(b *testing.B) {
 			Field:     fmt.Sprintf("option%d", i),
 			Type:      "string",
 			TagOption: TagOption{
-				Name:       fmt.Sprintf("opt%d", i),
-				IsRequired: i%3 == 0,
+				IsRequired:    i%3 == 0,
+				GoValidator:   "",
+				Default:       "",
+				Variadic:      false,
+				VariadicIsSet: false,
+				Skip:          false,
+				Name:          fmt.Sprintf("opt%d", i),
 			},
 		})
 	}
@@ -369,7 +383,7 @@ func BenchmarkMakeTemplateOptions(b *testing.B) {
 	}
 }
 
-// BenchmarkRenderSmallSpec benchmarks rendering with small spec (adds coverage for edge cases)
+// BenchmarkRenderSmallSpec benchmarks rendering with small spec (adds coverage for edge cases).
 func BenchmarkRenderSmallSpec(b *testing.B) {
 	_ = filepath.Join("..", "..", "options-gen", "testdata", "case-02-builtin-types", "options.go")
 	spec := &OptionSpec{
@@ -382,8 +396,13 @@ func BenchmarkRenderSmallSpec(b *testing.B) {
 				Field:     "field1",
 				Type:      "string",
 				TagOption: TagOption{
-					IsRequired: false,
-					Default:    "default",
+					IsRequired:    false,
+					GoValidator:   "",
+					Default:       "default",
+					Variadic:      false,
+					VariadicIsSet: false,
+					Skip:          false,
+					Name:          "",
 				},
 			},
 		},
@@ -412,7 +431,7 @@ func BenchmarkRenderSmallSpec(b *testing.B) {
 	}
 }
 
-// BenchmarkExtractFields benchmarks field list extraction
+// BenchmarkExtractFields benchmarks field list extraction.
 func BenchmarkExtractFields(b *testing.B) {
 	fset := token.NewFileSet()
 	source := `package test
