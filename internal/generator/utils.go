@@ -10,7 +10,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"reflect"
 	"slices"
 	"strconv"
 	"strings"
@@ -32,7 +31,8 @@ func formatComment(comment string) string {
 		return "// " + comment
 	}
 
-	buf := make([]byte, 0, len(comment)+strings.Count(comment, "\n")*3)
+	var buf strings.Builder
+	buf.Grow(len(comment) + (strings.Count(comment, "\n")+1)*3)
 	lineStart := 0
 	lineIndex := 0
 
@@ -47,17 +47,17 @@ func formatComment(comment string) string {
 		}
 
 		if lineIndex != 0 {
-			buf = append(buf, '\n')
+			buf.WriteByte('\n')
 		}
 
-		buf = append(buf, '/', '/', ' ')
-		buf = append(buf, comment[lineStart:i]...)
+		buf.WriteString("// ")
+		buf.WriteString(comment[lineStart:i])
 
 		lineIndex++
 		lineStart = i + 1
 	}
 
-	return string(buf)
+	return buf.String()
 }
 
 func findStructTypeParamsAndFields(fset *token.FileSet, filePath, typeName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll
@@ -711,12 +711,11 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 		return tagOpt, nil
 	}
 
-	tagValue := reflect.StructTag(strings.Trim(tag.Value, "`"))
-	tagOpt.GoValidator = tagValue.Get("validate")
-	tagOpt.Default = tagValue.Get(tagName)
+	goValidator, defaultValue, optionTag := lookupTagValues(strings.Trim(tag.Value, "`"), tagName)
+	tagOpt.GoValidator = goValidator
+	tagOpt.Default = defaultValue
 
 	var warnings []string
-	optionTag := tagValue.Get("option")
 	for len(optionTag) > 0 {
 		nextComma := strings.IndexByte(optionTag, ',')
 		opt := optionTag
@@ -768,6 +767,86 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 	}
 
 	return tagOpt, warnings
+}
+
+// lookupTagValues scans the struct tag once and returns the values of the
+// `validate`, tagName and `option` keys. It follows the same parsing rules as
+// reflect.StructTag.Lookup but avoids re-scanning the tag for every key.
+func lookupTagValues(tag, tagName string) (validate, defaultValue, option string) { //nolint:cyclop
+	var haveValidate, haveDefault, haveOption bool
+
+	for tag != "" {
+		// Skip leading space.
+		i := 0
+		for i < len(tag) && tag[i] == ' ' {
+			i++
+		}
+
+		tag = tag[i:]
+		if tag == "" {
+			break
+		}
+
+		// Scan to colon. A space, a quote or a control character is a syntax error.
+		i = 0
+		for i < len(tag) && tag[i] > ' ' && tag[i] != ':' && tag[i] != '"' && tag[i] != 0x7f {
+			i++
+		}
+
+		if i == 0 || i+1 >= len(tag) || tag[i] != ':' || tag[i+1] != '"' {
+			break
+		}
+
+		name := tag[:i]
+		tag = tag[i+1:]
+
+		// Scan quoted string to find value.
+		i = 1
+		for i < len(tag) && tag[i] != '"' {
+			if tag[i] == '\\' {
+				i++
+			}
+			i++
+		}
+
+		if i >= len(tag) {
+			break
+		}
+
+		qvalue := tag[:i+1]
+		tag = tag[i+1:]
+
+		if name != "validate" && name != tagName && name != "option" {
+			continue
+		}
+
+		value, err := strconv.Unquote(qvalue)
+
+		// The first occurrence of a key wins, malformed values resolve to an
+		// empty string — exactly like reflect.StructTag.Lookup.
+		if name == "validate" && !haveValidate {
+			haveValidate = true
+			if err == nil {
+				validate = value
+			}
+		}
+
+		if name == tagName && !haveDefault {
+			haveDefault = true
+			if err == nil {
+				defaultValue = value
+			}
+		}
+
+		if name == "option" && !haveOption {
+			haveOption = true
+			if err == nil {
+				option = value
+			}
+		}
+	}
+
+	return validate, defaultValue, option
 }
 
 func deprecatedRequiredWarning(fieldName string) string {

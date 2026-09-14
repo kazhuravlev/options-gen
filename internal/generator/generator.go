@@ -184,20 +184,18 @@ type templateOptionMeta struct {
 }
 
 func makeTemplateOptions(options []OptionMeta) []templateOptionMeta {
-	res := make([]templateOptionMeta, 0, len(options))
-	for _, opt := range options {
-		targetName := opt.Name
-		targetField := opt.Field
-		if opt.TagOption.Name != "" {
-			targetName = opt.TagOption.Name
-			targetField = opt.TagOption.Name
-		}
+	res := make([]templateOptionMeta, len(options))
+	for i := range options {
+		tplOpt := &res[i]
+		tplOpt.OptionMeta = options[i]
 
-		res = append(res, templateOptionMeta{
-			OptionMeta:  opt,
-			TargetName:  targetName,
-			TargetField: targetField,
-		})
+		if name := tplOpt.TagOption.Name; name != "" {
+			tplOpt.TargetName = name
+			tplOpt.TargetField = name
+		} else {
+			tplOpt.TargetName = tplOpt.Name
+			tplOpt.TargetField = tplOpt.Field
+		}
 	}
 
 	return res
