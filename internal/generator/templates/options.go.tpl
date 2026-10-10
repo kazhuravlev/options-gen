@@ -95,11 +95,11 @@ func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsS
 {{end}}
 
 {{ range .options }}
-	{{ if not .TagOption.IsRequired }}
+{{ if not .TagOption.IsRequired }}
 		{{- if ne .Docstring "" -}}
 			{{ .Docstring }}
 		{{- end }}
-		func With{{$.optionsPrefix}}{{ .TargetName }}{{ $.optionsTypeParamsSpec }}(opt {{if .TagOption.Variadic}}...{{end}}{{ .Type }}) {{$.optionsTypeName}}{{ $.optionsTypeParams }} {
+func With{{$.optionsPrefix}}{{ .TargetName }}{{ $.optionsTypeParamsSpec }}(opt {{if .TagOption.Variadic}}...{{end}}{{ .Type }}) {{$.optionsTypeName}}{{ $.optionsTypeParams }} {
 			return func(o *{{ $.optionsStructInstanceType }}) {
 				{{- if .TagOption.Variadic -}}
 					o.{{ .Field }} = append(o.{{ .Field }}, opt...)

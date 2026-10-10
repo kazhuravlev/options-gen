@@ -2,6 +2,7 @@ package generator
 
 import (
 	"bytes"
+	"cmp"
 	"embed"
 	"errors"
 	"fmt"
@@ -13,7 +14,9 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"slices"
 	"strconv"
+	"strings"
 	"syscall"
 	"text/template"
 
@@ -29,8 +32,34 @@ var tmpl = template.Must(template.ParseFS(templates, "templates/options.go.tpl")
 
 const generatedFormatTabWidth = 8
 
+// Rough size of the rendered source: a fixed part plus the constructor line,
+// the With* function and the validator of every option. It only pre-sizes the
+// render buffer, so a miss costs nothing but a reallocation.
+const (
+	renderedBaseSize   = 1024
+	renderedOptionSize = 512
+)
+
 // Render will render file and out it's content.
 func Render(opts Options) ([]byte, error) {
+	src, err := renderTemplate(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	formatted, err := formatGeneratedSource(src)
+	if err != nil {
+		_, _ = os.Stdout.Write(src) // For issues debug.
+
+		return nil, fmt.Errorf("cannot optimize generated source: %w", err)
+	}
+
+	return formatted, nil
+}
+
+// renderTemplate executes the options template and returns the raw, not yet
+// formatted source.
+func renderTemplate(opts Options) ([]byte, error) {
 	if err := opts.Validate(); err != nil {
 		return nil, fmt.Errorf("bad configuration: %w", err)
 	}
@@ -68,20 +97,182 @@ func Render(opts Options) ([]byte, error) {
 
 		"constructorTypeRender": opts.constructorTypeRender,
 	}
-	buf := new(bytes.Buffer)
+	buf := bytes.NewBuffer(make([]byte, 0, renderedBaseSize+renderedOptionSize*len(options)))
 
 	if err := tmpl.Execute(buf, tplContext); err != nil {
 		return nil, fmt.Errorf("cannot render template: %w", err)
 	}
 
-	formatted, err := optimizeGeneratedSource(buf.Bytes())
-	if err != nil {
-		_, _ = os.Stdout.Write(buf.Bytes()) // For issues debug.
+	return buf.Bytes(), nil
+}
 
-		return nil, fmt.Errorf("cannot optimize generated source: %w", err)
+// formatGeneratedSource turns the rendered template output into the final
+// file: it drops the imports that the code does not reference, lays the rest
+// out the way goimports does (standard library first, then the other packages,
+// sorted by path within a group, duplicates removed) and gofmt-formats the
+// source once.
+//
+// It produces the same bytes as optimizeGeneratedSource, which is kept as the
+// reference implementation for tests: that one parses and prints the source
+// four times (go/format and golang.org/x/tools/imports each do it twice).
+// The single pass relies on the template rendering doc comments in column 1:
+// go/printer reformats a doc comment only when it is unindented and abuts its
+// declaration, and the multi-pass pipeline got that on its second pass.
+func formatGeneratedSource(src []byte) ([]byte, error) {
+	// Neither comments nor object resolution matter for finding import usages.
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "", src, parser.SkipObjectResolution)
+	if err != nil {
+		return nil, fmt.Errorf("parse generated source: %w", err)
+	}
+
+	// Imports always precede other declarations, so the import declarations
+	// form one contiguous span of the source that is replaced as a whole.
+	// The template renders a single import declaration.
+	importDecls := make([]*ast.GenDecl, 0, 1)
+	for _, decl := range file.Decls {
+		genDecl, ok := decl.(*ast.GenDecl)
+		if !ok || genDecl.Tok != token.IMPORT {
+			break
+		}
+
+		importDecls = append(importDecls, genDecl)
+	}
+
+	if len(importDecls) > 0 {
+		used := usedSelectorBases(file)
+
+		// The used imports are collected in runs: an unused import ends the
+		// current run. That mirrors the multi-pass pipeline, where a pruned
+		// spec left a blank line behind and gofmt/goimports sort and group
+		// imports separated by a blank line independently.
+		var runs [][]*ast.ImportSpec
+		var run []*ast.ImportSpec
+		for _, decl := range importDecls {
+			for _, spec := range decl.Specs {
+				imp := spec.(*ast.ImportSpec)
+				if isImportUsed(imp, used) {
+					run = append(run, imp)
+				} else if len(run) > 0 {
+					runs = append(runs, run)
+					run = nil
+				}
+			}
+		}
+
+		if len(run) > 0 {
+			runs = append(runs, run)
+		}
+
+		tokFile := fset.File(file.Pos())
+		start := tokFile.Offset(importDecls[0].Pos())
+		end := tokFile.Offset(importDecls[len(importDecls)-1].End())
+		block := renderImportBlock(runs)
+
+		spliced := make([]byte, 0, len(src)-(end-start)+len(block))
+		spliced = append(spliced, src[:start]...)
+		spliced = append(spliced, block...)
+		spliced = append(spliced, src[end:]...)
+		src = spliced
+	}
+
+	formatted, err := format.Source(src)
+	if err != nil {
+		return nil, fmt.Errorf("format generated source: %w", err)
 	}
 
 	return formatted, nil
+}
+
+// Import groups as goimports numbers them when no local prefix is configured.
+// The appengine group is a goimports legacy that is mirrored for byte parity.
+const (
+	importGroupStd = iota
+	importGroupOther
+	importGroupAppengine
+)
+
+func importGroup(importPath string) int {
+	if strings.HasPrefix(importPath, "appengine") {
+		return importGroupAppengine
+	}
+
+	firstElem, _, _ := strings.Cut(importPath, "/")
+	if strings.Contains(firstElem, ".") {
+		return importGroupOther
+	}
+
+	return importGroupStd
+}
+
+type importLine struct {
+	group int
+	path  string // Unquoted import path, "" if the literal is malformed.
+	name  string // Explicit import name, "" for an implicit one.
+	text  string // The spec as written inside the import block.
+}
+
+// renderImportBlock renders a parenthesized import declaration from runs of
+// import specs. Every run is laid out on its own in goimports style: specs
+// sorted by group, path and name, exact duplicates dropped and a blank line
+// between groups; a blank line separates the runs. It returns "" when there
+// is nothing to import.
+func renderImportBlock(runs [][]*ast.ImportSpec) string {
+	var buf strings.Builder
+	for _, run := range runs {
+		if buf.Len() == 0 {
+			buf.WriteString("import (\n")
+		} else {
+			buf.WriteByte('\n')
+		}
+
+		lines := sortedImportLines(run)
+		for i, line := range lines {
+			if i > 0 && lines[i-1].group != line.group {
+				buf.WriteByte('\n')
+			}
+
+			buf.WriteByte('\t')
+			buf.WriteString(line.text)
+			buf.WriteByte('\n')
+		}
+	}
+
+	if buf.Len() == 0 {
+		return ""
+	}
+
+	buf.WriteByte(')')
+
+	return buf.String()
+}
+
+// sortedImportLines returns specs sorted by group, path and name, without
+// exact duplicates.
+func sortedImportLines(specs []*ast.ImportSpec) []importLine {
+	lines := make([]importLine, 0, len(specs))
+	for _, spec := range specs {
+		importPath, _ := strconv.Unquote(spec.Path.Value)
+		line := importLine{group: importGroup(importPath), path: importPath, name: "", text: spec.Path.Value}
+		if spec.Name != nil {
+			line.name = spec.Name.Name
+			line.text = spec.Name.Name + " " + spec.Path.Value
+		}
+
+		lines = append(lines, line)
+	}
+
+	slices.SortFunc(lines, func(a, b importLine) int {
+		return cmp.Or(
+			cmp.Compare(a.group, b.group),
+			strings.Compare(a.path, b.path),
+			strings.Compare(a.name, b.name),
+		)
+	})
+
+	return slices.CompactFunc(lines, func(a, b importLine) bool {
+		return a.path == b.path && a.name == b.name
+	})
 }
 
 func optimizeGeneratedSource(src []byte) ([]byte, error) {
@@ -114,7 +305,9 @@ func optimizeGeneratedSource(src []byte) ([]byte, error) {
 	return formatted, nil
 }
 
-func pruneUnusedImports(file *ast.File) {
+// usedSelectorBases returns the identifiers used as the base of a selector
+// expression (the `pkg` of `pkg.Name`) anywhere in file outside import specs.
+func usedSelectorBases(file *ast.File) map[string]struct{} {
 	usedSelectors := make(map[string]struct{})
 	ast.Inspect(file, func(node ast.Node) bool {
 		switch node := node.(type) {
@@ -129,6 +322,25 @@ func pruneUnusedImports(file *ast.File) {
 		return true
 	})
 
+	return usedSelectors
+}
+
+// isImportUsed reports whether imp has to stay: dot and blank imports always
+// do, the others only when their name is used as a selector base.
+func isImportUsed(imp *ast.ImportSpec, usedSelectors map[string]struct{}) bool {
+	importName := importSpecName(imp)
+	if importName == "_" || importName == "." {
+		return true
+	}
+
+	_, ok := usedSelectors[importName]
+
+	return ok
+}
+
+func pruneUnusedImports(file *ast.File) {
+	usedSelectors := usedSelectorBases(file)
+
 	importDecls := file.Decls[:0]
 	for _, decl := range file.Decls {
 		genDecl, ok := decl.(*ast.GenDecl)
@@ -140,15 +352,7 @@ func pruneUnusedImports(file *ast.File) {
 
 		importSpecs := genDecl.Specs[:0]
 		for _, spec := range genDecl.Specs {
-			imp := spec.(*ast.ImportSpec)
-			importName := importSpecName(imp)
-			if importName == "_" || importName == "." {
-				importSpecs = append(importSpecs, spec)
-
-				continue
-			}
-
-			if _, ok := usedSelectors[importName]; ok {
+			if isImportUsed(spec.(*ast.ImportSpec), usedSelectors) {
 				importSpecs = append(importSpecs, spec)
 			}
 		}
