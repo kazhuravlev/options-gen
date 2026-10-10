@@ -26,6 +26,7 @@ func NewOptions(
 	o.outPrefix = defaultOptions.outPrefix
 	o.defaults = defaultOptions.defaults
 	o.showWarnings = defaultOptions.showWarnings
+	o.ignoreErrors = defaultOptions.ignoreErrors
 	o.withIsset = defaultOptions.withIsset
 	o.allVariadic = defaultOptions.allVariadic
 	o.constructorTypeRender = defaultOptions.constructorTypeRender
@@ -69,6 +70,10 @@ func WithDefaults(opt Defaults) OptOptionsSetter {
 
 func WithShowWarnings(opt bool) OptOptionsSetter {
 	return func(o *Options) { o.showWarnings = opt }
+}
+
+func WithIgnoreErrors(opt bool) OptOptionsSetter {
+	return func(o *Options) { o.ignoreErrors = opt }
 }
 
 func WithWithIsset(opt bool) OptOptionsSetter {

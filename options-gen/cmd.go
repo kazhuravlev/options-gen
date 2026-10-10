@@ -1,13 +1,18 @@
 package optionsgen
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/kazhuravlev/options-gen/internal/ctype"
 	"github.com/kazhuravlev/options-gen/internal/generator"
 )
+
+// ErrGeneratorWarnings is returned in strict mode when the generator produced warnings.
+var ErrGeneratorWarnings = errors.New("generator found issues (use ignore-errors to downgrade them to warnings)")
 
 type DefaultsFrom string
 
@@ -75,6 +80,10 @@ func Run(opts Options) error {
 	))
 	if err != nil {
 		return fmt.Errorf("cannot renderOptions template: %w", err)
+	}
+
+	if !opts.ignoreErrors && len(spec.Warnings) > 0 {
+		return fmt.Errorf("%w:\n%s", ErrGeneratorWarnings, strings.TrimSpace(strings.Join(spec.Warnings, "\n")))
 	}
 
 	if err := os.WriteFile(opts.outFilename, res, ctype.DefaultPermission); err != nil {

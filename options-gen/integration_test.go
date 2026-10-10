@@ -144,6 +144,7 @@ type Options struct {
 		WithInFilename(inputFile),
 		WithOutFilename(outputFile),
 		WithShowWarnings(true),
+		WithIgnoreErrors(true),
 		WithWarningsHandler(handler),
 	)
 
@@ -229,6 +230,7 @@ type Options struct {
 					From:  tt.defaultsFrom,
 					Param: tt.param,
 				}),
+				WithIgnoreErrors(true),
 			)
 			if err := Run(opts); tt.wantErr {
 				require.Error(t, err)

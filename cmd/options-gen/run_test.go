@@ -318,7 +318,7 @@ func TestRun_Success(t *testing.T) {
 		{caseDir: "case-14-defaults-func", args: []string{"-out-prefix=Some", "-defaults-from=func=getDefaults"}},
 		{caseDir: "case-15-private-constructor", args: []string{"-constructor=private"}},
 		{caseDir: "case-16-without-cosntructor", args: []string{"-constructor=no"}},
-		{caseDir: "case-19.2-all-variadic", args: []string{"-all-variadic"}},
+		{caseDir: "case-19.2-all-variadic", args: []string{"-all-variadic", "-ignore-errors"}},
 		{caseDir: "case-20-isset", args: []string{"-with-isset"}},
 	}
 
@@ -359,7 +359,7 @@ func TestRun_Warnings(t *testing.T) {
 
 		var out bytes.Buffer
 
-		err := run(requiredArgs(inputFile, outputFile), noEnv, &out)
+		err := run(append(requiredArgs(inputFile, outputFile), "-ignore-errors"), noEnv, &out)
 		require.NoError(t, err)
 		assert.Contains(t, out.String(), "Warning: consider to make `PublicField` is private")
 		assert.FileExists(t, outputFile)
@@ -372,7 +372,7 @@ func TestRun_Warnings(t *testing.T) {
 
 		var out bytes.Buffer
 
-		err := run(append(requiredArgs(inputFile, outputFile), "-mute-warnings"), noEnv, &out)
+		err := run(append(requiredArgs(inputFile, outputFile), "-mute-warnings", "-ignore-errors"), noEnv, &out)
 		require.NoError(t, err)
 		assert.Empty(t, out.String())
 		assert.FileExists(t, outputFile)

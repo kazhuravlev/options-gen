@@ -49,6 +49,7 @@ type Options struct {
 				WithStructName("Options"),
 				WithInFilename(inputFile),
 				WithOutFilename(outputFile),
+				WithIgnoreErrors(true),
 			)
 			if err := Run(opts); err != nil {
 				errors <- fmt.Errorf("goroutine %d: Run() failed: %w", id, err)
