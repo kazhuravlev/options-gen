@@ -22,15 +22,12 @@ import (
 
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-	"golang.org/x/tools/imports"
 )
 
 //go:embed templates/options.go.tpl
 var templates embed.FS
 
 var tmpl = template.Must(template.ParseFS(templates, "templates/options.go.tpl"))
-
-const generatedFormatTabWidth = 8
 
 // Rough size of the rendered source: a fixed part plus the constructor line,
 // the With* function and the validator of every option. It only pre-sizes the
@@ -112,9 +109,10 @@ func renderTemplate(opts Options) ([]byte, error) {
 // sorted by path within a group, duplicates removed) and gofmt-formats the
 // source once.
 //
-// It produces the same bytes as optimizeGeneratedSource, which is kept as the
-// reference implementation for tests: that one parses and prints the source
-// four times (go/format and golang.org/x/tools/imports each do it twice).
+// It produces the same bytes as the previous pipeline, optimizeGeneratedSource,
+// which parsed and printed the source four times (go/format and
+// golang.org/x/tools/imports each do it twice). That pipeline lives in
+// legacy_format_test.go as the reference implementation for the parity tests.
 // The single pass relies on the template rendering doc comments in column 1:
 // go/printer reformats a doc comment only when it is unindented and abuts its
 // declaration, and the multi-pass pipeline got that on its second pass.
@@ -275,36 +273,6 @@ func sortedImportLines(specs []*ast.ImportSpec) []importLine {
 	})
 }
 
-func optimizeGeneratedSource(src []byte) ([]byte, error) {
-	fset := token.NewFileSet()
-	file, err := parser.ParseFile(fset, "", src, parser.ParseComments)
-	if err != nil {
-		return nil, fmt.Errorf("parse generated source: %w", err)
-	}
-
-	pruneUnusedImports(file)
-	ast.SortImports(fset, file)
-
-	var buf bytes.Buffer
-	if err := format.Node(&buf, fset, file); err != nil {
-		return nil, fmt.Errorf("format generated source: %w", err)
-	}
-
-	formatted, err := imports.Process("", buf.Bytes(), &imports.Options{
-		Fragment:   false,
-		AllErrors:  false,
-		Comments:   true,
-		TabIndent:  true,
-		TabWidth:   generatedFormatTabWidth,
-		FormatOnly: true,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("sort generated imports: %w", err)
-	}
-
-	return formatted, nil
-}
-
 // usedSelectorBases returns the identifiers used as the base of a selector
 // expression (the `pkg` of `pkg.Name`) anywhere in file outside import specs.
 func usedSelectorBases(file *ast.File) map[string]struct{} {
@@ -336,36 +304,6 @@ func isImportUsed(imp *ast.ImportSpec, usedSelectors map[string]struct{}) bool {
 	_, ok := usedSelectors[importName]
 
 	return ok
-}
-
-func pruneUnusedImports(file *ast.File) {
-	usedSelectors := usedSelectorBases(file)
-
-	importDecls := file.Decls[:0]
-	for _, decl := range file.Decls {
-		genDecl, ok := decl.(*ast.GenDecl)
-		if !ok || genDecl.Tok != token.IMPORT {
-			importDecls = append(importDecls, decl)
-
-			continue
-		}
-
-		importSpecs := genDecl.Specs[:0]
-		for _, spec := range genDecl.Specs {
-			if isImportUsed(spec.(*ast.ImportSpec), usedSelectors) {
-				importSpecs = append(importSpecs, spec)
-			}
-		}
-
-		if len(importSpecs) == 0 {
-			continue
-		}
-
-		genDecl.Specs = importSpecs
-		importDecls = append(importDecls, genDecl)
-	}
-
-	file.Decls = importDecls
 }
 
 func importSpecName(imp *ast.ImportSpec) string {

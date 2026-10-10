@@ -97,7 +97,7 @@ func BenchmarkGetOptionSpecCriticalPath(b *testing.B) {
 }
 
 // BenchmarkRenderCriticalPath measures Render (template execution plus
-// optimizeGeneratedSource) for specs of a growing number of string options, all of
+// formatGeneratedSource) for specs of a growing number of string options, all of
 // them with a `required` validator and every fourth one mandatory.
 func BenchmarkRenderCriticalPath(b *testing.B) {
 	for _, optionCount := range []int{1, 10, 50, 100} {

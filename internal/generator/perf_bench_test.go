@@ -5,13 +5,12 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"slices"
 	"strconv"
 	"testing"
 )
 
 var (
-	benchOptimizeSourceSink  []byte
+	benchFormatSourceSink    []byte
 	benchNormalizeSink       string
 	benchRenderExprSink      string
 	benchIsPublicSink        bool
@@ -23,43 +22,10 @@ var (
 	benchRenderSmallSink     []byte
 )
 
-// importsSnapshot remembers file.Decls and the specs of every import declaration so
-// that pruneUnusedImports, which edits both slices in place, can be re-run on identical
-// input without re-parsing the file. restore performs no allocations.
-type importsSnapshot struct {
-	file  *ast.File
-	decls []ast.Decl
-	specs map[*ast.GenDecl][]ast.Spec
-}
-
-func snapshotImports(file *ast.File) *importsSnapshot {
-	snap := &importsSnapshot{
-		file:  file,
-		decls: slices.Clone(file.Decls),
-		specs: make(map[*ast.GenDecl][]ast.Spec),
-	}
-
-	for _, decl := range file.Decls {
-		genDecl, ok := decl.(*ast.GenDecl)
-		if ok && genDecl.Tok == token.IMPORT {
-			snap.specs[genDecl] = slices.Clone(genDecl.Specs)
-		}
-	}
-
-	return snap
-}
-
-func (s *importsSnapshot) restore() {
-	s.file.Decls = append(s.file.Decls[:0], s.decls...)
-	for genDecl, specs := range s.specs {
-		genDecl.Specs = append(genDecl.Specs[:0], specs...)
-	}
-}
-
-// BenchmarkOptimizeGeneratedSource benchmarks the whole post-processing pipeline
-// (parse, prune imports, format, imports.Process) on a tiny hand-written source.
-// See BenchmarkRenderStages/optimize_source for realistic rendered inputs.
-func BenchmarkOptimizeGeneratedSource(b *testing.B) {
+// BenchmarkFormatGeneratedSource benchmarks the whole post-processing pipeline
+// (parse, prune imports, render the import block, gofmt) on a tiny hand-written
+// source. See BenchmarkRenderStages/format_source for realistic rendered inputs.
+func BenchmarkFormatGeneratedSource(b *testing.B) {
 	testSource := []byte(`package testcase
 
 import (
@@ -89,51 +55,10 @@ func WithField1(v string) OptOptionsSetter {
 
 	var err error
 	for b.Loop() {
-		benchOptimizeSourceSink, err = optimizeGeneratedSource(testSource)
+		benchFormatSourceSink, err = formatGeneratedSource(testSource)
 		if err != nil {
 			b.Fatal(err)
 		}
-	}
-}
-
-// BenchmarkPruneUnusedImports benchmarks only the import pruning logic. The file is
-// parsed once; the in-place edits of pruneUnusedImports are undone before every
-// iteration so each call sees the same five imports.
-func BenchmarkPruneUnusedImports(b *testing.B) {
-	source := `package testcase
-
-import (
-	"fmt"
-	"io"
-	"strings"
-	"time"
-	"bytes"
-)
-
-type Options struct {
-	field string
-}
-
-func Test() string {
-	return fmt.Sprintf("%s", "test")
-}`
-
-	file, err := parser.ParseFile(token.NewFileSet(), "", []byte(source), parser.ParseComments)
-	if err != nil {
-		b.Fatal(err)
-	}
-
-	snap := snapshotImports(file)
-
-	b.ReportAllocs()
-
-	for b.Loop() {
-		snap.restore()
-		pruneUnusedImports(file)
-	}
-
-	if len(file.Imports) != 5 || len(file.Decls) != 3 {
-		b.Fatalf("unexpected pruned file: %d imports, %d decls", len(file.Imports), len(file.Decls))
 	}
 }
 

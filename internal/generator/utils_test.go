@@ -236,7 +236,7 @@ func Test_typeParamsStr(t *testing.T) {
 	}
 }
 
-func Test_optimizeGeneratedSource_PrunesOnlyUnusedNamedImports(t *testing.T) {
+func Test_formatGeneratedSource_PrunesOnlyUnusedNamedImports(t *testing.T) {
 	src := []byte(`package testcase
 
 import (
@@ -252,7 +252,7 @@ var _ = alias.Builder{}
 var _ = Pi
 `)
 
-	got, err := optimizeGeneratedSource(src)
+	got, err := formatGeneratedSource(src)
 	require.NoError(t, err)
 
 	gotStr := string(got)
