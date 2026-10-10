@@ -375,6 +375,9 @@ func GetOptionSpec(
 
 	options := make([]OptionMeta, 0, len(fields))
 	packageStore := NewPackageStore(fset, workDir)
+	// A cases.Caser is not safe for concurrent use, but building one per
+	// field is needless: this one is used sequentially within this call.
+	titleCaser := cases.Title(language.English, cases.NoLower)
 
 	var warnings []string
 	for idx := range fields {
@@ -403,7 +406,7 @@ func GetOptionSpec(
 
 		warnings = append(warnings, tagWarnings...)
 		optMeta := OptionMeta{
-			Name:      cases.Title(language.English, cases.NoLower).String(fieldName),
+			Name:      titleCaser.String(fieldName),
 			Docstring: formatComment(field.Doc.Text()),
 			Field:     fieldName,
 			Type:      types.ExprString(field.Type),
