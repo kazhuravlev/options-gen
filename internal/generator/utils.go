@@ -7,6 +7,7 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
+	"math"
 	"os"
 	"path"
 	"path/filepath"
@@ -384,6 +385,11 @@ func parseModulePath(goMod string) (string, error) {
 				return "", errors.New("empty module path")
 			}
 
+			// The module path may be written as a quoted string.
+			if unquoted, err := strconv.Unquote(fields[0]); err == nil {
+				return unquoted, nil
+			}
+
 			return fields[0], nil
 		}
 	}
@@ -457,6 +463,20 @@ func addPackageToLocalType(inExpr ast.Expr, pkgName string, localTypes map[strin
 		casted.Elt = addPackageToLocalType(casted.Elt, pkgName, localTypes)
 	case *ast.ChanType:
 		casted.Value = addPackageToLocalType(casted.Value, pkgName, localTypes)
+	case *ast.IndexExpr:
+		// Generic instantiation with a single type argument: Box[Local].
+		casted.X = addPackageToLocalType(casted.X, pkgName, localTypes)
+		casted.Index = addPackageToLocalType(casted.Index, pkgName, localTypes)
+	case *ast.IndexListExpr:
+		// Generic instantiation with several type arguments: Pair[Local, int].
+		casted.X = addPackageToLocalType(casted.X, pkgName, localTypes)
+		for i := range casted.Indices {
+			casted.Indices[i] = addPackageToLocalType(casted.Indices[i], pkgName, localTypes)
+		}
+	case *ast.Ellipsis:
+		casted.Elt = addPackageToLocalType(casted.Elt, pkgName, localTypes)
+	case *ast.ParenExpr:
+		casted.X = addPackageToLocalType(casted.X, pkgName, localTypes)
 	case *ast.FuncType:
 		for i := range extractFields(casted.Params) {
 			casted.Params.List[i].Type = addPackageToLocalType(casted.Params.List[i].Type, pkgName, localTypes)
@@ -524,6 +544,20 @@ func addPackageToType(inExpr ast.Expr, pkgName string, scope *types.Scope) ast.E
 		casted.Elt = addPackageToType(casted.Elt, pkgName, scope)
 	case *ast.ChanType:
 		casted.Value = addPackageToType(casted.Value, pkgName, scope)
+	case *ast.IndexExpr:
+		// Generic instantiation with a single type argument: Box[Local].
+		casted.X = addPackageToType(casted.X, pkgName, scope)
+		casted.Index = addPackageToType(casted.Index, pkgName, scope)
+	case *ast.IndexListExpr:
+		// Generic instantiation with several type arguments: Pair[Local, int].
+		casted.X = addPackageToType(casted.X, pkgName, scope)
+		for i := range casted.Indices {
+			casted.Indices[i] = addPackageToType(casted.Indices[i], pkgName, scope)
+		}
+	case *ast.Ellipsis:
+		casted.Elt = addPackageToType(casted.Elt, pkgName, scope)
+	case *ast.ParenExpr:
+		casted.X = addPackageToType(casted.X, pkgName, scope)
 	case *ast.FuncType:
 		for i := range extractFields(casted.Params) {
 			casted.Params.List[i].Type = addPackageToType(casted.Params.List[i].Type, pkgName, scope)
@@ -559,17 +593,41 @@ func isPublic(fieldName string) bool {
 	return char != utf8.RuneError && unicode.IsUpper(char)
 }
 
+// Bit sizes of the numeric field types that support defaults. The generated
+// code assigns the default literal to the field directly, so a value that does
+// not fit into the field type would not compile.
+const (
+	bitSize8  = 8
+	bitSize16 = 16
+	bitSize32 = 32
+	bitSize64 = 64
+)
+
 func checkDefaultValue(fieldType string, tag string) error {
 	var err error
 	switch fieldType {
-	case "int", "int8", "int16", "int32", "int64":
-		_, err = strconv.ParseInt(tag, 10, 64)
+	case "int", "int64":
+		err = checkIntDefault(tag, bitSize64, false)
+	case "int8":
+		err = checkIntDefault(tag, bitSize8, false)
+	case "int16":
+		err = checkIntDefault(tag, bitSize16, false)
+	case "int32":
+		err = checkIntDefault(tag, bitSize32, false)
 
-	case "uint", "uint8", "uint16", "uint32", "uint64":
-		_, err = strconv.ParseUint(tag, 10, 64)
+	case "uint", "uint64":
+		err = checkIntDefault(tag, bitSize64, true)
+	case "uint8":
+		err = checkIntDefault(tag, bitSize8, true)
+	case "uint16":
+		err = checkIntDefault(tag, bitSize16, true)
+	case "uint32":
+		err = checkIntDefault(tag, bitSize32, true)
 
-	case "float32", "float64":
-		_, err = strconv.ParseFloat(tag, 64)
+	case "float32":
+		err = checkFloatDefault(tag, bitSize32)
+	case "float64":
+		err = checkFloatDefault(tag, bitSize64)
 
 	case "time.Duration":
 		_, err = time.ParseDuration(tag)
@@ -593,12 +651,78 @@ func checkDefaultValue(fieldType string, tag string) error {
 	return nil
 }
 
+// checkIntDefault makes sure that tag is a decimal literal that fits into an
+// integer type of the given bit size. Leading zeros are rejected because Go
+// reads such literals as octal: `010` would silently become 8 and `08` would
+// not compile at all.
+func checkIntDefault(tag string, bitSize int, unsigned bool) error {
+	var err error
+	if unsigned {
+		_, err = strconv.ParseUint(tag, 10, bitSize)
+	} else {
+		_, err = strconv.ParseInt(tag, 10, bitSize)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if digits := strings.TrimLeft(tag, "+-"); len(digits) > 1 && digits[0] == '0' {
+		return errors.New("leading zeros are not allowed")
+	}
+
+	return nil
+}
+
+// checkFloatDefault makes sure that tag is a float literal that fits into a
+// float type of the given bit size. strconv accepts "NaN" and "Inf", but they
+// are not valid Go literals, so they are rejected here.
+func checkFloatDefault(tag string, bitSize int) error {
+	val, err := strconv.ParseFloat(tag, bitSize)
+	if err != nil {
+		return err
+	}
+
+	if math.IsNaN(val) || math.IsInf(val, 0) {
+		return errors.New("NaN and Inf are not valid float literals")
+	}
+
+	return nil
+}
+
 func normalizeTypeName(typeName string) string {
+	typeName = trimTypeArgs(typeName)
+
 	if idx := strings.LastIndex(typeName, "."); idx > -1 {
 		typeName = typeName[idx+1:]
 	}
 
 	return strings.TrimPrefix(strings.TrimPrefix(typeName, "[]"), "*")
+}
+
+// trimTypeArgs strips a trailing type argument list, so that the embedded field
+// name of an instantiated generic type is derived from the type name only:
+// "pkg.Box[map[string]int]" -> "pkg.Box".
+func trimTypeArgs(typeName string) string {
+	if !strings.HasSuffix(typeName, "]") {
+		return typeName
+	}
+
+	depth := 0
+	for i := len(typeName) - 1; i > 0; i-- {
+		switch typeName[i] {
+		case ']':
+			depth++
+		case '[':
+			depth--
+			if depth == 0 {
+				return typeName[:i]
+			}
+		}
+	}
+
+	// The brackets open at the very beginning ("[]"), so this is not a type argument list.
+	return typeName
 }
 
 // extractSliceElemType will find the element type for given slice.
@@ -612,15 +736,12 @@ func extractSliceElemType(
 		return "", errIsNotSlice
 	case *ast.SelectorExpr:
 		// Extract package name and type name
-		pkgIdent, ok := expr.X.(*ast.Ident)
-		if !ok {
+		pkgIdent, isIdent := expr.X.(*ast.Ident)
+		if !isIdent {
 			return "", errors.New("unsupported selector")
 		}
 
-		pkgName := pkgIdent.Name
-		typeName := expr.Sel.Name
-
-		importPath, alias := findImportPath(curFile.Imports, pkgName)
+		importPath, _ := findImportPath(curFile.Imports, pkgIdent.Name)
 		if importPath == "" {
 			return "", errors.New("import path not found")
 		}
@@ -630,39 +751,54 @@ func extractSliceElemType(
 			return "", errors.New("unable to load package")
 		}
 
-		lookupType := pkg.Types.Scope().Lookup(typeName)
-		if expr, ok := lookupType.(*types.TypeName); ok { //nolint:nestif
-			if expr, ok := expr.Type().(*types.Named); ok {
-				if expr, ok := expr.Underlying().(*types.Slice); ok {
-					switch expr := expr.Elem().(type) {
-					case *types.Named:
-						if importPath == expr.Obj().Pkg().Path() {
-							return alias + "." + expr.Obj().Name(), nil
-						}
-
-						return expr.Obj().Pkg().Name() + "." + expr.Obj().Name(), nil
-					case *types.Basic:
-						return expr.Name(), nil
-					}
-				}
-
-				return "", errIsNotSlice
-			}
+		typeName, isTypeName := pkg.Types.Scope().Lookup(expr.Sel.Name).(*types.TypeName)
+		if !isTypeName {
+			return "", errors.New("lookup type not found")
 		}
 
-		return "", errors.New("lookup type not found")
+		// Aliases (`type Ints = []int`) are resolved to the type they stand for.
+		sliceType, isSlice := types.Unalias(typeName.Type()).Underlying().(*types.Slice)
+		if !isSlice {
+			return "", errIsNotSlice
+		}
+
+		// Packages are referenced through the alias used by the current file,
+		// if any, and through their own name otherwise.
+		qualifier := func(elemPkg *types.Package) string {
+			for _, imp := range curFile.Imports {
+				if imp.Name == nil {
+					continue
+				}
+
+				if impPath, err := strconv.Unquote(imp.Path.Value); err == nil && impPath == elemPkg.Path() {
+					return imp.Name.Name
+				}
+			}
+
+			return elemPkg.Name()
+		}
+
+		return types.TypeString(sliceType.Elem(), qualifier), nil
 	case *ast.ArrayType:
+		// [N]T is an array, not a slice: it cannot be appended to.
+		if expr.Len != nil {
+			return "", errIsNotSlice
+		}
+
 		return renderExprString(expr.Elt), nil
 	case *ast.Ident:
 		if expr.Obj == nil {
 			return "", errIsNotSlice
 		}
 
-		switch expr := expr.Obj.Decl.(type) {
+		switch decl := expr.Obj.Decl.(type) {
 		default:
 			return "", errors.New("unsupported ident expression")
+		case *ast.Field:
+			// Type parameters are declared as fields of the type parameter list.
+			return "", errIsNotSlice
 		case *ast.TypeSpec:
-			return extractSliceElemType(curFile, expr.Type, packageStore)
+			return extractSliceElemType(curFile, decl.Type, packageStore)
 		}
 	}
 }
@@ -743,16 +879,26 @@ func importPathBase(importPath string) string {
 
 		if isVersion && slashIdx > 0 {
 			prev := importPath[:slashIdx]
-			prevSlashIdx := strings.LastIndexByte(prev, '/')
-			if prevSlashIdx >= 0 {
-				return prev[prevSlashIdx+1:]
+			base = prev
+			if prevSlashIdx := strings.LastIndexByte(prev, '/'); prevSlashIdx >= 0 {
+				base = prev[prevSlashIdx+1:]
 			}
-
-			return prev
 		}
 	}
 
+	// Follow the same heuristic as goimports: a "go-" prefix is dropped and the
+	// name ends at the first character that cannot be part of an identifier
+	// (gopkg.in/yaml.v3 -> yaml, github.com/mattn/go-isatty -> isatty).
+	base = strings.TrimPrefix(base, "go-")
+	if idx := strings.IndexFunc(base, isNotIdentifierChar); idx >= 0 {
+		base = base[:idx]
+	}
+
 	return base
+}
+
+func isNotIdentifierChar(char rune) bool {
+	return char != '_' && !unicode.IsLetter(char) && !unicode.IsDigit(char)
 }
 
 func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, []string) {
@@ -761,7 +907,14 @@ func parseTag(tag *ast.BasicLit, fieldName string, tagName string) (TagOption, [
 		return tagOpt, nil
 	}
 
-	goValidator, defaultValue, optionTag := lookupTagValues(strings.Trim(tag.Value, "`"), tagName)
+	// Struct tags are usually raw string literals, but interpreted string
+	// literals ("option:\"mandatory\"") are legal as well.
+	tagValue, err := strconv.Unquote(tag.Value)
+	if err != nil {
+		tagValue = strings.Trim(tag.Value, "`")
+	}
+
+	goValidator, defaultValue, optionTag := lookupTagValues(tagValue, tagName)
 	tagOpt.GoValidator = goValidator
 	tagOpt.Default = defaultValue
 

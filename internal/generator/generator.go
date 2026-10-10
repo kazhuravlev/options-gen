@@ -419,7 +419,7 @@ func GetOptionSpec(
 			}
 
 			if err := checkDefaultValue(optMeta.Type, optMeta.TagOption.Default); err != nil {
-				return nil, fmt.Errorf("field `%s`: invalid `%s` tag value: %w", tagName, optMeta.Field, err)
+				return nil, fmt.Errorf("field `%s`: invalid `%s` tag value: %w", optMeta.Field, tagName, err)
 			}
 		}
 
