@@ -52,9 +52,9 @@ jobs:
     strategy:
       matrix:
         go_version:
-          - "1.24"
           - "1.25"
           - "1.26"
+          - "1.27"
         os: [ ubuntu-latest, macOS-latest ]
 
     steps:
@@ -84,7 +84,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   bench-and-fuzz:
-    name: Bench and fuzz on golang 1.26
+    name: Bench and fuzz on golang 1.27
     runs-on: ubuntu-latest
 
     steps:
@@ -92,7 +92,7 @@ jobs:
 
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
         with:
-          go-version: "1.26"
+          go-version: "1.27"
 
       - name: Get dependencies
         run: go mod download
