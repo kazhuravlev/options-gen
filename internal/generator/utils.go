@@ -60,8 +60,35 @@ func formatComment(comment string) string {
 	return buf.String()
 }
 
+// structDecl is a struct type declaration together with the file that
+// declares it (or, for an alias of an imported struct, the file of the
+// imported package with the caller's imports merged in).
+type structDecl struct {
+	file       *ast.File
+	typeParams []*ast.Field
+	fields     []*ast.Field
+}
+
 func findStructTypeParamsAndFields(fset *token.FileSet, filePath, typeName string) (*ast.File, []*ast.Field, []*ast.Field, error) { //nolint:lll
 	workDir := path.Dir(filePath)
+
+	// The target struct is almost always declared in filePath itself (the
+	// GOFILE of the go:generate directive), so look there before parsing the
+	// whole directory, which also holds the previously generated code and the
+	// tests of the package.
+	fileObj, err := parser.ParseFile(fset, filePath, nil, parser.ParseComments)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("cannot parse file: %w", err)
+	}
+
+	decl, found, err := findStructInFile(fset, fileObj, typeName, workDir)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	if found {
+		return decl.file, decl.typeParams, decl.fields, nil
+	}
 
 	node, err := parser.ParseDir(fset, workDir, nil, parser.ParseComments)
 	if err != nil {
@@ -70,57 +97,80 @@ func findStructTypeParamsAndFields(fset *token.FileSet, filePath, typeName strin
 
 	for _, pkgObj := range node {
 		for _, fileObj := range pkgObj.Files {
-			for _, decl := range fileObj.Decls {
-				genDecl, ok := decl.(*ast.GenDecl)
-				if !ok {
-					continue
-				}
+			decl, found, err := findStructInFile(fset, fileObj, typeName, workDir)
+			if err != nil {
+				return nil, nil, nil, err
+			}
 
-				for _, spec := range genDecl.Specs {
-					typeSpec, ok := spec.(*ast.TypeSpec)
-					if !ok {
-						continue
-					}
-
-					if typeSpec.Name.Name != typeName {
-						continue
-					}
-
-					switch castedType := typeSpec.Type.(type) {
-					case *ast.StructType:
-						return fileObj, extractFields(typeSpec.TypeParams), extractFields(castedType.Fields), nil
-					case *ast.SelectorExpr:
-						pkgIdent, ok := castedType.X.(*ast.Ident)
-						if !ok {
-							continue
-						}
-
-						importPath, _ := findImportPath(fileObj.Imports, pkgIdent.Name)
-						if importPath == "" {
-							continue
-						}
-
-						file, typeParams, fields, err := findStructTypeParamsAndFields2(
-							fset,
-							importPath,
-							castedType.Sel.Name,
-							workDir,
-							pkgIdent.Name,
-						)
-						if err != nil {
-							return nil, nil, nil, err
-						}
-
-						file.Imports = mergeImportSpecs(fileObj.Imports, file.Imports)
-
-						return file, typeParams, fields, nil
-					}
-				}
+			if found {
+				return decl.file, decl.typeParams, decl.fields, nil
 			}
 		}
 	}
 
 	return nil, nil, nil, errors.New("cannot find target struct")
+}
+
+// findStructInFile looks for the type declaration typeName in fileObj. It
+// reports found=false when the file does not declare such a struct.
+func findStructInFile(
+	fset *token.FileSet,
+	fileObj *ast.File,
+	typeName, workDir string,
+) (structDecl, bool, error) {
+	for _, decl := range fileObj.Decls {
+		genDecl, ok := decl.(*ast.GenDecl)
+		if !ok {
+			continue
+		}
+
+		for _, spec := range genDecl.Specs {
+			typeSpec, ok := spec.(*ast.TypeSpec)
+			if !ok {
+				continue
+			}
+
+			if typeSpec.Name.Name != typeName {
+				continue
+			}
+
+			switch castedType := typeSpec.Type.(type) {
+			case *ast.StructType:
+				return structDecl{
+					file:       fileObj,
+					typeParams: extractFields(typeSpec.TypeParams),
+					fields:     extractFields(castedType.Fields),
+				}, true, nil
+			case *ast.SelectorExpr:
+				pkgIdent, ok := castedType.X.(*ast.Ident)
+				if !ok {
+					continue
+				}
+
+				importPath, _ := findImportPath(fileObj.Imports, pkgIdent.Name)
+				if importPath == "" {
+					continue
+				}
+
+				file, typeParams, fields, err := findStructTypeParamsAndFields2(
+					fset,
+					importPath,
+					castedType.Sel.Name,
+					workDir,
+					pkgIdent.Name,
+				)
+				if err != nil {
+					return structDecl{file: nil, typeParams: nil, fields: nil}, false, err
+				}
+
+				file.Imports = mergeImportSpecs(fileObj.Imports, file.Imports)
+
+				return structDecl{file: file, typeParams: typeParams, fields: fields}, true, nil
+			}
+		}
+	}
+
+	return structDecl{file: nil, typeParams: nil, fields: nil}, false, nil
 }
 
 func findStructTypeParamsAndFields2(
