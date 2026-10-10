@@ -112,3 +112,6 @@ jobs:
 
       - name: Fuzz find import path
         run: go test -run '^$' -fuzz '^FuzzFindImportPath$' -fuzztime=10s -timeout=30s ./internal/generator
+
+      - name: Fuzz lookup tag values
+        run: go test -run '^$' -fuzz '^FuzzLookupTagValues$' -fuzztime=10s -timeout=30s ./internal/generator
