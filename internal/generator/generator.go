@@ -109,10 +109,16 @@ func renderTemplate(opts Options) ([]byte, error) {
 // sorted by path within a group, duplicates removed) and gofmt-formats the
 // source once.
 //
-// It produces the same bytes as the previous pipeline, optimizeGeneratedSource,
-// which parsed and printed the source four times (go/format and
-// golang.org/x/tools/imports each do it twice). That pipeline lives in
-// legacy_format_test.go as the reference implementation for the parity tests.
+// For everything the template can produce it yields the same bytes as the
+// previous pipeline, optimizeGeneratedSource, which parsed and printed the
+// source four times (go/format and golang.org/x/tools/imports each do it
+// twice); that pipeline lives in legacy_format_test.go as the reference for
+// the parity tests. It is not a general goimports replacement: blank-line
+// separated import runs are merged, comments inside the import block are
+// dropped, a bare `import "x"` is re-rendered in parentheses, and the group
+// layout follows goimports itself rather than the quirks of the old two-pass
+// run (a path imported twice under different names next to an unused import,
+// non-ASCII import aliases).
 // The single pass relies on the template rendering doc comments in column 1:
 // go/printer reformats a doc comment only when it is unindented and abuts its
 // declaration, and the multi-pass pipeline got that on its second pass.

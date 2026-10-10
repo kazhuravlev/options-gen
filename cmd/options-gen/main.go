@@ -14,12 +14,19 @@ import (
 	optionsgen "github.com/kazhuravlev/options-gen/options-gen"
 )
 
-// errMissedRequiredOptions is returned by run when at least one of the required flags is empty.
-var errMissedRequiredOptions = errors.New("missed required options")
+var (
+	// errMissedRequiredOptions is returned by run when at least one of the required flags is empty.
+	errMissedRequiredOptions = errors.New("missed required options")
+	// errParseFlags wraps flag parsing errors; the FlagSet has already written them and the usage to out.
+	errParseFlags = errors.New("parse flags")
+)
 
 func main() {
 	if err := run(os.Args[1:], os.Getenv, os.Stdout); err != nil {
-		fmt.Fprintln(os.Stdout, err.Error())
+		if !errors.Is(err, errParseFlags) {
+			fmt.Fprintln(os.Stdout, err.Error())
+		}
+
 		os.Exit(1)
 	}
 }
@@ -100,7 +107,7 @@ func run(args []string, getenv func(string) string, out io.Writer) error {
 			return nil
 		}
 
-		return fmt.Errorf("parse flags: %w", err)
+		return fmt.Errorf("%w: %w", errParseFlags, err)
 	}
 
 	if isEmpty(inFilename, outFilename, outPackageName, optionsStructName, defaultsFrom) {
