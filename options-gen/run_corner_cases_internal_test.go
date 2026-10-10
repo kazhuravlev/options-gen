@@ -137,7 +137,8 @@ func TestRun_WarningsHandler(t *testing.T) {
 
 		var err error
 		require.NotPanics(t, func() {
-			err = Run(validOptions(inputFile, outputFile, WithShowWarnings(true), WithIgnoreErrors(true), WithWarningsHandler(nil)))
+			err = Run(validOptions(inputFile, outputFile,
+				WithShowWarnings(true), WithIgnoreErrors(true), WithWarningsHandler(nil)))
 		})
 		require.NoError(t, err)
 		assert.FileExists(t, outputFile)
@@ -151,7 +152,8 @@ func TestRun_WarningsHandler(t *testing.T) {
 		var warnings []string
 		handler := func(msg string) { warnings = append(warnings, msg) }
 
-		err := Run(validOptions(inputFile, outputFile, WithShowWarnings(false), WithIgnoreErrors(true), WithWarningsHandler(handler)))
+		err := Run(validOptions(inputFile, outputFile,
+			WithShowWarnings(false), WithIgnoreErrors(true), WithWarningsHandler(handler)))
 		require.NoError(t, err)
 		assert.Empty(t, warnings)
 	})
