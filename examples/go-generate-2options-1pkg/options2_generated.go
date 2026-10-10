@@ -92,28 +92,28 @@ func (o *Options2) IsSet(field optNNNField) bool {
 }
 
 func _validate_Options2_field1(o *Options2) error {
-	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.field1, "min:3"); err != nil {
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.field1, "min=3"); err != nil {
 		return fmt461e464ebed9.Errorf("field `field1` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options2_field2(o *Options2) error {
-	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.field2, "min:3"); err != nil {
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.field2, "min=3"); err != nil {
 		return fmt461e464ebed9.Errorf("field `field2` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options2_field3(o *Options2) error {
-	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.field3, "min:3"); err != nil {
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.field3, "min=3"); err != nil {
 		return fmt461e464ebed9.Errorf("field `field3` did not pass the test: %w", err)
 	}
 	return nil
 }
 
 func _validate_Options2_field4(o *Options2) error {
-	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.field4, "min:3"); err != nil {
+	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.field4, "min=3"); err != nil {
 		return fmt461e464ebed9.Errorf("field `field4` did not pass the test: %w", err)
 	}
 	return nil
