@@ -11,8 +11,8 @@ import (
 	"github.com/kazhuravlev/options-gen/internal/generator"
 )
 
-// ErrStrictWarnings is returned in strict mode when the generator produced warnings.
-var ErrStrictWarnings = errors.New("generator warnings treated as errors (strict mode)")
+// ErrGeneratorWarnings is returned in strict mode when the generator produced warnings.
+var ErrGeneratorWarnings = errors.New("generator found issues (use ignore-errors to downgrade them to warnings)")
 
 type DefaultsFrom string
 
@@ -82,8 +82,8 @@ func Run(opts Options) error {
 		return fmt.Errorf("cannot renderOptions template: %w", err)
 	}
 
-	if opts.strict && len(spec.Warnings) > 0 {
-		return fmt.Errorf("%w:\n%s", ErrStrictWarnings, strings.TrimSpace(strings.Join(spec.Warnings, "\n")))
+	if !opts.ignoreErrors && len(spec.Warnings) > 0 {
+		return fmt.Errorf("%w:\n%s", ErrGeneratorWarnings, strings.TrimSpace(strings.Join(spec.Warnings, "\n")))
 	}
 
 	if err := os.WriteFile(opts.outFilename, res, ctype.DefaultPermission); err != nil {

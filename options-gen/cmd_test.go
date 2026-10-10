@@ -51,6 +51,7 @@ func TestRun(t *testing.T) {
 					optionsgen.WithOutPrefix(params.OutPrefix),
 					optionsgen.WithDefaults(params.Defaults),
 					optionsgen.WithShowWarnings(true),
+					optionsgen.WithIgnoreErrors(true),
 					optionsgen.WithWithIsset(params.WithIsset),
 					optionsgen.WithAllVariadic(params.AllVariadic),
 					optionsgen.WithConstructorTypeRender(params.Constructor),

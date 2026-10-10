@@ -43,7 +43,7 @@ func run(args []string, getenv func(string) string, out io.Writer) error {
 		outPrefix             string
 		defaultsFrom          string
 		muteWarnings          bool
-		strict                bool
+		ignoreErrors          bool
 		withIsset             bool
 		allVariadic           bool
 		constructorTypeRender optionsgen.ConstructorTypeRender
@@ -81,9 +81,9 @@ func run(args []string, getenv func(string) string, out io.Writer) error {
 	flags.BoolVar(&muteWarnings,
 		"mute-warnings", false,
 		"mute all warnings")
-	flags.BoolVar(&strict,
-		"strict", false,
-		"treat generator warnings as errors: fail without writing the output file")
+	flags.BoolVar(&ignoreErrors,
+		"ignore-errors", false,
+		"downgrade generator errors back to warnings and still write the output file")
 	flags.StringVar(&outPrefix,
 		"out-prefix", "",
 		"prefix for generated structs and functions. It is like namespace that can be used in case "+
@@ -140,7 +140,7 @@ func run(args []string, getenv func(string) string, out io.Writer) error {
 			optionsgen.WithOutPrefix(outPrefix),
 			optionsgen.WithDefaults(*defaults),
 			optionsgen.WithShowWarnings(!muteWarnings),
-			optionsgen.WithStrict(strict),
+			optionsgen.WithIgnoreErrors(ignoreErrors),
 			optionsgen.WithWithIsset(withIsset),
 			optionsgen.WithAllVariadic(allVariadic),
 			optionsgen.WithConstructorTypeRender(constructorTypeRender),

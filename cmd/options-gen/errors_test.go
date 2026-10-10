@@ -10,20 +10,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const strictSrc = `package testpkg
+const warnSrc = `package testpkg
 
 type Options struct {
 	Public string
 }
 `
 
-func runStrict(t *testing.T, extra ...string) (string, error) {
+func runGen(t *testing.T, extra ...string) (string, error) {
 	t.Helper()
 
 	dir := t.TempDir()
 	in := filepath.Join(dir, "in.go")
 	out := filepath.Join(dir, "out_generated.go")
-	require.NoError(t, os.WriteFile(in, []byte(strictSrc), 0o600))
+	require.NoError(t, os.WriteFile(in, []byte(warnSrc), 0o600))
 
 	args := append([]string{
 		"-filename", in, "-out-filename", out, "-pkg", "testpkg", "-from-struct", "Options",
@@ -35,29 +35,29 @@ func runStrict(t *testing.T, extra ...string) (string, error) {
 	return out, err
 }
 
-func TestRun_Strict(t *testing.T) {
+func TestRun_WarningsAreErrors(t *testing.T) {
 	t.Parallel()
 
 	t.Run("warnings fail and nothing is written", func(t *testing.T) {
 		t.Parallel()
 
-		out, err := runStrict(t, "-strict")
-		require.ErrorIs(t, err, optionsgen.ErrStrictWarnings)
+		out, err := runGen(t)
+		require.ErrorIs(t, err, optionsgen.ErrGeneratorWarnings)
 		require.ErrorContains(t, err, "Public")
 		require.NoFileExists(t, out)
 	})
 
-	t.Run("strict is not silenced by mute-warnings", func(t *testing.T) {
+	t.Run("errors are not silenced by mute-warnings", func(t *testing.T) {
 		t.Parallel()
 
-		_, err := runStrict(t, "-strict", "-mute-warnings")
-		require.ErrorIs(t, err, optionsgen.ErrStrictWarnings)
+		_, err := runGen(t, "-mute-warnings")
+		require.ErrorIs(t, err, optionsgen.ErrGeneratorWarnings)
 	})
 
-	t.Run("default mode stays lenient", func(t *testing.T) {
+	t.Run("ignore-errors still generates", func(t *testing.T) {
 		t.Parallel()
 
-		out, err := runStrict(t)
+		out, err := runGen(t, "-ignore-errors")
 		require.NoError(t, err)
 		require.FileExists(t, out)
 	})
