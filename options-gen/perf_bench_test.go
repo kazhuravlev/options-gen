@@ -5,13 +5,15 @@ import (
 	"testing"
 )
 
-var benchOptionsSink Options
+var (
+	benchOptionsSink     Options
+	errBenchValidateSink error
+)
 
 // BenchmarkNewOptions benchmarks creating Options with various configurations.
 func BenchmarkNewOptions(b *testing.B) {
 	b.Run("minimal_options", func(b *testing.B) {
 		b.ReportAllocs()
-		b.ResetTimer()
 
 		for b.Loop() {
 			benchOptionsSink = NewOptions(
@@ -26,7 +28,6 @@ func BenchmarkNewOptions(b *testing.B) {
 
 	b.Run("full_options", func(b *testing.B) {
 		b.ReportAllocs()
-		b.ResetTimer()
 
 		for b.Loop() {
 			benchOptionsSink = NewOptions(
@@ -46,7 +47,7 @@ func BenchmarkNewOptions(b *testing.B) {
 	})
 }
 
-// BenchmarkOptionsValidation benchmarks Options.Validate() method.
+// BenchmarkOptionsValidation benchmarks Options.Validate(), which Run calls first.
 func BenchmarkOptionsValidation(b *testing.B) {
 	opts := NewOptions(
 		WithVersion("test"),
@@ -59,10 +60,13 @@ func BenchmarkOptionsValidation(b *testing.B) {
 	)
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
-		_ = opts.Validate()
+		errBenchValidateSink = opts.Validate()
+	}
+
+	if errBenchValidateSink != nil {
+		b.Fatal(errBenchValidateSink)
 	}
 }
 
@@ -70,7 +74,6 @@ func BenchmarkOptionsValidation(b *testing.B) {
 func BenchmarkWithOptionals(b *testing.B) {
 	b.Run("10_options", func(b *testing.B) {
 		b.ReportAllocs()
-		b.ResetTimer()
 
 		for b.Loop() {
 			benchOptionsSink = NewOptions(
