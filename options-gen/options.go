@@ -15,6 +15,7 @@ type Options struct {
 	outPrefix             string
 	defaults              Defaults `validate:"required"`
 	showWarnings          bool
+	strict                bool
 	withIsset             bool
 	allVariadic           bool
 	constructorTypeRender ConstructorTypeRender `validate:"required,oneof=public private no"`
@@ -35,6 +36,7 @@ var defaultOptions = Options{
 		Param: "",
 	},
 	showWarnings:          false,
+	strict:                false,
 	withIsset:             false,
 	allVariadic:           false,
 	constructorTypeRender: ConstructorPublicRender,

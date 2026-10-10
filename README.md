@@ -334,6 +334,10 @@ it will have the following arguments:
 - `mute-warnings` - suppress warning messages during code generation.
 
   Default: `false` - warnings are displayed
+- `strict` - treat generator warnings (public fields, deprecated tags, bad variadic spec) as errors.
+  The generator exits with a non-zero code and does not write the output file. Not affected by `mute-warnings`.
+
+  Default: `false`
 - `out-prefix` - add prefix to the generated file. Useful when you have multiple Options structs in the same package.
 
   Default: empty string
