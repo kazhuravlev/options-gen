@@ -58,10 +58,33 @@ tasks:
       - go test ./...
 
   bench:
-    desc: Run benchmarks
+    desc: Run benchmarks of all packages once (BENCH=<regexp> narrows the set, default ".")
+    vars:
+      BENCH_PATTERN: '{{.BENCH | default "."}}'
     cmds:
       - echo "- Benchmarks"
-      - go test -run '^$' -bench . -benchmem ./internal/generator
+      - go test -run '^$' -bench '{{.BENCH_PATTERN}}' -benchmem ./...
+
+  bench:save:
+    desc: "Run benchmarks COUNT (default 6) times and save them to BENCH_OUT (default /tmp/options-gen-bench.txt)"
+    vars:
+      BENCH_PATTERN: '{{.BENCH | default "."}}'
+      BENCH_COUNT: '{{.COUNT | default "6"}}'
+      BENCH_FILE: '{{.BENCH_OUT | default "/tmp/options-gen-bench.txt"}}'
+    cmds:
+      - echo "- Benchmarks x{{.BENCH_COUNT}} -> {{.BENCH_FILE}}"
+      - set -o pipefail; go test -run '^$' -bench '{{.BENCH_PATTERN}}' -benchmem -count={{.BENCH_COUNT}} ./... | tee '{{.BENCH_FILE}}'
+
+  bench:compare:
+    desc: "Compare two saved benchmark runs with benchstat: task bench:compare OLD=<file> NEW=<file>"
+    preconditions:
+      - sh: test -n "{{.OLD}}" && test -n "{{.NEW}}"
+        msg: "usage: task bench:compare OLD=<file> NEW=<file>"
+      - sh: test -f "{{.OLD}}" && test -f "{{.NEW}}"
+        msg: "OLD and NEW must be existing files produced by `task bench:save`"
+    cmds:
+      - echo "- Compare {{.OLD}} -> {{.NEW}}"
+      - go run golang.org/x/perf/cmd/benchstat@latest '{{.OLD}}' '{{.NEW}}'
 
   scorecard:
     desc: Run OpenSSF Scorecard checks

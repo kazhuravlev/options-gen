@@ -98,7 +98,8 @@ jobs:
         run: go mod download
 
       - name: Run benchmarks
-        run: go test -run '^$' -bench . -benchmem ./internal/generator
+        # Smoke test only: every benchmark runs a single iteration in every package.
+        run: go test -run '^$' -bench . -benchmem -benchtime=1x ./...
 
       - name: Fuzz check default values
         run: go test -run '^$' -fuzz '^FuzzCheckDefaultValue$' -fuzztime=10s -timeout=30s ./internal/generator
