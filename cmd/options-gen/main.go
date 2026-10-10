@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -13,7 +14,27 @@ import (
 	optionsgen "github.com/kazhuravlev/options-gen/options-gen"
 )
 
+var (
+	// errMissedRequiredOptions is returned by run when at least one of the required flags is empty.
+	errMissedRequiredOptions = errors.New("missed required options")
+	// errParseFlags wraps flag parsing errors; the FlagSet has already written them and the usage to out.
+	errParseFlags = errors.New("parse flags")
+)
+
 func main() {
+	if err := run(os.Args[1:], os.Getenv, os.Stdout); err != nil {
+		if !errors.Is(err, errParseFlags) {
+			fmt.Fprintln(os.Stdout, err.Error())
+		}
+
+		os.Exit(1)
+	}
+}
+
+// run parses args, runs the generator and returns a non-nil error when the code was not generated,
+// so that `go generate` fails together with the generator. Usage and flag parse errors are written to out.
+// getenv provides the GOFILE/GOPACKAGE defaults that `go generate` sets for the tool.
+func run(args []string, getenv func(string) string, out io.Writer) error {
 	var (
 		inFilename            string
 		outFilename           string
@@ -29,74 +50,80 @@ func main() {
 		exclude               string
 	)
 
-	envGoFile := os.Getenv("GOFILE")
-	envGoPackage := os.Getenv("GOPACKAGE")
+	envGoFile := getenv("GOFILE")
+	envGoPackage := getenv("GOPACKAGE")
 
-	defaultOutFilename := strings.Replace(filepath.Base(envGoFile), ".go", "_generated.go", 1)
+	// Without GOFILE there is nothing to derive the output filename from, so the flag stays required.
+	var defaultOutFilename string
+	if envGoFile != "" {
+		defaultOutFilename = strings.Replace(filepath.Base(envGoFile), ".go", "_generated.go", 1)
+	}
 
-	flag.StringVar(&inFilename,
+	flags := flag.NewFlagSet("options-gen", flag.ContinueOnError)
+	flags.SetOutput(out)
+
+	flags.StringVar(&inFilename,
 		"filename", envGoFile,
 		"input filename")
-	flag.StringVar(&outPackageName,
+	flags.StringVar(&outPackageName,
 		"pkg", envGoPackage,
 		"output package name")
-	flag.StringVar(&outFilename,
+	flags.StringVar(&outFilename,
 		"out-filename", defaultOutFilename,
 		"output filename")
-	flag.StringVar(&optionsStructName,
+	flags.StringVar(&optionsStructName,
 		"from-struct", "",
 		"struct that contains options")
-	flag.StringVar(&defaultsFrom,
+	flags.StringVar(&defaultsFrom,
 		"defaults-from", "tag=default",
 		"where to get defaults for options. none, tag=TagName, func=FuncName, var=VarName")
-	flag.BoolVar(&muteWarnings,
+	flags.BoolVar(&muteWarnings,
 		"mute-warnings", false,
 		"mute all warnings")
-	flag.StringVar(&outPrefix,
+	flags.StringVar(&outPrefix,
 		"out-prefix", "",
 		"prefix for generated structs and functions. It is like namespace that can be used in case "+
 			"when you have a several options structs in one package")
-	flag.BoolVar(&withIsset,
+	flags.BoolVar(&withIsset,
 		"with-isset", false,
 		"generate a function that helps check which fields have been set")
-	flag.BoolVar(&allVariadic,
+	flags.BoolVar(&allVariadic,
 		"all-variadic", false,
 		"generate variadic functions")
-	flag.StringVar((*string)(&constructorTypeRender),
+	flags.StringVar((*string)(&constructorTypeRender),
 		"constructor", string(optionsgen.ConstructorPublicRender),
 		"generate a function constructor. Possible values: "+strings.Join([]string{
 			string(optionsgen.ConstructorPublicRender),
 			string(optionsgen.ConstructorPrivateRender),
 			string(optionsgen.ConstructorNoRender),
 		}, ", ")+".")
-	flag.StringVar(&outSetterName,
+	flags.StringVar(&outSetterName,
 		"out-setter-name", "",
 		"name for the option setter type (function alias). If not specified, the 'Opt[StructName]Setter' template is used.")
-	flag.StringVar(&exclude, "exclude", "", "list of masks for field names excluded from generation, semicolon-separated")
-	flag.Parse()
+	flags.StringVar(&exclude, "exclude", "", "list of masks for field names excluded from generation, semicolon-separated")
+
+	if err := flags.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return nil
+		}
+
+		return fmt.Errorf("%w: %w", errParseFlags, err)
+	}
 
 	if isEmpty(inFilename, outFilename, outPackageName, optionsStructName, defaultsFrom) {
-		flag.Usage()
-		//nolint:forbidigo
-		fmt.Println("missed required options")
+		flags.Usage()
 
-		return
+		return errMissedRequiredOptions
 	}
 
 	defaults, err := parseDefaults(defaultsFrom)
 	if err != nil {
-		//nolint:forbidigo
-		fmt.Println("bad defaults spec", err.Error())
-
-		return
+		return fmt.Errorf("bad defaults spec: %w", err)
 	}
 
 	excludes, err := splitExcludes(exclude)
 	if err != nil {
-		//nolint:forbidigo
-		fmt.Println("parse excludes", err.Error())
-
-		return
+		return fmt.Errorf("parse excludes: %w", err)
 	}
 
 	errRun := optionsgen.Run(
@@ -114,14 +141,16 @@ func main() {
 			optionsgen.WithConstructorTypeRender(constructorTypeRender),
 			optionsgen.WithOutOptionTypeName(outSetterName),
 			optionsgen.WithExclude(excludes...),
+			optionsgen.WithWarningsHandler(func(msg string) {
+				fmt.Fprintln(out, msg)
+			}),
 		),
 	)
 	if errRun != nil {
-		//nolint:forbidigo
-		fmt.Println("cannot run options gen", errRun.Error())
-
-		return
+		return fmt.Errorf("cannot run options gen: %w", errRun)
 	}
+
+	return nil
 }
 
 func parseDefaults(in string) (*optionsgen.Defaults, error) {

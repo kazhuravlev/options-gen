@@ -67,7 +67,7 @@ func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsS
         {{- if eq .Type "time.Duration" }}
 	        o.{{ .Field }}, _ = time.ParseDuration("{{ .TagOption.Default }}")
         {{- else if eq .Type "string" }}
-	        o.{{ .Field }} = "{{ .TagOption.Default }}"
+	        o.{{ .Field }} = {{ printf "%q" .TagOption.Default }}
         {{- else }}
 	        o.{{ .Field }} = {{ .TagOption.Default }}
         {{- end }}
@@ -95,11 +95,11 @@ func {{if eq .constructorTypeRender "public" }}New{{else}}new{{end}}{{ .optionsS
 {{end}}
 
 {{ range .options }}
-	{{ if not .TagOption.IsRequired }}
+{{ if not .TagOption.IsRequired }}
 		{{- if ne .Docstring "" -}}
 			{{ .Docstring }}
 		{{- end }}
-		func With{{$.optionsPrefix}}{{ .TargetName }}{{ $.optionsTypeParamsSpec }}(opt {{if .TagOption.Variadic}}...{{end}}{{ .Type }}) {{$.optionsTypeName}}{{ $.optionsTypeParams }} {
+func With{{$.optionsPrefix}}{{ .TargetName }}{{ $.optionsTypeParamsSpec }}(opt {{if .TagOption.Variadic}}...{{end}}{{ .Type }}) {{$.optionsTypeName}}{{ $.optionsTypeParams }} {
 			return func(o *{{ $.optionsStructInstanceType }}) {
 				{{- if .TagOption.Variadic -}}
 					o.{{ .Field }} = append(o.{{ .Field }}, opt...)
@@ -137,7 +137,7 @@ func (o *{{ .optionsStructInstanceType }}) Validate() error {
 {{ range .options }}
 	{{- if .TagOption.GoValidator }}
 		func _validate_{{ $.optionsStructName }}_{{ .Field }}{{ $.optionsTypeParamsSpec }}(o *{{ $.optionsStructInstanceType }}) error {
-			if err := validator461e464ebed9.GetValidatorFor(o).Var(o.{{ .Field }}, "{{ .TagOption.GoValidator }}"); err != nil {
+			if err := validator461e464ebed9.GetValidatorFor(o).Var(o.{{ .Field }}, {{ printf "%q" .TagOption.GoValidator }}); err != nil {
 				return fmt461e464ebed9.Errorf("field `{{ .Field }}` did not pass the test: %w", err)
 			}
 			return nil

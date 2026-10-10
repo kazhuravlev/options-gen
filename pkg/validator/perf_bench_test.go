@@ -9,56 +9,42 @@ import (
 
 var benchValidatorSink *goplvalidator.Validate
 
-// BenchmarkGetValidatorForNil benchmarks getting default validator with nil input.
+// GetValidatorFor runs inside every generated _validate_* function, so these
+// benchmarks guard the fast path (a type assertion and a global read, no allocs).
+
+// BenchmarkGetValidatorForNil benchmarks getting the default validator for nil input.
 func BenchmarkGetValidatorForNil(b *testing.B) {
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
 		benchValidatorSink = validator.GetValidatorFor(nil)
 	}
 }
 
-// BenchmarkGetValidatorForCustom benchmarks getting custom validator from options.
+// BenchmarkGetValidatorForCustom benchmarks getting a custom validator from an
+// options struct that implements the provider interface.
 func BenchmarkGetValidatorForCustom(b *testing.B) {
 	customOpts := &validatorProvider{}
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
 		benchValidatorSink = validator.GetValidatorFor(customOpts)
 	}
 }
 
-// BenchmarkGetValidatorForWithoutProvider benchmarks getting default validator from non-provider struct.
+// BenchmarkGetValidatorForWithoutProvider benchmarks getting the default validator
+// for an options struct without a provider method.
 func BenchmarkGetValidatorForWithoutProvider(b *testing.B) {
 	opts := &struct {
 		field string
 	}{field: ""}
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
 		benchValidatorSink = validator.GetValidatorFor(opts)
 	}
-}
-
-// BenchmarkValidatorSet benchmarks setting a new global validator.
-func BenchmarkValidatorSet(b *testing.B) {
-	newValidator := goplvalidator.New()
-	originalValidator := validator.GetValidatorFor(nil)
-
-	b.ReportAllocs()
-	b.ResetTimer()
-
-	for b.Loop() {
-		validator.Set(newValidator)
-	}
-
-	// Restore original validator after test
-	validator.Set(originalValidator)
 }
 
 type validatorProvider struct{}

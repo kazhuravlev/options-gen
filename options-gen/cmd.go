@@ -82,8 +82,14 @@ func Run(opts Options) error {
 	}
 
 	if opts.showWarnings {
+		// WithWarningsHandler(nil) must not turn warnings into a panic: fall back to the default handler.
+		handler := opts.warningsHandler
+		if handler == nil {
+			handler = defaultOptions.warningsHandler
+		}
+
 		for _, warning := range spec.Warnings {
-			opts.warningsHandler(warning)
+			handler(warning)
 		}
 	}
 

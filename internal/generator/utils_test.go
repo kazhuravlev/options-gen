@@ -31,7 +31,17 @@ var (
 	benchmarkParseTagWarningsSink     []string
 	benchmarkImportPathBaseSink       string
 	benchmarkExtractSliceElemTypeSink string
+	benchmarkLookupTagValidateSink    string
+	benchmarkLookupTagDefaultSink     string
+	benchmarkLookupTagOptionSink      string
 )
+
+// benchmarkLongStructTag is a realistic "kitchen sink" struct tag: ten keys of which
+// only validate, default and option are relevant to options-gen.
+const benchmarkLongStructTag = `json:"field_name,omitempty" yaml:"field_name" mapstructure:"field_name" ` +
+	`env:"FIELD_NAME" validate:"required,min=1,max=255,alphanum,excludesall=!@#?" ` +
+	`default:"some-default-value" option:"name=CustomName,variadic=true" ` +
+	`toml:"field_name" xml:"fieldName,attr" bson:"field_name"`
 
 const compileGeneratedPackageTimeout = 30 * time.Second
 
@@ -226,7 +236,7 @@ func Test_typeParamsStr(t *testing.T) {
 	}
 }
 
-func Test_optimizeGeneratedSource_PrunesOnlyUnusedNamedImports(t *testing.T) {
+func Test_formatGeneratedSource_PrunesOnlyUnusedNamedImports(t *testing.T) {
 	src := []byte(`package testcase
 
 import (
@@ -242,7 +252,7 @@ var _ = alias.Builder{}
 var _ = Pi
 `)
 
-	got, err := optimizeGeneratedSource(src)
+	got, err := formatGeneratedSource(src)
 	require.NoError(t, err)
 
 	gotStr := string(got)
@@ -941,12 +951,57 @@ func BenchmarkParseTag(b *testing.B) {
 		}
 	})
 
+	b.Run("long_tag", func(b *testing.B) {
+		tag := &ast.BasicLit{Value: "`" + benchmarkLongStructTag + "`"}
+
+		b.ReportAllocs()
+		for b.Loop() {
+			benchmarkParseTagOptionSink, benchmarkParseTagWarningsSink = parseTag(tag, "fieldName", "default")
+		}
+
+		if benchmarkParseTagOptionSink.Name != "CustomName" || !benchmarkParseTagOptionSink.Variadic {
+			b.Fatalf("unexpected tag option %+v", benchmarkParseTagOptionSink)
+		}
+	})
+
 	b.Run("nil_tag", func(b *testing.B) {
 		b.ReportAllocs()
 		for b.Loop() {
 			benchmarkParseTagOptionSink, benchmarkParseTagWarningsSink = parseTag(nil, "fieldName", "default")
 		}
 	})
+}
+
+// BenchmarkLookupTagValues measures the single-pass struct tag scanner that
+// parseTag relies on: a short tag, the long tag above and a long tag without any of
+// the three keys options-gen looks for (worst case: every key is scanned and skipped).
+func BenchmarkLookupTagValues(b *testing.B) {
+	noMatchTag := strings.NewReplacer(
+		"validate:", "check:",
+		"default:", "fallback:",
+		"option:", "extra:",
+	).Replace(benchmarkLongStructTag)
+
+	testCases := []struct {
+		name string
+		tag  string
+	}{
+		{name: "short", tag: `validate:"required"`},
+		{name: "long", tag: benchmarkLongStructTag},
+		{name: "long_no_match", tag: noMatchTag},
+	}
+
+	for _, tc := range testCases {
+		b.Run(tc.name, func(b *testing.B) {
+			b.ReportAllocs()
+			for b.Loop() {
+				validate, defaultValue, option := lookupTagValues(tc.tag, "default")
+				benchmarkLookupTagValidateSink = validate
+				benchmarkLookupTagDefaultSink = defaultValue
+				benchmarkLookupTagOptionSink = option
+			}
+		})
+	}
 }
 
 func BenchmarkImportPathBase(b *testing.B) {
@@ -987,7 +1042,11 @@ func BenchmarkImportPathBase(b *testing.B) {
 	})
 }
 
-func BenchmarkExtractSliceElemType(b *testing.B) {
+// benchmarkSomepkgModule writes a tiny module with a "somepkg" package into a temp dir
+// and returns the dir, the file set and the parsed main file that imports somepkg.
+func benchmarkSomepkgModule(b *testing.B) (string, *token.FileSet, *ast.File) {
+	b.Helper()
+
 	tempDir := b.TempDir()
 
 	somepkgDir := tempDir + "/somepkg"
@@ -1015,11 +1074,23 @@ type User struct {
 	mainFile, err := parser.ParseFile(fset, tempDir+"/main.go", nil, parser.ParseComments)
 	require.NoError(b, err)
 
+	return tempDir, fset, mainFile
+}
+
+// BenchmarkExtractSliceElemType measures slice element type resolution. The imported_*
+// cases share one PackageStore whose cache is warmed before the loop, so they measure
+// the cache hit plus the go/types lookup; see BenchmarkPackageStoreLoadCold for the
+// cost of the first (uncached) load.
+func BenchmarkExtractSliceElemType(b *testing.B) {
+	tempDir, fset, mainFile := benchmarkSomepkgModule(b)
+
 	b.Run("local_slice", func(b *testing.B) {
 		expr := &ast.ArrayType{
 			Elt: &ast.Ident{Name: "int"},
 		}
 		store := NewPackageStore(fset, tempDir)
+
+		var err error
 
 		b.ReportAllocs()
 		for b.Loop() {
@@ -1034,6 +1105,9 @@ type User struct {
 			Sel: &ast.Ident{Name: "SliceInt"},
 		}
 		store := NewPackageStore(fset, tempDir)
+
+		_, err := extractSliceElemType(mainFile, expr, store) // Warm the package cache.
+		require.NoError(b, err)
 
 		b.ReportAllocs()
 		for b.Loop() {
@@ -1051,12 +1125,47 @@ type User struct {
 		}
 		store := NewPackageStore(fset, tempDir)
 
+		_, err := extractSliceElemType(mainFile, expr, store) // Warm the package cache.
+		require.NoError(b, err)
+
 		b.ReportAllocs()
 		for b.Loop() {
 			benchmarkExtractSliceElemTypeSink, err = extractSliceElemType(mainFile, expr, store)
 			require.NoError(b, err)
 		}
 	})
+}
+
+// BenchmarkPackageStoreLoadCold measures resolving an imported named slice type with
+// a fresh PackageStore on every iteration, i.e. the real cost of PackageStore.Load:
+// packages.Load runs `go list` in a subprocess and type-checks the package. This is
+// what every GetOptionSpec call pays per imported package when a variadic field has
+// a selector type, because GetOptionSpec creates its own store.
+func BenchmarkPackageStoreLoadCold(b *testing.B) {
+	if testing.Short() {
+		b.Skip("runs `go list` through packages.Load on every iteration (tens of ms)")
+	}
+
+	tempDir, _, mainFile := benchmarkSomepkgModule(b)
+	expr := &ast.SelectorExpr{
+		X:   &ast.Ident{Name: "somepkg"},
+		Sel: &ast.Ident{Name: "SliceInt"},
+	}
+
+	b.ReportAllocs()
+
+	var err error
+	for b.Loop() {
+		store := NewPackageStore(token.NewFileSet(), tempDir)
+		benchmarkExtractSliceElemTypeSink, err = extractSliceElemType(mainFile, expr, store)
+		if err != nil {
+			b.Fatal(err)
+		}
+	}
+
+	if benchmarkExtractSliceElemTypeSink != "int" {
+		b.Fatalf("unexpected element type %q", benchmarkExtractSliceElemTypeSink)
+	}
 }
 
 func TestExtractSliceElemType(t *testing.T) {

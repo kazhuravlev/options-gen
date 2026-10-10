@@ -30,6 +30,11 @@ func (e *validationError) Is(err error) bool {
 	return errors.Is(e.err, err)
 }
 
+// Unwrap returns the underlying error, so errors.As can reach it.
+func (e *validationError) Unwrap() error {
+	return e.err
+}
+
 type ValidationErrors []validationError
 
 func (e ValidationErrors) Error() string {
@@ -47,6 +52,21 @@ func (e ValidationErrors) Error() string {
 	}
 
 	return buf.String()
+}
+
+// Unwrap exposes the collected errors to errors.Is and errors.As (Go 1.20 multi-error unwrapping),
+// so callers can match an underlying error through the aggregate.
+func (e ValidationErrors) Unwrap() []error {
+	if len(e) == 0 {
+		return nil
+	}
+
+	errs := make([]error, len(e))
+	for i := range e {
+		errs[i] = &e[i]
+	}
+
+	return errs
 }
 
 func (e ValidationErrors) Errors() []validationError { //nolint:revive,nolintlint

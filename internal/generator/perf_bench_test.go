@@ -2,27 +2,30 @@
 package generator
 
 import (
-	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"path/filepath"
-	"regexp"
+	"strconv"
 	"testing"
 )
 
 var (
-	benchOptimizeSourceSink  []byte
+	benchFormatSourceSink    []byte
 	benchNormalizeSink       string
 	benchRenderExprSink      string
 	benchIsPublicSink        bool
 	errBenchCheckDefaultSink error
 	benchDeleteByIndexSink   []string
+	benchMergeImportsSink    []*ast.ImportSpec
+	benchImportSpecNameSink  string
+	benchTemplateOptionsSink []templateOptionMeta
+	benchRenderSmallSink     []byte
 )
 
-// BenchmarkOptimizeGeneratedSource benchmarks the optimization of generated source code.
-func BenchmarkOptimizeGeneratedSource(b *testing.B) {
-	// Prepare a typical generated source with unused imports
+// BenchmarkFormatGeneratedSource benchmarks the whole post-processing pipeline
+// (parse, prune imports, render the import block, gofmt) on a tiny hand-written
+// source. See BenchmarkRenderStages/format_source for realistic rendered inputs.
+func BenchmarkFormatGeneratedSource(b *testing.B) {
 	testSource := []byte(`package testcase
 
 import (
@@ -49,51 +52,17 @@ func WithField1(v string) OptOptionsSetter {
 `)
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	var err error
 	for b.Loop() {
-		benchOptimizeSourceSink, err = optimizeGeneratedSource(testSource)
+		benchFormatSourceSink, err = formatGeneratedSource(testSource)
 		if err != nil {
 			b.Fatal(err)
 		}
 	}
 }
 
-// BenchmarkPruneUnusedImports benchmarks the import pruning logic.
-func BenchmarkPruneUnusedImports(b *testing.B) {
-	fset := token.NewFileSet()
-
-	// Setup: parse a file with multiple unused imports
-	source := `package testcase
-
-import (
-	"fmt"
-	"io"
-	"strings"
-	"time"
-	"bytes"
-)
-
-type Options struct {
-	field string
-}
-
-func Test() string {
-	return fmt.Sprintf("%s", "test")
-}`
-
-	b.ReportAllocs()
-	b.ResetTimer()
-
-	for b.Loop() {
-		// Create a fresh copy of the file for each iteration
-		fileCopy, _ := parser.ParseFile(fset, "", []byte(source), parser.ParseComments)
-		pruneUnusedImports(fileCopy)
-	}
-}
-
-// BenchmarkNormalizeTypeName benchmarks type name normalization.
+// BenchmarkNormalizeTypeName benchmarks type name normalization (eight inputs per op).
 func BenchmarkNormalizeTypeName(b *testing.B) {
 	testCases := []string{
 		"int",
@@ -107,7 +76,6 @@ func BenchmarkNormalizeTypeName(b *testing.B) {
 	}
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
 		for _, tc := range testCases {
@@ -116,11 +84,8 @@ func BenchmarkNormalizeTypeName(b *testing.B) {
 	}
 }
 
-// BenchmarkRenderExprString benchmarks AST expression rendering.
+// BenchmarkRenderExprString benchmarks AST expression rendering (six expressions per op).
 func BenchmarkRenderExprString(b *testing.B) {
-	fset := token.NewFileSet()
-
-	// Parse to get sample expressions
 	source := `package test
 type M map[string]int
 type C chan string
@@ -129,28 +94,26 @@ type I interface{ Read([]byte) (int, error) }
 var x *int
 var y []string`
 
-	file, err := parser.ParseFile(fset, "", []byte(source), 0)
+	file, err := parser.ParseFile(token.NewFileSet(), "", []byte(source), 0)
 	if err != nil {
 		b.Fatal(err)
 	}
 
-	// Extract various expressions from the parsed AST
 	var exprs []ast.Expr
 	for _, decl := range file.Decls {
 		genDecl, ok := decl.(*ast.GenDecl)
 		if !ok {
 			continue
 		}
+
 		for _, spec := range genDecl.Specs {
-			typeSpec, ok := spec.(*ast.TypeSpec)
-			if ok {
+			if typeSpec, ok := spec.(*ast.TypeSpec); ok {
 				exprs = append(exprs, typeSpec.Type)
 			}
 		}
 	}
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
 		for _, expr := range exprs {
@@ -159,7 +122,7 @@ var y []string`
 	}
 }
 
-// BenchmarkIsPublic benchmarks the public/private field name check.
+// BenchmarkIsPublic benchmarks the public/private field name check (twelve names per op).
 func BenchmarkIsPublic(b *testing.B) {
 	testCases := []string{
 		"Field",
@@ -177,7 +140,6 @@ func BenchmarkIsPublic(b *testing.B) {
 	}
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
 		for _, tc := range testCases {
@@ -186,7 +148,7 @@ func BenchmarkIsPublic(b *testing.B) {
 	}
 }
 
-// BenchmarkCheckDefaultValue benchmarks default value validation.
+// BenchmarkCheckDefaultValue benchmarks default value validation (ten values per op).
 func BenchmarkCheckDefaultValue(b *testing.B) {
 	testCases := []struct {
 		fieldType string
@@ -205,7 +167,6 @@ func BenchmarkCheckDefaultValue(b *testing.B) {
 	}
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
 		for _, tc := range testCases {
@@ -214,116 +175,60 @@ func BenchmarkCheckDefaultValue(b *testing.B) {
 	}
 }
 
-// BenchmarkDeleteByIndex benchmarks slice element deletion.
+// BenchmarkDeleteByIndex benchmarks slice element deletion. deleteByIndex shifts the
+// tail in place, so every iteration first restores the slice from a pristine copy;
+// that copy (a memmove of the same order as the deletion itself) is part of the
+// measured time, while the element strings are built once outside the loop.
 func BenchmarkDeleteByIndex(b *testing.B) {
-	b.Run("small_slice", func(b *testing.B) {
-		b.ReportAllocs()
-		b.ResetTimer()
-
-		for b.Loop() {
-			data := []string{"a", "b", "c", "d", "e"}
-			benchDeleteByIndexSink = deleteByIndex(data, 2)
-		}
-	})
-
-	b.Run("medium_slice", func(b *testing.B) {
-		b.ReportAllocs()
-		b.ResetTimer()
-
-		for b.Loop() {
-			data := make([]string, 100)
-			for i := range data {
-				data[i] = fmt.Sprintf("item_%d", i)
+	run := func(name string, size, index int) {
+		b.Run(name, func(b *testing.B) {
+			pristine := make([]string, size)
+			for i := range pristine {
+				pristine[i] = "item_" + strconv.Itoa(i)
 			}
-			benchDeleteByIndexSink = deleteByIndex(data, 50)
-		}
-	})
 
-	b.Run("large_slice", func(b *testing.B) {
-		b.ReportAllocs()
-		b.ResetTimer()
+			data := make([]string, size)
 
-		for b.Loop() {
-			data := make([]string, 10000)
-			for i := range data {
-				data[i] = fmt.Sprintf("item_%d", i)
+			b.ReportAllocs()
+
+			for b.Loop() {
+				copy(data, pristine)
+				benchDeleteByIndexSink = deleteByIndex(data, index)
 			}
-			benchDeleteByIndexSink = deleteByIndex(data, 5000)
-		}
-	})
+
+			if len(benchDeleteByIndexSink) != size-1 {
+				b.Fatalf("unexpected result length %d", len(benchDeleteByIndexSink))
+			}
+		})
+	}
+
+	run("small_slice", 5, 2)
+	run("medium_slice", 100, 50)
+	run("large_slice", 10000, 5000)
 }
 
-// BenchmarkMergeImportSpecs benchmarks import spec merging.
+// BenchmarkMergeImportSpecs benchmarks import spec merging of two overlapping groups.
 func BenchmarkMergeImportSpecs(b *testing.B) {
-	fset := token.NewFileSet()
 	source1 := `package test; import ("fmt"; "strings"; "bytes")`
 	source2 := `package test; import ("fmt"; "io"; "os")`
 
-	file1, _ := parser.ParseFile(fset, "", []byte(source1), 0)
-	file2, _ := parser.ParseFile(fset, "", []byte(source2), 0)
-
-	var imports1, imports2 []*ast.ImportSpec
-	for _, decl := range file1.Decls {
-		if genDecl, ok := decl.(*ast.GenDecl); ok && genDecl.Tok == token.IMPORT {
-			for _, spec := range genDecl.Specs {
-				imports1 = append(imports1, spec.(*ast.ImportSpec))
-			}
-		}
-	}
-	for _, decl := range file2.Decls {
-		if genDecl, ok := decl.(*ast.GenDecl); ok && genDecl.Tok == token.IMPORT {
-			for _, spec := range genDecl.Specs {
-				imports2 = append(imports2, spec.(*ast.ImportSpec))
-			}
-		}
-	}
+	imports1 := parseImportSpecs(b, source1)
+	imports2 := parseImportSpecs(b, source2)
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
-		_ = mergeImportSpecs(imports1, imports2)
+		benchMergeImportsSink = mergeImportSpecs(imports1, imports2)
+	}
+
+	if len(benchMergeImportsSink) != 5 {
+		b.Fatalf("unexpected merged imports count %d", len(benchMergeImportsSink))
 	}
 }
 
-// BenchmarkApplyExcludesWithRegex benchmarks regex-based option exclusion.
-func BenchmarkApplyExcludesWithRegex(b *testing.B) {
-	specSize := 50
-	options := make([]OptionMeta, specSize)
-	for i := range specSize {
-		options[i] = OptionMeta{
-			Name:      fmt.Sprintf("Option%d", i),
-			Docstring: "",
-			Field:     fmt.Sprintf("option%d", i),
-			Type:      "string",
-			TagOption: TagOption{
-				IsRequired:    false,
-				GoValidator:   "",
-				Default:       "",
-				Variadic:      false,
-				VariadicIsSet: false,
-				Skip:          false,
-				Name:          "",
-			},
-		}
-	}
-
-	excludePatterns := []*regexp.Regexp{
-		regexp.MustCompile("^Option(1|2|3)$"),
-		regexp.MustCompile(".*5$"),
-	}
-
-	b.ReportAllocs()
-	b.ResetTimer()
-
-	for b.Loop() {
-		ApplyExcludes(options, excludePatterns)
-	}
-}
-
-// BenchmarkImportSpecName benchmarks import spec name extraction.
+// BenchmarkImportSpecName benchmarks import name resolution (five specs per op:
+// plain path, alias, dot import, blank import and a deep aliased path).
 func BenchmarkImportSpecName(b *testing.B) {
-	fset := token.NewFileSet()
 	source := `package test
 import (
 	"fmt"
@@ -333,35 +238,25 @@ import (
 	customAlias "github.com/kazhuravlev/options-gen/pkg"
 )`
 
-	file, _ := parser.ParseFile(fset, "", []byte(source), 0)
-
-	var specs []*ast.ImportSpec
-	for _, decl := range file.Decls {
-		if genDecl, ok := decl.(*ast.GenDecl); ok && genDecl.Tok == token.IMPORT {
-			for _, spec := range genDecl.Specs {
-				specs = append(specs, spec.(*ast.ImportSpec))
-			}
-		}
-	}
+	specs := parseImportSpecs(b, source)
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
 		for _, spec := range specs {
-			_ = importSpecName(spec)
+			benchImportSpecNameSink = importSpecName(spec)
 		}
 	}
 }
 
-// BenchmarkMakeTemplateOptions benchmarks template option preparation.
+// BenchmarkMakeTemplateOptions benchmarks template option preparation for 50 options.
 func BenchmarkMakeTemplateOptions(b *testing.B) {
 	options := make([]OptionMeta, 0, 50)
 	for i := range 50 {
 		options = append(options, OptionMeta{
-			Name:      fmt.Sprintf("Option%d", i),
-			Docstring: fmt.Sprintf("// Option %d", i),
-			Field:     fmt.Sprintf("option%d", i),
+			Name:      "Option" + strconv.Itoa(i),
+			Docstring: "// Option " + strconv.Itoa(i),
+			Field:     "option" + strconv.Itoa(i),
 			Type:      "string",
 			TagOption: TagOption{
 				IsRequired:    i%3 == 0,
@@ -370,22 +265,21 @@ func BenchmarkMakeTemplateOptions(b *testing.B) {
 				Variadic:      false,
 				VariadicIsSet: false,
 				Skip:          false,
-				Name:          fmt.Sprintf("opt%d", i),
+				Name:          "opt" + strconv.Itoa(i),
 			},
 		})
 	}
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
-		makeTemplateOptions(options)
+		benchTemplateOptionsSink = makeTemplateOptions(options)
 	}
 }
 
-// BenchmarkRenderSmallSpec benchmarks rendering with small spec (adds coverage for edge cases).
+// BenchmarkRenderSmallSpec benchmarks Render for a one-field spec with a tag default
+// and without validators, i.e. the smallest realistic output.
 func BenchmarkRenderSmallSpec(b *testing.B) {
-	_ = filepath.Join("..", "..", "options-gen", "testdata", "case-02-builtin-types", "options.go")
 	spec := &OptionSpec{
 		TypeParamsSpec: "",
 		TypeParams:     "",
@@ -408,66 +302,43 @@ func BenchmarkRenderSmallSpec(b *testing.B) {
 		},
 	}
 
-	opts := NewOptions(
-		WithVersion("bench"),
-		WithPackageName("testcase"),
-		WithOptionsStructName("Options"),
-		WithFileImports(nil),
-		WithSpec(spec),
-		WithTagName("default"),
-		WithConstructorTypeRender("public"),
-		WithOptionTypeName("OptOptionsSetter"),
-	)
+	opts := benchmarkRenderOptions(spec)
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	var err error
 	for b.Loop() {
-		_, err = Render(opts)
+		benchRenderSmallSink, err = Render(opts)
 		if err != nil {
 			b.Fatal(err)
 		}
 	}
 }
 
-// BenchmarkExtractFields benchmarks field list extraction.
-func BenchmarkExtractFields(b *testing.B) {
-	fset := token.NewFileSet()
-	source := `package test
-	type S struct {
-		Field1 string
-		Field2 int
-		Field3 bool
-		Field4 []string
-		Field5 map[string]int
-		Field6 *MyType
-		Field7 interface{}
-		Field8 chan int
-		Field9 func(string) error
-		Field10 MyInterface
-	}`
+func parseImportSpecs(b *testing.B, source string) []*ast.ImportSpec {
+	b.Helper()
 
-	file, _ := parser.ParseFile(fset, "", []byte(source), 0)
-	var fieldLists []*ast.FieldList
+	file, err := parser.ParseFile(token.NewFileSet(), "", []byte(source), 0)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	var specs []*ast.ImportSpec
 	for _, decl := range file.Decls {
-		if genDecl, ok := decl.(*ast.GenDecl); ok {
-			for _, spec := range genDecl.Specs {
-				if typeSpec, ok := spec.(*ast.TypeSpec); ok {
-					if structType, ok := typeSpec.Type.(*ast.StructType); ok {
-						fieldLists = append(fieldLists, structType.Fields)
-					}
-				}
+		genDecl, ok := decl.(*ast.GenDecl)
+		if !ok || genDecl.Tok != token.IMPORT {
+			continue
+		}
+
+		for _, spec := range genDecl.Specs {
+			importSpec, ok := spec.(*ast.ImportSpec)
+			if !ok {
+				b.Fatalf("unexpected spec %T", spec)
 			}
+
+			specs = append(specs, importSpec)
 		}
 	}
 
-	b.ReportAllocs()
-	b.ResetTimer()
-
-	for b.Loop() {
-		for _, fl := range fieldLists {
-			extractFields(fl)
-		}
-	}
+	return specs
 }

@@ -1,8 +1,8 @@
 package errors_test
 
 import (
-	"fmt"
 	"io"
+	"strconv"
 	"testing"
 
 	"github.com/kazhuravlev/options-gen/pkg/errors"
@@ -11,24 +11,46 @@ import (
 var (
 	errBenchValidationSink  error
 	errBenchValidationsSink error
+	benchErrorStringSink    string
+	benchIsSink             bool
+	benchErrorsCopySink     int
+	benchCollectionLenSink  int
 )
+
+// benchFieldNames returns n distinct field names, built once outside the timed loop.
+func benchFieldNames(n int) []string {
+	names := make([]string, n)
+	for i := range names {
+		names[i] = "field" + strconv.Itoa(i)
+	}
+
+	return names
+}
+
+// benchCollection returns a collection with n validation errors.
+func benchCollection(n int) *errors.ValidationErrors {
+	errs := new(errors.ValidationErrors)
+	for _, name := range benchFieldNames(n) {
+		errs.Add(errors.NewValidationError(name, io.EOF))
+	}
+
+	return errs
+}
 
 // BenchmarkNewValidationError benchmarks creating a single validation error.
 func BenchmarkNewValidationError(b *testing.B) {
 	err := io.EOF
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
 		errBenchValidationSink = errors.NewValidationError("fieldName", err)
 	}
 }
 
-// BenchmarkNewValidationErrorNil benchmarks creating a validation error with nil error.
+// BenchmarkNewValidationErrorNil benchmarks the nil fast path of NewValidationError.
 func BenchmarkNewValidationErrorNil(b *testing.B) {
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
 		errBenchValidationSink = errors.NewValidationError("fieldName", nil)
@@ -40,145 +62,104 @@ func BenchmarkValidationErrorError(b *testing.B) {
 	err := errors.NewValidationError("fieldName", io.EOF)
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
-		_ = err.Error()
+		benchErrorStringSink = err.Error()
 	}
 }
 
-// BenchmarkValidationErrorIs benchmarks error checking.
+// BenchmarkValidationErrorIs benchmarks error matching through errors.Is.
 func BenchmarkValidationErrorIs(b *testing.B) {
 	err := errors.NewValidationError("fieldName", io.EOF)
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
-		_ = err.Is(io.EOF)
+		benchIsSink = err.Is(io.EOF)
 	}
 }
 
-// BenchmarkValidationErrorsAdd benchmarks adding errors to collection.
+// BenchmarkValidationErrorsAdd benchmarks building a collection of 5/50/500 errors
+// from scratch (the field names are prepared outside the loop so only
+// NewValidationError and Add are measured).
 func BenchmarkValidationErrorsAdd(b *testing.B) {
-	b.Run("small_collection", func(b *testing.B) {
-		b.ReportAllocs()
-		b.ResetTimer()
+	for _, tt := range []struct {
+		name string
+		size int
+	}{
+		{name: "small_collection", size: 5},
+		{name: "medium_collection", size: 50},
+		{name: "large_collection", size: 500},
+	} {
+		b.Run(tt.name, func(b *testing.B) {
+			names := benchFieldNames(tt.size)
 
-		for b.Loop() {
-			errs := new(errors.ValidationErrors)
-			for i := range 5 {
-				errs.Add(errors.NewValidationError(
-					fmt.Sprintf("field%d", i),
-					io.EOF,
-				))
+			b.ReportAllocs()
+
+			for b.Loop() {
+				errs := new(errors.ValidationErrors)
+				for _, name := range names {
+					errs.Add(errors.NewValidationError(name, io.EOF))
+				}
+
+				benchCollectionLenSink = len(*errs)
 			}
-		}
-	})
-
-	b.Run("medium_collection", func(b *testing.B) {
-		b.ReportAllocs()
-		b.ResetTimer()
-
-		for b.Loop() {
-			errs := new(errors.ValidationErrors)
-			for i := range 50 {
-				errs.Add(errors.NewValidationError(
-					fmt.Sprintf("field%d", i),
-					io.EOF,
-				))
-			}
-		}
-	})
-
-	b.Run("large_collection", func(b *testing.B) {
-		b.ReportAllocs()
-		b.ResetTimer()
-
-		for b.Loop() {
-			errs := new(errors.ValidationErrors)
-			for i := range 500 {
-				errs.Add(errors.NewValidationError(
-					fmt.Sprintf("field%d", i),
-					io.EOF,
-				))
-			}
-		}
-	})
+		})
+	}
 }
 
-// BenchmarkValidationErrorsError benchmarks generating error string from collection.
+// BenchmarkValidationErrorsError benchmarks generating the error string of a
+// collection of ten errors.
 func BenchmarkValidationErrorsError(b *testing.B) {
-	errs := new(errors.ValidationErrors)
-	for i := range 10 {
-		errs.Add(errors.NewValidationError(
-			fmt.Sprintf("field%d", i),
-			io.EOF,
-		))
-	}
+	errs := benchCollection(10)
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
-		_ = errs.Error()
+		benchErrorStringSink = errs.Error()
 	}
 }
 
-// BenchmarkValidationErrorsAsError benchmarks converting to error interface.
+// BenchmarkValidationErrorsAsError benchmarks converting a non-empty collection to
+// the error interface.
 func BenchmarkValidationErrorsAsError(b *testing.B) {
-	errs := new(errors.ValidationErrors)
-	for i := range 10 {
-		errs.Add(errors.NewValidationError(
-			fmt.Sprintf("field%d", i),
-			io.EOF,
-		))
-	}
+	errs := benchCollection(10)
 
 	b.ReportAllocs()
-	b.ResetTimer()
-
-	for b.Loop() {
-		_ = errs.AsError()
-	}
-}
-
-// BenchmarkValidationErrorsErrors benchmarks getting error list copy.
-func BenchmarkValidationErrorsErrors(b *testing.B) {
-	errs := new(errors.ValidationErrors)
-	for i := range 20 {
-		errs.Add(errors.NewValidationError(
-			fmt.Sprintf("field%d", i),
-			io.EOF,
-		))
-	}
-
-	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
 		errBenchValidationsSink = errs.AsError()
 	}
 }
 
-// BenchmarkValidationErrorsEmptyError benchmarks empty collection error string.
+// BenchmarkValidationErrorsErrors benchmarks copying the error list of a collection
+// of twenty errors through Errors().
+func BenchmarkValidationErrorsErrors(b *testing.B) {
+	errs := benchCollection(20)
+
+	b.ReportAllocs()
+
+	for b.Loop() {
+		benchErrorsCopySink = len(errs.Errors())
+	}
+}
+
+// BenchmarkValidationErrorsEmptyError benchmarks the empty collection error string.
 func BenchmarkValidationErrorsEmptyError(b *testing.B) {
 	errs := new(errors.ValidationErrors)
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
-		_ = errs.Error()
+		benchErrorStringSink = errs.Error()
 	}
 }
 
-// BenchmarkValidationErrorsEmptyAsError benchmarks empty collection as error.
+// BenchmarkValidationErrorsEmptyAsError benchmarks the empty collection as error.
 func BenchmarkValidationErrorsEmptyAsError(b *testing.B) {
 	errs := new(errors.ValidationErrors)
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	for b.Loop() {
 		errBenchValidationsSink = errs.AsError()
