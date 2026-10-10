@@ -283,11 +283,25 @@ func TestGetOptionSpec_DirectoryLayout(t *testing.T) {
 		require.Equal(t, []Import{{Path: `"time"`, Alias: nil}}, res.Imports)
 	})
 
-	t.Run("sibling_file_with_syntax_error", func(t *testing.T) {
+	t.Run("sibling_file_with_syntax_error_is_ignored_when_the_struct_is_in_the_given_file", func(t *testing.T) {
 		t.Parallel()
 
 		dir := writeOptionsModule(t, map[string]string{
 			"options.go": "package corner\n\ntype Options struct {\n\tport int\n}\n",
+			"broken.go":  "package corner\n\nfunc broken( {\n",
+		})
+
+		res, err := GetOptionSpec(filepath.Join(dir, "options.go"), "Options", "default", false, nil)
+		require.NoError(t, err)
+		require.Len(t, res.Spec.Options, 1)
+	})
+
+	t.Run("sibling_file_with_syntax_error_fails_when_the_directory_must_be_parsed", func(t *testing.T) {
+		t.Parallel()
+
+		dir := writeOptionsModule(t, map[string]string{
+			"options.go": "package corner\n",
+			"other.go":   "package corner\n\ntype Options struct {\n\tport int\n}\n",
 			"broken.go":  "package corner\n\nfunc broken( {\n",
 		})
 
@@ -302,9 +316,8 @@ func TestGetOptionSpec_DirectoryLayout(t *testing.T) {
 			"sub/options.go": "package sub\n\ntype Options struct {\n\tport int\n}\n",
 		})
 
-		// The parent directory is parsed instead of the directory itself.
 		_, err := GetOptionSpec(filepath.Join(dir, "sub"), "Options", "default", false, nil)
-		require.EqualError(t, err, "cannot find target struct: cannot find target struct")
+		require.ErrorContains(t, err, "is a directory")
 	})
 
 	t.Run("alias_of_an_unknown_package_is_skipped", func(t *testing.T) {

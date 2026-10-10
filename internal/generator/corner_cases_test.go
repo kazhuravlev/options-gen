@@ -328,8 +328,16 @@ func Test_findImportPath_SpecialImports(t *testing.T) {
 	}
 }
 
-func Test_optimizeGeneratedSource_ImportCornerCases(t *testing.T) {
+// Test_formatGeneratedSource_ImportCornerCases runs the import corner cases
+// through the production formatter and through the legacy pipeline that the
+// parity tests keep as the reference.
+func Test_formatGeneratedSource_ImportCornerCases(t *testing.T) {
 	t.Parallel()
+
+	formatters := map[string]func([]byte) ([]byte, error){
+		"current": formatGeneratedSource,
+		"legacy":  optimizeGeneratedSource,
+	}
 
 	testCases := []struct {
 		name        string
@@ -386,7 +394,7 @@ import "fmt"
 
 var _ = fmt.Sprint
 `,
-			contains: []string{`import "fmt"`},
+			contains: []string{`"fmt"`},
 		},
 		{
 			name:    "unparsable_source",
@@ -395,26 +403,28 @@ var _ = fmt.Sprint
 		},
 	}
 
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			t.Parallel()
+	for formatterName, formatter := range formatters {
+		for _, testCase := range testCases {
+			t.Run(formatterName+"/"+testCase.name, func(t *testing.T) {
+				t.Parallel()
 
-			got, err := optimizeGeneratedSource([]byte(testCase.src))
-			if testCase.wantErr != "" {
-				require.ErrorContains(t, err, testCase.wantErr)
+				got, err := formatter([]byte(testCase.src))
+				if testCase.wantErr != "" {
+					require.ErrorContains(t, err, testCase.wantErr)
 
-				return
-			}
+					return
+				}
 
-			require.NoError(t, err)
-			for _, substr := range testCase.contains {
-				require.Contains(t, string(got), substr)
-			}
+				require.NoError(t, err)
+				for _, substr := range testCase.contains {
+					require.Contains(t, string(got), substr)
+				}
 
-			for _, substr := range testCase.notContains {
-				require.NotContains(t, string(got), substr)
-			}
-		})
+				for _, substr := range testCase.notContains {
+					require.NotContains(t, string(got), substr)
+				}
+			})
+		}
 	}
 }
 

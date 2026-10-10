@@ -361,8 +361,13 @@ func GetOptionSpec(
 	allVariadic bool,
 	excludes []*regexp.Regexp,
 ) (*GetOptionSpecRes, error) {
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+	stat, err := os.Stat(filePath)
+	if os.IsNotExist(err) {
 		return nil, fmt.Errorf("source file not exist: %w", syscall.ENOENT)
+	}
+
+	if err == nil && stat.IsDir() {
+		return nil, fmt.Errorf("source file `%s` is a directory", filePath)
 	}
 
 	workDir := path.Dir(filePath)
